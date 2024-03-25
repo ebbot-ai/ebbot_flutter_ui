@@ -63,7 +63,6 @@ class _EbbotUiWidgetState extends State<EbbotUiWidget>
 
   @override
   void dispose() {
-    // TODO: implement dispose
     ebbotDartClient.dispose();
     super.dispose();
   }
