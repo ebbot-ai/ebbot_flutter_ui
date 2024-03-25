@@ -140,9 +140,11 @@ packages:
   ebbot_dart_client:
     dependency: "direct main"
     description:
-      path: "../ebbot-dart-client"
-      relative: true
-    source: path
+      path: "."
+      ref: main
+      resolved-ref: "46d2e5b84913e24ff83dd2610ef2bef9b4fa0ec5"
+      url: "https://github.com/ebbot-ai/ebbot_dart_client"
+    source: git
     version: "0.0.1"
   equatable:
     dependency: transitive
@@ -511,9 +513,11 @@ packages:
   socketcluster_client:
     dependency: transitive
     description:
-      path: "../socketcluster_client"
-      relative: true
-    source: path
+      path: "."
+      ref: main
+      resolved-ref: "062da645d676b1a7b2e09c048e05b61752ecb70f"
+      url: "https://github.com/ebbot-ai/socketcluster_client"
+    source: git
     version: "0.3.0"
   source_gen:
     dependency: transitive

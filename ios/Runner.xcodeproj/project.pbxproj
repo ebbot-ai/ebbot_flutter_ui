@@ -470,11 +470,14 @@
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				DEVELOPMENT_TEAM = W6CD5W3J6Q;
 				ENABLE_BITCODE = NO;
+				FLUTTER_APPLICATION_PATH = /Users/pariz/Development/Clients/Ebbot/ebbot_flutter_ui;
+				FLUTTER_TARGET = /Users/pariz/Development/Clients/Ebbot/ebbot_flutter_ui/lib/main.dart;
 				INFOPLIST_FILE = Runner/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				PACKAGE_CONFIG = /Users/pariz/Development/Clients/Ebbot/ebbot_flutter_ui/.dart_tool/package_config.json;
 				PRODUCT_BUNDLE_IDENTIFIER = com.ebbot.flutterui;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
@@ -649,11 +652,14 @@
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				DEVELOPMENT_TEAM = W6CD5W3J6Q;
 				ENABLE_BITCODE = NO;
+				FLUTTER_APPLICATION_PATH = /Users/pariz/Development/Clients/Ebbot/ebbot_flutter_ui;
+				FLUTTER_TARGET = /Users/pariz/Development/Clients/Ebbot/ebbot_flutter_ui/lib/main.dart;
 				INFOPLIST_FILE = Runner/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				PACKAGE_CONFIG = /Users/pariz/Development/Clients/Ebbot/ebbot_flutter_ui/.dart_tool/package_config.json;
 				PRODUCT_BUNDLE_IDENTIFIER = com.ebbot.flutterui;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
@@ -672,11 +678,14 @@
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				DEVELOPMENT_TEAM = W6CD5W3J6Q;
 				ENABLE_BITCODE = NO;
+				FLUTTER_APPLICATION_PATH = /Users/pariz/Development/Clients/Ebbot/ebbot_flutter_ui;
+				FLUTTER_TARGET = /Users/pariz/Development/Clients/Ebbot/ebbot_flutter_ui/lib/main.dart;
 				INFOPLIST_FILE = Runner/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				PACKAGE_CONFIG = /Users/pariz/Development/Clients/Ebbot/ebbot_flutter_ui/.dart_tool/package_config.json;
 				PRODUCT_BUNDLE_IDENTIFIER = com.ebbot.flutterui;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";

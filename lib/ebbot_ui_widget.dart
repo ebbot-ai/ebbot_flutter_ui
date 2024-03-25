@@ -1,7 +1,8 @@
 import 'dart:io';
 
 import 'package:ebbot_dart_client/valueobjects/message_type.dart';
-import 'package:ebbot_demo/handler/ebbot_message_handler.dart';
+import 'package:ebbot_flutter_ui/configuration/ebbot_configuration.dart';
+import 'package:ebbot_flutter_ui/handler/ebbot_message_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:ebbot_dart_client/ebbot_chat_client.dart';
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
@@ -18,8 +19,14 @@ import 'package:path_provider/path_provider.dart';
 
 class EbbotUiWidget extends StatefulWidget {
   final String botId;
-  const EbbotUiWidget({Key? key, required this.botId}) : super(key: key);
+  final EbbotConfiguration config;
 
+  EbbotUiWidget({
+    Key? key,
+    required this.botId,
+    EbbotConfiguration? config,
+  })  : config = config ?? EbbotConfigurationBuilder().build(),
+        super(key: key);
 
   @override
   State<EbbotUiWidget> createState() => _EbbotUiWidgetState();
@@ -31,7 +38,7 @@ String _randomString() {
   return base64UrlEncode(values);
 }
 
-class _EbbotUiWidgetState extends State<EbbotUiWidget> {
+class _EbbotUiWidgetState extends State<EbbotUiWidget> with AutomaticKeepAliveClientMixin {
   final List<types.Message> _messages = [];
   types.User? _user;
 
@@ -59,6 +66,9 @@ class _EbbotUiWidgetState extends State<EbbotUiWidget> {
     ebbotDartClient.dispose();
     super.dispose();
   }
+
+  @override
+  bool get wantKeepAlive => true;
 
   void initEbbotDartClient() async {
     
@@ -98,7 +108,7 @@ class _EbbotUiWidgetState extends State<EbbotUiWidget> {
   @override
   Widget build(BuildContext context) => Scaffold(
         body: Chat(
-          theme: const DefaultChatTheme(),
+          theme: widget.config.theme,
           messages: _messages,
           onSendPressed: _handleSendPressed,
           onMessageTap: _handleMessageTap,
