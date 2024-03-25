@@ -4,7 +4,6 @@ import 'package:logger/logger.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 
 class EbbotMessageHandler {
-
   final logger = Logger(
     printer: PrettyPrinter(),
   );
@@ -21,42 +20,59 @@ class EbbotMessageHandler {
       case MessageType.text:
         logger.i("handling text message");
         return handleText(message, user, id);
-        case MessageType.file:
+      case MessageType.file:
         logger.i("handling file message");
         return handleFile(message, user, id);
+      case MessageType.text_info:
+        logger.i("handling text info message");
+        return handleTextInfo(message, user, id);
       default:
         logger.w("Unsupported message type: $messageType");
         return null;
     }
   }
 
+  types.Message? handleTextInfo(Message message, types.User author, String id) {
+    // Add your message handling logic here
+    var text = message.data.message.value is String
+        ? message.data.message.value
+        : message.data.message.value['text'];
+
+    return types.SystemMessage(
+        id: id,
+        author: author,
+        createdAt: DateTime.now().millisecondsSinceEpoch,
+        text: text);
+  }
+
   types.Message? handleGpt(Message message, types.User author, String id) {
     // Add your message handling logic here
     var text = message.data.message.value is String
-              ? message.data.message.value
-              : message.data.message.value['text'];
+        ? message.data.message.value
+        : message.data.message.value['text'];
 
-          
     return types.TextMessage(
       author: author,
       createdAt: DateTime.now().millisecondsSinceEpoch,
       id: id,
       text: text,
-    );          
+    );
   }
 
   types.Message? handleImage(Message message, types.User author, String id) {
     // Add your message handling logic here
     logger.i("Handling image message");
     if (message.data.message.value is! Map<String, dynamic>) {
-      logger.i("message is NOT a map, I don't know how to process this, so skipping.. type is ${message.data.message.value.runtimeType}");
+      logger.i(
+          "message is NOT a map, I don't know how to process this, so skipping.. type is ${message.data.message.value.runtimeType}");
       return null;
-    } 
+    }
 
     Map<String, dynamic> image = message.data.message.value;
     return types.ImageMessage(
       id: image['key'],
-      author: author, // No good placeholder for author, should probably figure out how to get the actual author
+      author:
+          author, // No good placeholder for author, should probably figure out how to get the actual author
       name: image['filename'],
       uri: image['url'],
       size: image['size'],
@@ -90,9 +106,10 @@ class EbbotMessageHandler {
     // Add your message handling logic here
     logger.i("Handling file message");
     if (message.data.message.value is! Map<String, dynamic>) {
-      logger.i("message is NOT a map, I don't know how to process this, so skipping.. type is ${message.data.message.value.runtimeType}");
+      logger.i(
+          "message is NOT a map, I don't know how to process this, so skipping.. type is ${message.data.message.value.runtimeType}");
       return null;
-    } 
+    }
 
     Map<String, dynamic> file = message.data.message.value;
 

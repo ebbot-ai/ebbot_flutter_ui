@@ -16,7 +16,6 @@ import 'dart:convert';
 import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
 
-
 class EbbotUiWidget extends StatefulWidget {
   final String botId;
   final EbbotConfiguration config;
@@ -38,11 +37,13 @@ String _randomString() {
   return base64UrlEncode(values);
 }
 
-class _EbbotUiWidgetState extends State<EbbotUiWidget> with AutomaticKeepAliveClientMixin {
+class _EbbotUiWidgetState extends State<EbbotUiWidget>
+    with AutomaticKeepAliveClientMixin {
   final List<types.Message> _messages = [];
   types.User? _user;
 
-  final _ebbotGPTUser = const types.User(id: 'ebbot-gpt', firstName: 'Ebbot Chat');
+  final _ebbotGPTUser =
+      const types.User(id: 'ebbot-gpt', firstName: 'Ebbot Chat');
   final _agentUser = const types.User(id: 'agent', firstName: 'Agent');
   final _typingUsers = <types.User>[];
   late EbbotDartClient ebbotDartClient;
@@ -55,7 +56,7 @@ class _EbbotUiWidgetState extends State<EbbotUiWidget> with AutomaticKeepAliveCl
   @override
   void initState() {
     super.initState();
-    ebbotDartClient = EbbotDartClient(widget.botId); // ebqqtpv3h1qzwflhfroyzc7jzdxqqx
+    ebbotDartClient = EbbotDartClient(widget.botId);
     _user = types.User(id: ebbotDartClient.chatId);
     initEbbotDartClient();
   }
@@ -71,7 +72,6 @@ class _EbbotUiWidgetState extends State<EbbotUiWidget> with AutomaticKeepAliveCl
   bool get wantKeepAlive => true;
 
   void initEbbotDartClient() async {
-    
     // Initialize the chat client
     await ebbotDartClient.initialize();
 
@@ -96,13 +96,12 @@ class _EbbotUiWidgetState extends State<EbbotUiWidget> with AutomaticKeepAliveCl
         _typingUsers.remove(_ebbotGPTUser);
       });
 
-      _addMessage(ebbotMessageHandler.handle(message, _ebbotGPTUser, _randomString()));
-
+      _addMessage(
+          ebbotMessageHandler.handle(message, _ebbotGPTUser, _randomString()));
     });
 
     // We are ready to start receiving messages
     ebbotDartClient.startReceive();
-    
   }
 
   @override
@@ -113,7 +112,8 @@ class _EbbotUiWidgetState extends State<EbbotUiWidget> with AutomaticKeepAliveCl
           onSendPressed: _handleSendPressed,
           onMessageTap: _handleMessageTap,
           user: _user!,
-          typingIndicatorOptions: TypingIndicatorOptions(typingMode: TypingIndicatorMode.both, typingUsers: _typingUsers),
+          typingIndicatorOptions: TypingIndicatorOptions(
+              typingMode: TypingIndicatorMode.both, typingUsers: _typingUsers),
         ),
       );
 
