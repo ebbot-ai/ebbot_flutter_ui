@@ -49,3 +49,7 @@ class EbbotDemoApp extends StatelessWidget {
   }
 }
 ```
+
+### Demo app
+A demo app that implements the `ebbot-flutter-ui` can be found in this repository: https://github.com/ebbot-ai/ebbot_flutter_ui_demo
+This is a good starting point for anyone implementing the chat for the first time.
