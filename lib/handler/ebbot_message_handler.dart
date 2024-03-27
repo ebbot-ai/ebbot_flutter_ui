@@ -11,19 +11,19 @@ class EbbotMessageHandler {
   types.Message? handle(Message message, types.User user, String id) {
     var messageType = message.data.message.type;
     switch (messageType) {
-      case MessageType.gpt:
+      case 'gpt':
         logger.i("handling gpt message");
         return handleGpt(message, user, id);
-      case MessageType.image:
+      case 'image':
         logger.i("handling image message");
         return handleImage(message, user, id);
-      case MessageType.text:
+      case 'text':
         logger.i("handling text message");
         return handleText(message, user, id);
-      case MessageType.file:
+      case 'file':
         logger.i("handling file message");
         return handleFile(message, user, id);
-      case MessageType.text_info:
+      case 'text_info':
         logger.i("handling text info message");
         return handleTextInfo(message, user, id);
       default:

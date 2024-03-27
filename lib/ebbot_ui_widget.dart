@@ -83,7 +83,7 @@ class _EbbotUiWidgetState extends State<EbbotUiWidget>
       logger.i('listener got message of type: $messageType');
 
       // Special case for typing, as we use Flyers typing indicator logic
-      if (messageType == MessageType.typing) {
+      if (messageType == 'typing') {
         logger.i("handling typing message");
         setState(() {
           _typingUsers.add(_ebbotGPTUser); // TODO: Check which user to add
