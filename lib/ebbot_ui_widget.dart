@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:ebbot_dart_client/valueobjects/message_type.dart';
 import 'package:ebbot_flutter_ui/configuration/ebbot_configuration.dart';
 import 'package:ebbot_flutter_ui/handler/ebbot_message_handler.dart';
+import 'package:ebbot_flutter_ui/widget/custom_message.dart';
 import 'package:flutter/material.dart';
 import 'package:ebbot_dart_client/ebbot_chat_client.dart';
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
@@ -104,17 +105,21 @@ class _EbbotUiWidgetState extends State<EbbotUiWidget>
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-        body: Chat(
-          theme: widget.config.theme,
-          messages: _messages,
-          onSendPressed: _handleSendPressed,
-          onMessageTap: _handleMessageTap,
-          user: _user!,
-          typingIndicatorOptions: TypingIndicatorOptions(
-              typingMode: TypingIndicatorMode.both, typingUsers: _typingUsers),
-        ),
-      );
+  Widget build(BuildContext context) {
+    super.build(context);
+    return Scaffold(
+      body: Chat(
+        theme: widget.config.theme,
+        messages: _messages,
+        onSendPressed: _handleSendPressed,
+        onMessageTap: _handleMessageTap,
+        user: _user!,
+        customMessageBuilder: customMessageBuilder,
+        typingIndicatorOptions: TypingIndicatorOptions(
+            typingMode: TypingIndicatorMode.both, typingUsers: _typingUsers),
+      ),
+    );
+  }
 
   void _addMessage(types.Message? message) {
     if (message == null) {

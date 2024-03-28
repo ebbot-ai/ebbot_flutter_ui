@@ -1,4 +1,4 @@
-import 'package:ebbot_dart_client/entities/message.dart';
+import 'package:ebbot_dart_client/entities/message/message.dart';
 import 'package:ebbot_dart_client/valueobjects/message_type.dart';
 import 'package:logger/logger.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
@@ -26,10 +26,19 @@ class EbbotMessageHandler {
       case 'text_info':
         logger.i("handling text info message");
         return handleTextInfo(message, user, id);
+      case 'url':
+        logger.i("handling url message");
+        return handleCustom(message, user, id);
+
       default:
         logger.w("Unsupported message type: $messageType");
         return null;
     }
+  }
+
+  types.Message? handleCustom(Message message, types.User user, String id) {
+    return types.CustomMessage(
+        id: id, author: user, metadata: message.data.message.toJson());
   }
 
   types.Message? handleTextInfo(Message message, types.User author, String id) {
