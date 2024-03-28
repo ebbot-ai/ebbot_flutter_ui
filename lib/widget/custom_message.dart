@@ -28,8 +28,11 @@ Widget customMessageBuilder(types.CustomMessage message,
     ...(content.value['urls'] as List).map((url) => urlMessageBuilder(url)),
   ];
 
-  return Column(
-    children: children,
+  return Padding(
+    padding: const EdgeInsets.all(8.0),
+    child: Column(
+      children: children,
+    ),
   );
 }
 
