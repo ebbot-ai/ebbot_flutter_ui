@@ -14,6 +14,9 @@ class EbbotMessageHandler {
       case 'gpt':
         logger.i("handling gpt message");
         return handleGpt(message, user, id);
+      case 'answer':
+        logger.i("handling answer message");
+        return handleAnswer(message, user, id);
       case 'image':
         logger.i("handling image message");
         return handleImage(message, user, id);
@@ -55,6 +58,20 @@ class EbbotMessageHandler {
   }
 
   types.Message? handleGpt(Message message, types.User author, String id) {
+    // Add your message handling logic here
+    var text = message.data.message.value is String
+        ? message.data.message.value
+        : message.data.message.value['text'];
+
+    return types.TextMessage(
+      author: author,
+      createdAt: DateTime.now().millisecondsSinceEpoch,
+      id: id,
+      text: text,
+    );
+  }
+
+  types.Message? handleAnswer(Message message, types.User author, String id) {
     // Add your message handling logic here
     var text = message.data.message.value is String
         ? message.data.message.value

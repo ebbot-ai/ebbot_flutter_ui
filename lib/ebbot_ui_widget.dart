@@ -3,10 +3,11 @@ import 'dart:io';
 import 'package:ebbot_dart_client/configuration/configuration.dart';
 import 'package:ebbot_dart_client/valueobjects/message_type.dart';
 import 'package:ebbot_flutter_ui/configuration/ebbot_configuration.dart';
+
 import 'package:ebbot_flutter_ui/handler/ebbot_message_handler.dart';
 import 'package:ebbot_flutter_ui/widget/custom_message.dart';
 import 'package:flutter/material.dart';
-import 'package:ebbot_dart_client/ebbot_chat_client.dart';
+import 'package:ebbot_dart_client/ebbot_dart_client.dart';
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:http/http.dart' as http;
@@ -51,6 +52,7 @@ class _EbbotUiWidgetState extends State<EbbotUiWidget>
   final _typingUsers = <types.User>[];
   late EbbotDartClient ebbotClient;
   final ebbotMessageHandler = EbbotMessageHandler();
+  bool hasReceivedGPTMessageBefore = false;
 
   final logger = Logger(
     printer: PrettyPrinter(),
@@ -85,8 +87,8 @@ class _EbbotUiWidgetState extends State<EbbotUiWidget>
       logger.i('listener got chat: $chat');
     });
 
-    ebbotClient.listener.messageStream.listen((message) {
-      var messageType = message.data.message.type;
+    ebbotClient.listener.messageStream.listen((messageBody) {
+      var messageType = messageBody.data.message.type;
       logger.i('listener got message of type: $messageType');
 
       // Special case for typing, as we use Flyers typing indicator logic
@@ -102,8 +104,20 @@ class _EbbotUiWidgetState extends State<EbbotUiWidget>
         _typingUsers.remove(_ebbotGPTUser);
       });
 
-      _addMessage(
-          ebbotMessageHandler.handle(message, _ebbotGPTUser, _randomString()));
+      // If this is the first time we get a GPT message, lets add a "AI generated message" system message
+      if (hasReceivedGPTMessageBefore == false && messageType == 'gpt') {
+        hasReceivedGPTMessageBefore = true;
+
+        var systemMessage = types.SystemMessage(
+            id: _randomString(),
+            author: _ebbotGPTUser,
+            text: "AI generated message");
+        _addMessage(systemMessage);
+      }
+
+      var message = ebbotMessageHandler.handle(
+          messageBody, _ebbotGPTUser, _randomString());
+      _addMessage(message);
     });
 
     // We are ready to start receiving messages
@@ -113,6 +127,8 @@ class _EbbotUiWidgetState extends State<EbbotUiWidget>
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    var customMessage = CustomMessage(client: ebbotClient);
+
     return Scaffold(
       body: Chat(
         theme: widget._configuration.theme,
@@ -120,9 +136,9 @@ class _EbbotUiWidgetState extends State<EbbotUiWidget>
         onSendPressed: _handleSendPressed,
         onMessageTap: _handleMessageTap,
         user: _user!,
-        customMessageBuilder: customMessageBuilder,
+        customMessageBuilder: customMessage.handle,
         typingIndicatorOptions: TypingIndicatorOptions(
-            typingMode: TypingIndicatorMode.both, typingUsers: _typingUsers),
+            typingMode: TypingIndicatorMode.avatar, typingUsers: _typingUsers),
       ),
     );
   }
@@ -194,6 +210,6 @@ class _EbbotUiWidgetState extends State<EbbotUiWidget>
     );
 
     _addMessage(textMessage);
-    ebbotClient.sendMessage(textMessage.text);
+    ebbotClient.sendTextMessage(textMessage.text);
   }
 }
