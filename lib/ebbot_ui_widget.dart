@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:ebbot_dart_client/configuration/configuration.dart';
 import 'package:ebbot_dart_client/valueobjects/message_type.dart';
 import 'package:ebbot_flutter_ui/configuration/ebbot_configuration.dart';
 import 'package:ebbot_flutter_ui/handler/ebbot_message_handler.dart';
@@ -18,14 +19,15 @@ import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
 
 class EbbotUiWidget extends StatefulWidget {
-  final String botId;
-  final EbbotConfiguration config;
+  final String _botId;
+  final EbbotConfiguration _configuration;
 
   EbbotUiWidget({
     Key? key,
-    required this.botId,
-    EbbotConfiguration? config,
-  })  : config = config ?? EbbotConfigurationBuilder().build(),
+    required String botId,
+    EbbotConfiguration? configuration,
+  })  : _botId = botId,
+        _configuration = configuration ?? EbbotConfigurationBuilder().build(),
         super(key: key);
 
   @override
@@ -47,7 +49,7 @@ class _EbbotUiWidgetState extends State<EbbotUiWidget>
       const types.User(id: 'ebbot-gpt', firstName: 'Ebbot Chat');
   final _agentUser = const types.User(id: 'agent', firstName: 'Agent');
   final _typingUsers = <types.User>[];
-  late EbbotDartClient ebbotDartClient;
+  late EbbotDartClient ebbotClient;
   final ebbotMessageHandler = EbbotMessageHandler();
 
   final logger = Logger(
@@ -57,14 +59,18 @@ class _EbbotUiWidgetState extends State<EbbotUiWidget>
   @override
   void initState() {
     super.initState();
-    ebbotDartClient = EbbotDartClient(widget.botId);
-    _user = types.User(id: ebbotDartClient.chatId);
+
+    var configuration = ConfigurationBuilder()
+        .environment(widget._configuration.environment)
+        .build();
+    ebbotClient = EbbotDartClient(widget._botId, configuration);
+    _user = types.User(id: ebbotClient.chatId);
     initEbbotDartClient();
   }
 
   @override
   void dispose() {
-    ebbotDartClient.dispose();
+    ebbotClient.dispose();
     super.dispose();
   }
 
@@ -73,13 +79,13 @@ class _EbbotUiWidgetState extends State<EbbotUiWidget>
 
   void initEbbotDartClient() async {
     // Initialize the chat client
-    await ebbotDartClient.initialize();
+    await ebbotClient.initialize();
 
-    ebbotDartClient.listener.chatStream.listen((chat) {
+    ebbotClient.listener.chatStream.listen((chat) {
       logger.i('listener got chat: $chat');
     });
 
-    ebbotDartClient.listener.messageStream.listen((message) {
+    ebbotClient.listener.messageStream.listen((message) {
       var messageType = message.data.message.type;
       logger.i('listener got message of type: $messageType');
 
@@ -101,7 +107,7 @@ class _EbbotUiWidgetState extends State<EbbotUiWidget>
     });
 
     // We are ready to start receiving messages
-    ebbotDartClient.startReceive();
+    ebbotClient.startReceive();
   }
 
   @override
@@ -109,7 +115,7 @@ class _EbbotUiWidgetState extends State<EbbotUiWidget>
     super.build(context);
     return Scaffold(
       body: Chat(
-        theme: widget.config.theme,
+        theme: widget._configuration.theme,
         messages: _messages,
         onSendPressed: _handleSendPressed,
         onMessageTap: _handleMessageTap,
@@ -188,6 +194,6 @@ class _EbbotUiWidgetState extends State<EbbotUiWidget>
     );
 
     _addMessage(textMessage);
-    ebbotDartClient.sendMessage(textMessage.text);
+    ebbotClient.sendMessage(textMessage.text);
   }
 }
