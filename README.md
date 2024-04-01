@@ -1,9 +1,9 @@
 # ebbot-flutter-ui
 
 A flutter ui widget for implementing the Ebbot chatbot.
-This widget encapsulates the logic in the `ebbot-dart-client`package and provides an drop-in ready solution for rendering a Ebbot Chat in your flutter App.
+This widget encapsulates the logic in the `ebbot-dart-client` package and provides an drop-in ready solution for rendering a Ebbot Chat in your Flutter App.
 
-## Notable echincal dependencies
+## Notable techincal dependencies
 - This widget depends on the `flutter-chat-ui` package for rendering the chat ui
 - It also depends on the `ebbot-dart-client` client library which wraps the business logic of the Ebbot Chat bot
 
@@ -30,14 +30,19 @@ class EbbotDemoApp extends StatelessWidget {
 
 ### Configuration
 
-As of now, the only configurable option is to change the underlying theme in `flutter-chat-ui` by passing it as a configuration option:
+As of now, the only configurable options are to change the underlying theme in `flutter-chat-ui` or by setting the cloud environment the App is running against.
+
+Visit the `flutter-chat-ui` [documentation page](https://docs.flyer.chat/flutter/chat-ui/themes) to learn more about styling the chat.
 ```
 class EbbotDemoApp extends StatelessWidget {
   const EbbotDemoApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    var config = EbbotConfigurationBuilder().theme(const DarkChatTheme()).build();
+    var config = EbbotConfigurationBuilder()
+      .theme(const DarkChatTheme())
+      .environment(Environment.staging)
+      .build();
     return MaterialApp(
       title: 'Ebbot Chat Demo',
       theme: ThemeData(
