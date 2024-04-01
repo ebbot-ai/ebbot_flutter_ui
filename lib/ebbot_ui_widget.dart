@@ -1,9 +1,7 @@
 import 'dart:io';
 
 import 'package:ebbot_dart_client/configuration/configuration.dart';
-import 'package:ebbot_dart_client/valueobjects/message_type.dart';
 import 'package:ebbot_flutter_ui/configuration/ebbot_configuration.dart';
-
 import 'package:ebbot_flutter_ui/handler/ebbot_message_handler.dart';
 import 'package:ebbot_flutter_ui/widget/custom_message.dart';
 import 'package:flutter/material.dart';
@@ -48,7 +46,7 @@ class _EbbotUiWidgetState extends State<EbbotUiWidget>
 
   final _ebbotGPTUser =
       const types.User(id: 'ebbot-gpt', firstName: 'Ebbot Chat');
-  final _agentUser = const types.User(id: 'agent', firstName: 'Agent');
+  //final _agentUser = const types.User(id: 'agent', firstName: 'Agent');
   final _typingUsers = <types.User>[];
   late EbbotDartClient ebbotClient;
   final ebbotMessageHandler = EbbotMessageHandler();

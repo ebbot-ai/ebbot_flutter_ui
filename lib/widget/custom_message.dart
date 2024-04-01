@@ -1,7 +1,6 @@
 import 'package:ebbot_dart_client/ebbot_dart_client.dart';
 import 'package:ebbot_dart_client/entities/message/message.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:url_launcher/url_launcher.dart';
 
