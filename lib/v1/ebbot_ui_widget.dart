@@ -1,26 +1,37 @@
 import 'dart:io';
-
 import 'package:ebbot_dart_client/configuration/configuration.dart';
-import 'package:ebbot_flutter_ui/configuration/ebbot_configuration.dart';
-import 'package:ebbot_flutter_ui/handler/ebbot_message_handler.dart';
-import 'package:ebbot_flutter_ui/widget/custom_message.dart';
+import 'package:ebbot_flutter_ui/v1/configuration/ebbot_configuration.dart';
+import 'package:ebbot_flutter_ui/v1/src/handler/ebbot_message_processor.dart';
+import 'package:ebbot_flutter_ui/v1/src/widget/custom_message.dart';
 import 'package:flutter/material.dart';
 import 'package:ebbot_dart_client/ebbot_dart_client.dart';
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:http/http.dart' as http;
-
 import 'package:logger/logger.dart';
 import 'dart:math';
 import 'dart:convert';
-
 import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
 
+/// A Flutter widget for integrating Ebbot chat bot functionality into the UI.
+///
+/// This widget facilitates communication between the user interface and
+/// the Ebbot chat system. It manages sending and receiving messages, handling
+/// typing indicators, and displaying messages within the UI.
 class EbbotUiWidget extends StatefulWidget {
+  /// The ID of the Ebbot Chat Bot to connect to.
   final String _botId;
+
+  /// Configuration settings for the Ebbot chat.
   final EbbotConfiguration _configuration;
 
+  /// Constructs an instance of [EbbotUiWidget].
+  ///
+  /// The [botId] parameter is required and represents the ID of the bot
+  /// that this user interface will interact with. The [configuration] parameter
+  /// allows specifying custom configuration settings for the Ebbot chat.
+  /// If not provided, default configuration settings will be used.
   EbbotUiWidget({
     Key? key,
     required String botId,
@@ -39,6 +50,10 @@ String _randomString() {
   return base64UrlEncode(values);
 }
 
+/// The state class for the [EbbotUiWidget].
+///
+/// Manages the internal state of the user interface, including message handling,
+/// user interactions, and communication with the Ebbot chat bot.
 class _EbbotUiWidgetState extends State<EbbotUiWidget>
     with AutomaticKeepAliveClientMixin {
   final List<types.Message> _messages = [];
@@ -49,7 +64,7 @@ class _EbbotUiWidgetState extends State<EbbotUiWidget>
   //final _agentUser = const types.User(id: 'agent', firstName: 'Agent');
   final _typingUsers = <types.User>[];
   late EbbotDartClient ebbotClient;
-  final ebbotMessageHandler = EbbotMessageHandler();
+  final ebbotMessageHandler = EbbotMessageProcessor();
   bool hasReceivedGPTMessageBefore = false;
 
   final logger = Logger(
@@ -113,7 +128,7 @@ class _EbbotUiWidgetState extends State<EbbotUiWidget>
         _addMessage(systemMessage);
       }
 
-      var message = ebbotMessageHandler.handle(
+      var message = ebbotMessageHandler.process(
           messageBody, _ebbotGPTUser, _randomString());
       _addMessage(message);
     });
