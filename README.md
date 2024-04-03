@@ -65,11 +65,13 @@ Visit the `flutter-chat-ui` [documentation page](https://docs.flyer.chat/flutter
 Configuring the cloud environment is done by passing a configuration property to the `environment` builder function.
 
 Available configuration options are:
-`Environment.staging` which resolves to `https://ebbot-staging.storage.googleapis.com`
-`Environment.release` which resolves to `https://ebbot-release.storage.googleapis.com`
-`Environment.googleCanadaProduction` which resolves to `https://ebbot-ca.storage.googleapis.com`
-`googleEUProduction` which resolves to `https://ebbot-v2.storage.googleapis.com`
-`ovhEUProduction` which resolves to `https://storage.gra.cloud.ovh.net`
+| Environment                          | Host                                         |
+| ------------------------------------ | -------------------------------------------- |
+| `Environment.staging`                | https://ebbot-staging.storage.googleapis.com |
+| `Environment.release`                | https://ebbot-release.storage.googleapis.com |
+| `Environment.googleCanadaProduction` | https://ebbot-ca.storage.googleapis.com      |
+| `Environment.googleEUProduction`     | https://ebbot-v2.storage.googleapis.com      |
+| `Environment.ovhEUProduction`        | https://storage.gra.cloud.ovh.net            |
 
 The configuration is subject to change, so in order to see the most recent changes, reading the [configuration source code](https://github.com/ebbot-ai/ebbot_dart_client/blob/main/lib/configuration/environment_configuration_config.dart) is the best way to go.
 
