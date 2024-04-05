@@ -108,13 +108,16 @@ class _EbbotUiWidgetState extends State<EbbotUiWidget>
       if (messageType == 'typing') {
         logger.i("handling typing message");
         setState(() {
-          _typingUsers.add(_ebbotGPTUser); // TODO: Check which user to add
+          _typingUsers.clear();
+          _typingUsers.add(_ebbotGPTUser);
         });
         return;
       }
 
       setState(() {
-        _typingUsers.remove(_ebbotGPTUser);
+        //_typingUsers.remove((u) => _ebbotGPTUser.id == u.id);
+        _typingUsers
+            .clear(); // Maybe not the cleanest way to remove all typing users
       });
 
       // If this is the first time we get a GPT message, lets add a "AI generated message" system message
