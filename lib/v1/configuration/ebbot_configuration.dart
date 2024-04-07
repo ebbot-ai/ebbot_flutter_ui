@@ -1,4 +1,4 @@
-import 'package:ebbot_dart_client/configuration/environment_configuration_config.dart';
+import 'package:ebbot_dart_client/valueobjects/environment.dart';
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 
 class EbbotConfiguration {

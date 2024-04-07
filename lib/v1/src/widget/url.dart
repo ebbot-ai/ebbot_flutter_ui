@@ -1,27 +1,32 @@
-import 'package:ebbot_dart_client/ebbot_dart_client.dart';
 import 'package:ebbot_dart_client/entities/message/message.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
-import 'package:url_launcher/url_launcher.dart';
 
-class CustomMessage {
-  final EbbotDartClient client;
+class Url extends StatefulWidget {
+  final MessageContent content;
+  final void Function(String) onURlPressed;
+  final void Function(String) onScenarioPressed;
+  final void Function(String, String) onVariablePressed;
 
-  CustomMessage({
-    required this.client,
-  });
+  const Url(
+      {super.key,
+      required this.content,
+      required this.onURlPressed,
+      required this.onScenarioPressed,
+      required this.onVariablePressed});
 
-  Widget handle(types.CustomMessage message, {required int messageWidth}) {
-    if (message.metadata == null) {
-      return Container();
-    }
+  @override
+  _UrlState createState() => _UrlState();
+}
 
-    MessageContent content = MessageContent.fromJson(message.metadata!);
+class _UrlState extends State<Url> {
+  @override
+  void initState() {
+    super.initState();
+  }
 
-    if (content.type != 'url') {
-      return Container();
-    }
-
+  @override
+  Widget build(BuildContext context) {
+    final content = widget.content;
     // Check if content has a property called urls, that should be a list
     if (content.value['urls'] is! List) {
       return Container();
@@ -30,12 +35,15 @@ class CustomMessage {
     var description = content.value['description'];
 
     List<Widget> children = [
-      Text(description),
+      Container(
+        margin: EdgeInsets.only(bottom: 10.0), // Adjust bottom margin as needed
+        child: Text(description, textAlign: TextAlign.center),
+      ),
       ...(content.value['urls'] as List).map((url) => _urlMessageBuilder(url)),
     ];
 
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(20.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: children,
@@ -47,12 +55,8 @@ class CustomMessage {
     if (url['type'] == 'url') {
       return ElevatedButton(
         onPressed: () async {
-          var uri = Uri.parse(url['value']);
-          if (await canLaunchUrl(uri)) {
-            await launchUrl(uri);
-          } else {
-            throw 'Could not launch $uri';
-          }
+          // Perform URL action
+          widget.onURlPressed(url['value']);
         },
         child: Text(url['label']),
       );
@@ -60,7 +64,7 @@ class CustomMessage {
       return ElevatedButton(
         onPressed: () {
           // Perform scenario action
-          client.sendScenarioMessage(url['next']['scenario']);
+          widget.onScenarioPressed(url['next']['scenario']);
         },
         child: Text(url['label']),
       );
@@ -68,7 +72,7 @@ class CustomMessage {
       return ElevatedButton(
         onPressed: () {
           // Perform variable action
-          client.sendVariableMessage(url['name'], url['value']);
+          widget.onVariablePressed(url['name'], url['value']);
         },
         child: Text(url['label']),
       );

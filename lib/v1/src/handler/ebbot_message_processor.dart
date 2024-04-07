@@ -20,9 +20,6 @@ class EbbotMessageProcessor {
       case 'gpt':
         logger.i("processing gpt message");
         return processGpt(message.data.message, user, id);
-      case 'answer':
-        logger.i("processing answer message");
-        return processAnswer(message.data.message, user, id);
       case 'image':
         logger.i("processing image message");
         return processImage(message.data.message, user, id);
@@ -37,6 +34,9 @@ class EbbotMessageProcessor {
         return processTextInfo(message.data.message, user, id);
       case 'url':
         logger.i("processing url message");
+        return processCustom(message.data.message, user, id);
+      case 'rating_request':
+        logger.i("processing rating request");
         return processCustom(message.data.message, user, id);
 
       default:
@@ -64,19 +64,6 @@ class EbbotMessageProcessor {
   }
 
   types.Message? processGpt(
-      MessageContent message, types.User author, String id) {
-    // Add your message handling logic here
-    var text = message.value is String ? message.value : message.value['text'];
-
-    return types.TextMessage(
-      author: author,
-      createdAt: DateTime.now().millisecondsSinceEpoch,
-      id: id,
-      text: text,
-    );
-  }
-
-  types.Message? processAnswer(
       MessageContent message, types.User author, String id) {
     // Add your message handling logic here
     var text = message.value is String ? message.value : message.value['text'];
