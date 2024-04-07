@@ -41,7 +41,7 @@ class EbbotFlutterUi extends StatefulWidget {
         super(key: key);
 
   @override
-  State<EbbotFlutterUi> createState() => _EbbotFlutterUiState();
+  State<EbbotFlutterUi> createState() => EbbotFlutterUiState();
 }
 
 String _randomString() {
@@ -54,7 +54,7 @@ String _randomString() {
 ///
 /// Manages the internal state of the user interface, including message handling,
 /// user interactions, and communication with the Ebbot chat bot.
-class _EbbotFlutterUiState extends State<EbbotFlutterUi>
+class EbbotFlutterUiState extends State<EbbotFlutterUi>
     with AutomaticKeepAliveClientMixin {
   final List<types.Message> _messages = [];
   types.User? _user;
@@ -76,12 +76,7 @@ class _EbbotFlutterUiState extends State<EbbotFlutterUi>
   void initState() {
     super.initState();
 
-    var configuration = ConfigurationBuilder()
-        .environment(widget._configuration.environment)
-        .build();
-    ebbotClient = EbbotDartClient(widget._botId, configuration);
-    _user = types.User(id: ebbotClient.chatId);
-    initEbbotDartClient();
+    initialize();
   }
 
   @override
@@ -93,7 +88,13 @@ class _EbbotFlutterUiState extends State<EbbotFlutterUi>
   @override
   bool get wantKeepAlive => true;
 
-  void initEbbotDartClient() async {
+  void initialize() async {
+    var configuration = ConfigurationBuilder()
+        .environment(widget._configuration.environment)
+        .build();
+    ebbotClient = EbbotDartClient(widget._botId, configuration);
+    _user = types.User(id: ebbotClient.chatId);
+
     // Initialize the chat client
     await ebbotClient.initialize();
 
@@ -152,7 +153,7 @@ class _EbbotFlutterUiState extends State<EbbotFlutterUi>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    var customMessage = CustomMessage(client: ebbotClient);
+    var customMessage = CustomMessage(client: ebbotClient, ebbotFlutterUiState: this);
 
     return Scaffold(
       body: Chat(

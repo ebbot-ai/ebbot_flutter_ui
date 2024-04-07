@@ -7,27 +7,25 @@ class Url extends StatefulWidget {
   final void Function(String) onScenarioPressed;
   final void Function(String, String) onVariablePressed;
 
-  const Url(
-      {super.key,
-      required this.content,
-      required this.onURlPressed,
-      required this.onScenarioPressed,
-      required this.onVariablePressed});
+  const Url({
+    Key? key,
+    required this.content,
+    required this.onURlPressed,
+    required this.onScenarioPressed,
+    required this.onVariablePressed,
+  }) : super(key: key);
 
   @override
   _UrlState createState() => _UrlState();
 }
 
 class _UrlState extends State<Url> {
-  @override
-  void initState() {
-    super.initState();
-  }
+  final Map<String, bool> _hasBeenPressed = {};
 
   @override
   Widget build(BuildContext context) {
     final content = widget.content;
-    // Check if content has a property called urls, that should be a list
+
     if (content.value['urls'] is! List) {
       return Container();
     }
@@ -36,7 +34,7 @@ class _UrlState extends State<Url> {
 
     List<Widget> children = [
       Container(
-        margin: EdgeInsets.only(bottom: 10.0), // Adjust bottom margin as needed
+        margin: EdgeInsets.only(bottom: 10.0),
         child: Text(description, textAlign: TextAlign.center),
       ),
       ...(content.value['urls'] as List).map((url) => _urlMessageBuilder(url)),
@@ -53,27 +51,45 @@ class _UrlState extends State<Url> {
 
   Widget _urlMessageBuilder(dynamic url) {
     if (url['type'] == 'url') {
+      var pattern = url['type'] + url['value'];
+      var exists = _hasBeenPressed[pattern];
       return ElevatedButton(
-        onPressed: () async {
-          // Perform URL action
-          widget.onURlPressed(url['value']);
-        },
+        onPressed: exists != null && exists
+            ? null
+            : () {
+                setState(() {
+                  _hasBeenPressed[pattern] = true;
+                });
+                widget.onURlPressed(url['value']);
+              },
         child: Text(url['label']),
       );
     } else if (url['type'] == 'scenario') {
+      var pattern = url['type'] + url['next']['scenario'];
+      var exists = _hasBeenPressed[pattern];
       return ElevatedButton(
-        onPressed: () {
-          // Perform scenario action
-          widget.onScenarioPressed(url['next']['scenario']);
-        },
+        onPressed: exists != null && exists
+            ? null
+            : () {
+                setState(() {
+                  _hasBeenPressed[pattern] = true;
+                });
+                widget.onScenarioPressed(url['next']['scenario']);
+              },
         child: Text(url['label']),
       );
     } else if (url['type'] == 'variable') {
+      var pattern = url['type'] + url["name"] + url['value'];
+      var exists = _hasBeenPressed[pattern];
       return ElevatedButton(
-        onPressed: () {
-          // Perform variable action
-          widget.onVariablePressed(url['name'], url['value']);
-        },
+        onPressed: exists != null && exists
+            ? null
+            : () {
+                setState(() {
+                  _hasBeenPressed[pattern] = true;
+                });
+                widget.onVariablePressed(url['name'], url['value']);
+              },
         child: Text(url['label']),
       );
     } else {

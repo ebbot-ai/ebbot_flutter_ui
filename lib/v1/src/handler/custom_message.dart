@@ -1,5 +1,6 @@
 import 'package:ebbot_dart_client/ebbot_dart_client.dart';
 import 'package:ebbot_dart_client/entities/message/message.dart';
+import 'package:ebbot_flutter_ui/v1/ebbot_flutter_ui.dart';
 import 'package:ebbot_flutter_ui/v1/src/widget/rating.dart';
 import 'package:ebbot_flutter_ui/v1/src/widget/url.dart';
 import 'package:flutter/material.dart';
@@ -8,9 +9,11 @@ import 'package:url_launcher/url_launcher.dart';
 
 class CustomMessage {
   final EbbotDartClient client;
+  final EbbotFlutterUiState ebbotFlutterUiState;
 
   CustomMessage({
     required this.client,
+    required this.ebbotFlutterUiState,
   });
 
   Widget handle(types.CustomMessage message, {required int messageWidth}) {
@@ -47,7 +50,8 @@ class CustomMessage {
 
           // If uri protocol is ebbot://reset, reset the conversation by letting the parent know
           if (uri.scheme == 'ebbot' && uri.host == 'reset') {
-            //client.sendResetMessage();
+            await client.restart();
+            ebbotFlutterUiState.initialize();
             return;
           }
 
