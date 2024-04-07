@@ -58,6 +58,7 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
     with AutomaticKeepAliveClientMixin {
   final List<types.Message> _messages = [];
   types.User? _user;
+  bool isInitialized = false;
 
   final _ebbotGPTUser =
       const types.User(id: 'ebbot-gpt', firstName: 'Ebbot Chat');
@@ -89,8 +90,11 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
   bool get wantKeepAlive => true;
 
   void initialize() async {
+    isInitialized = false;
+    _messages.clear();
     var configuration = ConfigurationBuilder()
         .environment(widget._configuration.environment)
+        .userAttributes(widget._configuration.userAttributes)
         .build();
     ebbotClient = EbbotDartClient(widget._botId, configuration);
     _user = types.User(id: ebbotClient.chatId);
@@ -136,9 +140,7 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
       // If the type is rating, the conversation has ended
       // and we should disable the input field
       if (messageType == 'rating') {
-        /*_inputOptions = const InputOptions(
-          enabled: false,
-        );*/
+        canType(false);
       }
 
       var message = ebbotMessageHandler.process(
@@ -148,26 +150,37 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
 
     // We are ready to start receiving messages
     ebbotClient.startReceive();
+    isInitialized = true;
   }
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    var customMessage = CustomMessage(client: ebbotClient, ebbotFlutterUiState: this);
+    var customMessage = CustomMessage(
+        client: ebbotClient, ebbotFlutterUiState: this, canType: canType);
 
     return Scaffold(
-      body: Chat(
-        inputOptions: _inputOptions,
-        theme: widget._configuration.theme,
-        messages: _messages,
-        onSendPressed: _handleSendPressed,
-        onMessageTap: _handleMessageTap,
-        user: _user!,
-        customMessageBuilder: customMessage.handle,
-        typingIndicatorOptions: TypingIndicatorOptions(
-            typingMode: TypingIndicatorMode.avatar, typingUsers: _typingUsers),
-      ),
+      body: !isInitialized
+          ? const Center(child: CircularProgressIndicator())
+          : Chat(
+              inputOptions: _inputOptions,
+              theme: widget._configuration.theme,
+              messages: _messages,
+              onSendPressed: _handleSendPressed,
+              onMessageTap: _handleMessageTap,
+              user: _user!,
+              customMessageBuilder: customMessage.handle,
+              typingIndicatorOptions: TypingIndicatorOptions(
+                  typingMode: TypingIndicatorMode.avatar,
+                  typingUsers: _typingUsers),
+            ),
     );
+  }
+
+  void canType(bool canType) {
+    setState(() {
+      _inputOptions = InputOptions(enabled: canType);
+    });
   }
 
   void _addMessage(types.Message? message) {

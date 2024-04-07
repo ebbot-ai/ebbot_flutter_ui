@@ -10,10 +10,12 @@ import 'package:url_launcher/url_launcher.dart';
 class CustomMessage {
   final EbbotDartClient client;
   final EbbotFlutterUiState ebbotFlutterUiState;
+  final void Function(bool) canType;
 
   CustomMessage({
     required this.client,
     required this.ebbotFlutterUiState,
+    required this.canType,
   });
 
   Widget handle(types.CustomMessage message, {required int messageWidth}) {
@@ -50,6 +52,8 @@ class CustomMessage {
 
           // If uri protocol is ebbot://reset, reset the conversation by letting the parent know
           if (uri.scheme == 'ebbot' && uri.host == 'reset') {
+            ebbotFlutterUiState.isInitialized =
+                false; // This should be moved out of this function to the parent, but i'll keep it here for now
             await client.restart();
             ebbotFlutterUiState.initialize();
             return;

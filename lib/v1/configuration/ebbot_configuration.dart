@@ -5,10 +5,12 @@ class EbbotConfiguration {
   final ChatTheme theme;
   final Environment
       environment; // This lives in the ebbot_dart_client package for now
+  final Map<String, dynamic> userAttributes;
 
   EbbotConfiguration._builder(EbbotConfigurationBuilder builder)
       : theme = builder._theme,
-        environment = builder._environment;
+        environment = builder._environment,
+        userAttributes = builder._userAttributes;
 
   factory EbbotConfiguration(EbbotConfigurationBuilder builder) {
     return EbbotConfiguration._builder(builder);
@@ -18,6 +20,7 @@ class EbbotConfiguration {
 class EbbotConfigurationBuilder {
   ChatTheme _theme = const DefaultChatTheme();
   Environment _environment = Environment.staging; // Default to staging
+  Map<String, dynamic> _userAttributes = {};
 
   EbbotConfigurationBuilder theme(ChatTheme theme) {
     _theme = theme;
@@ -26,6 +29,11 @@ class EbbotConfigurationBuilder {
 
   EbbotConfigurationBuilder environment(Environment env) {
     _environment = env;
+    return this;
+  }
+
+  EbbotConfigurationBuilder userAttributes(Map<String, dynamic> attributes) {
+    _userAttributes = attributes;
     return this;
   }
 
