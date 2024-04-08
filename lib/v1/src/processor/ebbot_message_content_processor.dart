@@ -7,18 +7,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:url_launcher/url_launcher.dart';
 
-class CustomMessage {
+class EbbotMessageContentProcessor {
   final EbbotDartClient client;
   final EbbotFlutterUiState ebbotFlutterUiState;
   final void Function(bool) canType;
 
-  CustomMessage({
+  EbbotMessageContentProcessor({
     required this.client,
     required this.ebbotFlutterUiState,
     required this.canType,
   });
 
-  Widget handle(types.CustomMessage message, {required int messageWidth}) {
+  Widget process(types.CustomMessage message, {required int messageWidth}) {
     if (message.metadata == null) {
       return Container();
     }
@@ -27,15 +27,15 @@ class CustomMessage {
 
     switch (content.type) {
       case 'url':
-        return handleUrl(content);
+        return processUrl(content);
       case 'rating_request':
-        return handleRatingRequest(content);
+        return processRatingRequest(content);
       default:
         return Container();
     }
   }
 
-  Widget handleRatingRequest(MessageContent content) {
+  Widget processRatingRequest(MessageContent content) {
     return Rating(
       onRatingChanged: (rating) {
         client.sendRatingMessage(rating);
@@ -44,7 +44,7 @@ class CustomMessage {
     );
   }
 
-  Widget handleUrl(MessageContent content) {
+  Widget processUrl(MessageContent content) {
     return Url(
         content: content,
         onURlPressed: (url) async {

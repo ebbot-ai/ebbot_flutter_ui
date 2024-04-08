@@ -1,8 +1,8 @@
 import 'dart:io';
 import 'package:ebbot_dart_client/configuration/configuration.dart';
 import 'package:ebbot_flutter_ui/v1/configuration/ebbot_configuration.dart';
-import 'package:ebbot_flutter_ui/v1/src/handler/ebbot_message_processor.dart';
-import 'package:ebbot_flutter_ui/v1/src/handler/custom_message.dart';
+import 'package:ebbot_flutter_ui/v1/src/processor/ebbot_message_processor.dart';
+import 'package:ebbot_flutter_ui/v1/src/processor/ebbot_message_content_processor.dart';
 import 'package:flutter/material.dart';
 import 'package:ebbot_dart_client/ebbot_dart_client.dart';
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
@@ -150,13 +150,14 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
 
     // We are ready to start receiving messages
     ebbotClient.startReceive();
+    canType(true);
     isInitialized = true;
   }
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    var customMessage = CustomMessage(
+    var customMessage = EbbotMessageContentProcessor(
         client: ebbotClient, ebbotFlutterUiState: this, canType: canType);
 
     return Scaffold(
@@ -169,7 +170,7 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
               onSendPressed: _handleSendPressed,
               onMessageTap: _handleMessageTap,
               user: _user!,
-              customMessageBuilder: customMessage.handle,
+              customMessageBuilder: customMessage.process,
               typingIndicatorOptions: TypingIndicatorOptions(
                   typingMode: TypingIndicatorMode.avatar,
                   typingUsers: _typingUsers),
