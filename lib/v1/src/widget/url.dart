@@ -34,7 +34,7 @@ class _UrlState extends State<Url> {
 
     List<Widget> children = [
       Container(
-        margin: EdgeInsets.only(bottom: 10.0),
+        margin: const EdgeInsets.only(bottom: 10.0),
         child: Text(description, textAlign: TextAlign.center),
       ),
       ...(content.value['urls'] as List).map((url) => _urlMessageBuilder(url)),

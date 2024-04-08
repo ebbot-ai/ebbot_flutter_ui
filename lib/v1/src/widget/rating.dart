@@ -6,8 +6,8 @@ class Rating extends StatefulWidget {
   final void Function(int) onRatingChanged;
   final MessageContent content;
 
-  Rating(
-      {this.initialRating = 0,
+  const Rating(
+      {super.key, this.initialRating = 0,
       required this.onRatingChanged,
       required this.content});
 
@@ -33,7 +33,7 @@ class _RatingState extends State<Rating> {
             Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
           Container(
             margin:
-                EdgeInsets.only(bottom: 10.0), // Adjust bottom margin as needed
+                const EdgeInsets.only(bottom: 10.0), // Adjust bottom margin as needed
             child: Text(widget.content.value['question'],
                 textAlign: TextAlign.center),
           ),

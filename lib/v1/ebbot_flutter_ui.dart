@@ -67,7 +67,7 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
   late EbbotDartClient ebbotClient;
   final ebbotMessageHandler = EbbotMessageProcessor();
   bool hasReceivedGPTMessageBefore = false;
-  InputOptions _inputOptions = InputOptions();
+  InputOptions _inputOptions = const InputOptions();
 
   final logger = Logger(
     printer: PrettyPrinter(),
