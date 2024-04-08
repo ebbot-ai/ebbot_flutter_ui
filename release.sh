@@ -10,9 +10,9 @@ if [ -z "$version" ]; then
 fi
 
 # Create Git tag
-git tag -a $version -m "Release version $version"
+git tag -a v$version -m "Release version $version"
 
 # Push tag to remote repository
-git push origin $version
+git push origin v$version
 
 echo "Release tagged with version $version"
