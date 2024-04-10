@@ -1,8 +1,10 @@
 import 'package:ebbot_dart_client/entities/message/message.dart';
+import 'package:ebbot_flutter_ui/v1/configuration/ebbot_configuration.dart';
 import 'package:flutter/material.dart';
 
 class Url extends StatefulWidget {
   final MessageContent content;
+  final EbbotConfiguration configuration;
   final void Function(String) onURlPressed;
   final void Function(String) onScenarioPressed;
   final void Function(String, String) onVariablePressed;
@@ -10,6 +12,7 @@ class Url extends StatefulWidget {
   const Url({
     Key? key,
     required this.content,
+    required this.configuration,
     required this.onURlPressed,
     required this.onScenarioPressed,
     required this.onVariablePressed,
@@ -25,6 +28,7 @@ class _UrlState extends State<Url> {
   @override
   Widget build(BuildContext context) {
     final content = widget.content;
+    final theme = widget.configuration.theme;
 
     if (content.value['urls'] is! List) {
       return Container();
@@ -35,7 +39,9 @@ class _UrlState extends State<Url> {
     List<Widget> children = [
       Container(
         margin: const EdgeInsets.only(bottom: 10.0),
-        child: Text(description, textAlign: TextAlign.center),
+        child: Text(description,
+            textAlign: TextAlign.center,
+            style: theme.receivedMessageBodyTextStyle),
       ),
       ...(content.value['urls'] as List).map((url) => _urlMessageBuilder(url)),
     ];

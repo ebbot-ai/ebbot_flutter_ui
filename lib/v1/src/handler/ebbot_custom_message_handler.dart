@@ -1,20 +1,24 @@
 import 'package:ebbot_dart_client/ebbot_dart_client.dart';
 import 'package:ebbot_dart_client/entities/message/message.dart';
+import 'package:ebbot_flutter_ui/v1/configuration/ebbot_configuration.dart';
 import 'package:ebbot_flutter_ui/v1/ebbot_flutter_ui.dart';
+import 'package:ebbot_flutter_ui/v1/src/widget/carousel.dart';
 import 'package:ebbot_flutter_ui/v1/src/widget/rating.dart';
 import 'package:ebbot_flutter_ui/v1/src/widget/url.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:url_launcher/url_launcher.dart';
 
-class EbbotMessageContentProcessor {
+class EbbotCustomMessageHandler {
   final EbbotDartClient client;
   final EbbotFlutterUiState ebbotFlutterUiState;
+  final EbbotConfiguration configuration;
   final void Function(bool) canType;
 
-  EbbotMessageContentProcessor({
+  EbbotCustomMessageHandler({
     required this.client,
     required this.ebbotFlutterUiState,
+    required this.configuration,
     required this.canType,
   });
 
@@ -27,26 +31,34 @@ class EbbotMessageContentProcessor {
 
     switch (content.type) {
       case 'url':
-        return processUrl(content);
+        return handleUrl(content);
       case 'rating_request':
-        return processRatingRequest(content);
+        return handleRatingRequest(content);
+      case 'carousel':
+        return handleCarousel(content);
       default:
         return Container();
     }
   }
 
-  Widget processRatingRequest(MessageContent content) {
+  Widget handleCarousel(MessageContent content) {
+    return Carousel(content: content, configuration: configuration);
+  }
+
+  Widget handleRatingRequest(MessageContent content) {
     return Rating(
+      content: content,
+      configuration: configuration,
       onRatingChanged: (rating) {
         client.sendRatingMessage(rating);
       },
-      content: content,
     );
   }
 
-  Widget processUrl(MessageContent content) {
+  Widget handleUrl(MessageContent content) {
     return Url(
         content: content,
+        configuration: configuration,
         onURlPressed: (url) async {
           var uri = Uri.parse(url);
 

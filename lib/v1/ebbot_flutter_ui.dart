@@ -1,8 +1,8 @@
 import 'dart:io';
 import 'package:ebbot_dart_client/configuration/configuration.dart';
 import 'package:ebbot_flutter_ui/v1/configuration/ebbot_configuration.dart';
-import 'package:ebbot_flutter_ui/v1/src/processor/ebbot_message_processor.dart';
-import 'package:ebbot_flutter_ui/v1/src/processor/ebbot_message_content_processor.dart';
+import 'package:ebbot_flutter_ui/v1/src/handler/ebbot_message_handler.dart';
+import 'package:ebbot_flutter_ui/v1/src/handler/ebbot_custom_message_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:ebbot_dart_client/ebbot_dart_client.dart';
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
@@ -65,7 +65,7 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
   //final _agentUser = const types.User(id: 'agent', firstName: 'Agent');
   final _typingUsers = <types.User>[];
   late EbbotDartClient ebbotClient;
-  final ebbotMessageHandler = EbbotMessageProcessor();
+  final ebbotMessageHandler = EbbotMessageHandler();
   bool hasReceivedGPTMessageBefore = false;
   InputOptions _inputOptions = const InputOptions();
 
@@ -143,7 +143,7 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
         canType(false);
       }
 
-      var message = ebbotMessageHandler.process(
+      var message = ebbotMessageHandler.handle(
           messageBody, _ebbotGPTUser, _randomString());
       _addMessage(message);
     });
@@ -157,8 +157,8 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    var customMessage = EbbotMessageContentProcessor(
-        client: ebbotClient, ebbotFlutterUiState: this, canType: canType);
+    var customMessage = EbbotCustomMessageHandler(
+        client: ebbotClient, ebbotFlutterUiState: this, configuration: widget._configuration, canType: canType);
 
     return Scaffold(
       body: !isInitialized
