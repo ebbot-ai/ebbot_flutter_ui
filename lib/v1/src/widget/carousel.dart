@@ -94,9 +94,13 @@ class _CarouselState extends State<Carousel> {
               ),
               // Image
               Expanded(
-                child: Image.network(
-                  slides[index]["url"],
-                  fit: BoxFit.cover,
+                child: Container(
+                  padding: EdgeInsets.fromLTRB(10.0, 0, 10.0, 0),
+                  width: double.infinity,
+                  child: Image.network(
+                    slides[index]["url"],
+                    fit: BoxFit.cover,
+                  ),
                 ),
               ),
               // List of urls
