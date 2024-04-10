@@ -3,15 +3,15 @@ import 'package:ebbot_flutter_ui/v1/configuration/ebbot_configuration.dart';
 import 'package:flutter/material.dart';
 
 class Url extends StatefulWidget {
-  final MessageContent content;
   final EbbotConfiguration configuration;
+  final dynamic url;
   final void Function(String) onURlPressed;
   final void Function(String) onScenarioPressed;
   final void Function(String, String) onVariablePressed;
 
   const Url({
     Key? key,
-    required this.content,
+    required this.url,
     required this.configuration,
     required this.onURlPressed,
     required this.onScenarioPressed,
@@ -23,76 +23,46 @@ class Url extends StatefulWidget {
 }
 
 class _UrlState extends State<Url> {
-  final Map<String, bool> _hasBeenPressed = {};
+  bool _hasBeenPressed = false;
 
   @override
   Widget build(BuildContext context) {
-    final content = widget.content;
-    final theme = widget.configuration.theme;
-
-    if (content.value['urls'] is! List) {
-      return Container();
-    }
-
-    var description = content.value['description'];
-
-    List<Widget> children = [
-      Container(
-        margin: const EdgeInsets.only(bottom: 10.0),
-        child: Text(description,
-            textAlign: TextAlign.center,
-            style: theme.receivedMessageBodyTextStyle),
-      ),
-      ...(content.value['urls'] as List).map((url) => _urlMessageBuilder(url)),
-    ];
-
-    return Padding(
-      padding: const EdgeInsets.all(20.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: children,
-      ),
-    );
+    return _urlMessageBuilder(widget.url);
   }
 
   Widget _urlMessageBuilder(dynamic url) {
+    Widget button;
     if (url['type'] == 'url') {
-      var pattern = url['type'] + url['value'];
-      var exists = _hasBeenPressed[pattern];
-      return ElevatedButton(
-        onPressed: exists != null && exists
+      button = ElevatedButton(
+        onPressed: _hasBeenPressed
             ? null
             : () {
                 setState(() {
-                  _hasBeenPressed[pattern] = true;
+                  _hasBeenPressed = true;
                 });
                 widget.onURlPressed(url['value']);
               },
         child: Text(url['label']),
       );
     } else if (url['type'] == 'scenario') {
-      var pattern = url['type'] + url['next']['scenario'];
-      var exists = _hasBeenPressed[pattern];
-      return ElevatedButton(
-        onPressed: exists != null && exists
+      button = ElevatedButton(
+        onPressed: _hasBeenPressed
             ? null
             : () {
                 setState(() {
-                  _hasBeenPressed[pattern] = true;
+                  _hasBeenPressed = true;
                 });
                 widget.onScenarioPressed(url['next']['scenario']);
               },
         child: Text(url['label']),
       );
     } else if (url['type'] == 'variable') {
-      var pattern = url['type'] + url["name"] + url['value'];
-      var exists = _hasBeenPressed[pattern];
-      return ElevatedButton(
-        onPressed: exists != null && exists
+      button = ElevatedButton(
+        onPressed: _hasBeenPressed
             ? null
             : () {
                 setState(() {
-                  _hasBeenPressed[pattern] = true;
+                  _hasBeenPressed = true;
                 });
                 widget.onVariablePressed(url['name'], url['value']);
               },
@@ -101,5 +71,10 @@ class _UrlState extends State<Url> {
     } else {
       return Container();
     }
+
+    return Padding(
+      padding: EdgeInsets.only(top: 10.0),
+      child: button,
+    );
   }
 }

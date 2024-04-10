@@ -1,12 +1,22 @@
 import 'package:ebbot_dart_client/entities/message/message.dart';
 import 'package:ebbot_flutter_ui/v1/configuration/ebbot_configuration.dart';
+import 'package:ebbot_flutter_ui/v1/src/widget/url.dart';
 import 'package:flutter/material.dart';
 
 class Carousel extends StatefulWidget {
   final MessageContent content;
   final EbbotConfiguration configuration;
+  final void Function(String) onURlPressed;
+  final void Function(String) onScenarioPressed;
+  final void Function(String, String) onVariablePressed;
 
-  const Carousel({Key? key, required this.content, required this.configuration})
+  const Carousel(
+      {Key? key,
+      required this.content,
+      required this.configuration,
+      required this.onURlPressed,
+      required this.onScenarioPressed,
+      required this.onVariablePressed})
       : super(key: key);
 
   @override
@@ -38,56 +48,82 @@ class _CarouselState extends State<Carousel> {
             });
           },
           itemBuilder: (BuildContext context, int index) {
-            return Column(
-              children: [
-                // Image
-                Expanded(
-                  child: Image.network(
-                    slides[index]["url"],
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                // Title
-                Text(
+            var slide = slides[index];
+
+            var urls = slide['urls'];
+
+            List<Url> urlsList = [];
+
+            if (urls is List) {
+              urlsList = urls
+                  .map((url) => Url(
+                        url: url,
+                        configuration: widget.configuration,
+                        onURlPressed: (String url) {
+                          widget.onURlPressed(url);
+                        },
+                        onScenarioPressed: (String scenario) {
+                          widget.onScenarioPressed(scenario);
+                        },
+                        onVariablePressed: (String name, String value) {
+                          widget.onVariablePressed(name, value);
+                        },
+                      ))
+                  .toList();
+            }
+
+            return Column(children: [
+              // Title
+              Padding(
+                padding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
+                child: Text(
                   slides[index]["title"],
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 20,
+                    fontSize: 16,
                   ),
                 ),
-                // Description
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 20),
-                  child: Text(
-                    slides[index]["description"],
-                    textAlign: TextAlign.center,
-                  ),
+              ),
+              // Description
+              Padding(
+                padding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
+                child: Text(
+                  slides[index]["description"],
+                  textAlign: TextAlign.center,
                 ),
-                // Text Message
-                Text(
-                  "Your text message here",
-                  style: TextStyle(
-                    fontStyle: FontStyle.italic,
-                  ),
+              ),
+              // Image
+              Expanded(
+                child: Image.network(
+                  slides[index]["url"],
+                  fit: BoxFit.cover,
                 ),
-              ],
-            );
+              ),
+              // List of urls
+              Padding(
+                  padding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
+                  child: Column(
+                    children: urlsList,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                  ))
+            ]);
           },
         ),
       )
     ];
 
-    if (slides.isNotEmpty) {
-      pageChildren.add(
-        Row(
+    if (slides.length > 1) {
+      pageChildren.add(Padding(
+        padding: EdgeInsets.fromLTRB(0, 10, 0, 10),
+        child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: _buildDots(slides),
         ),
-      );
+      ));
     }
 
     return Container(
-      height: 400,
+      height: 500,
       child: Column(
         children: pageChildren,
       ),
