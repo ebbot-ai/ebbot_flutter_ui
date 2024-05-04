@@ -102,6 +102,30 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
     // Initialize the chat client
     await ebbotClient.initialize();
 
+    // If the chatStyle.v2 has info_section_enabled and info_section_in_conversation set to true, we need to present a modal (dismissible) with the info section
+
+    if (ebbotClient.notifications.isNotEmpty) {
+      for (var notification in ebbotClient.notifications) {
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: Text(notification.title),
+                content: Text(notification.text),
+                actions: <Widget>[
+                  TextButton(
+                    child: const Text('OK'),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              );
+            },
+          );
+      }
+    }
+
     ebbotClient.listener.chatStream.listen((chat) {
       logger.i('listener got chat: $chat');
     });
@@ -158,11 +182,16 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
   Widget build(BuildContext context) {
     super.build(context);
     var customMessage = EbbotCustomMessageHandler(
-        client: ebbotClient, ebbotFlutterUiState: this, configuration: widget._configuration, canType: canType);
+        client: ebbotClient,
+        ebbotFlutterUiState: this,
+        configuration: widget._configuration,
+        canType: canType);
 
     return Scaffold(
       body: !isInitialized
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(
+              child: CircularProgressIndicator(
+                  color: widget._configuration.theme.primaryColor))
           : Chat(
               inputOptions: _inputOptions,
               theme: widget._configuration.theme,

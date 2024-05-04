@@ -1,6 +1,6 @@
 import 'package:ebbot_dart_client/entities/message/message.dart';
 import 'package:ebbot_flutter_ui/v1/configuration/ebbot_configuration.dart';
-import 'package:ebbot_flutter_ui/v1/src/widget/url.dart';
+import 'package:ebbot_flutter_ui/v1/src/widget/url_button.dart';
 import 'package:flutter/material.dart';
 
 class UrlBox extends StatefulWidget {
@@ -42,7 +42,7 @@ class _UrlBoxState extends State<UrlBox> {
             textAlign: TextAlign.center,
             style: theme.receivedMessageBodyTextStyle),
       ),
-      ...(content.value['urls'] as List).map((url) => Url(
+      ...(content.value['urls'] as List).map((url) => UrlButton(
             url: url,
             configuration: widget.configuration,
             onURlPressed: (String url) {

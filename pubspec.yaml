@@ -1,7 +1,7 @@
 name: ebbot_flutter_ui
 description: "The Ebbot flutter ui project."
 publish_to: "none" # Remove this line if you wish to publish to pub.dev¨
-version: 0.0.7
+version: 0.0.8
 
 environment:
   sdk: ">=3.2.6 <4.0.0"
@@ -19,7 +19,7 @@ dependencies:
   ebbot_dart_client:
     git:
       url: https://github.com/ebbot-ai/ebbot_dart_client
-      ref: v0.0.6
+      ref: v0.0.7
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.

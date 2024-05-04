@@ -1,7 +1,8 @@
 import 'package:ebbot_dart_client/entities/message/message.dart';
 import 'package:ebbot_flutter_ui/v1/configuration/ebbot_configuration.dart';
-import 'package:ebbot_flutter_ui/v1/src/widget/url.dart';
+import 'package:ebbot_flutter_ui/v1/src/widget/url_button.dart';
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
 
 class Carousel extends StatefulWidget {
   final MessageContent content;
@@ -10,7 +11,7 @@ class Carousel extends StatefulWidget {
   final void Function(String) onScenarioPressed;
   final void Function(String, String) onVariablePressed;
 
-  const Carousel(
+  Carousel(
       {Key? key,
       required this.content,
       required this.configuration,
@@ -24,11 +25,16 @@ class Carousel extends StatefulWidget {
 }
 
 class _CarouselState extends State<Carousel> {
-  final PageController _controller = PageController();
+  final PageController _controller = PageController(initialPage: 0);
   int _currentPage = 0;
+
+  final logger = Logger(
+    printer: PrettyPrinter(),
+  );
 
   @override
   Widget build(BuildContext context) {
+    logger.i("Building carousel, page: $_currentPage");
     final content = widget.content;
 
     if (content.value['slides'] is! List) {
@@ -43,6 +49,7 @@ class _CarouselState extends State<Carousel> {
           itemCount: slides.length,
           controller: _controller,
           onPageChanged: (int page) {
+            logger.i("Page changed to $page, current page: $_currentPage");
             setState(() {
               _currentPage = page;
             });
@@ -52,11 +59,11 @@ class _CarouselState extends State<Carousel> {
 
             var urls = slide['urls'];
 
-            List<Url> urlsList = [];
+            List<UrlButton> urlsList = [];
 
             if (urls is List) {
               urlsList = urls
-                  .map((url) => Url(
+                  .map((url) => UrlButton(
                         url: url,
                         configuration: widget.configuration,
                         onURlPressed: (String url) {
@@ -136,6 +143,7 @@ class _CarouselState extends State<Carousel> {
 
   List<Widget> _buildDots(List slides) {
     final theme = widget.configuration.theme;
+
     List<Widget> dots = [];
     for (int i = 0; i < slides.length; i++) {
       dots.add(
@@ -145,9 +153,7 @@ class _CarouselState extends State<Carousel> {
           height: 10,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: _currentPage == i
-                ? theme.primaryColor
-                : theme.receivedMessageBodyTextStyle.color,
+            color: _currentPage == i ? theme.primaryColor : Colors.grey,
           ),
         ),
       );

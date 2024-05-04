@@ -32,6 +32,8 @@ class _RatingState extends State<Rating> {
   @override
   Widget build(BuildContext context) {
     final theme = widget.configuration.theme;
+    var i = Icons.star_border;
+
     return Padding(
         padding: const EdgeInsets.all(12.0),
         child:
@@ -50,10 +52,8 @@ class _RatingState extends State<Rating> {
                 onTap: () {
                   setState(() {
                     if (_hasRated == true) {
-                      print("Has rated");
                       return;
                     }
-                    print("Has not rated");
                     _rating = index + 1;
                     _hasRated = true;
                     widget.onRatingChanged(_rating);
@@ -61,7 +61,7 @@ class _RatingState extends State<Rating> {
                 },
                 child: Icon(
                   index < _rating ? Icons.star : Icons.star_border,
-                  color: Colors.yellow,
+                  color: widget.configuration.theme.primaryColor,
                   size: 30,
                 ),
               );

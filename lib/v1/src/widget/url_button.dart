@@ -2,14 +2,14 @@ import 'package:ebbot_dart_client/entities/message/message.dart';
 import 'package:ebbot_flutter_ui/v1/configuration/ebbot_configuration.dart';
 import 'package:flutter/material.dart';
 
-class Url extends StatefulWidget {
+class UrlButton extends StatefulWidget {
   final EbbotConfiguration configuration;
   final dynamic url;
   final void Function(String) onURlPressed;
   final void Function(String) onScenarioPressed;
   final void Function(String, String) onVariablePressed;
 
-  const Url({
+  const UrlButton({
     Key? key,
     required this.url,
     required this.configuration,
@@ -19,10 +19,10 @@ class Url extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _UrlState createState() => _UrlState();
+  _UrlButtonState createState() => _UrlButtonState();
 }
 
-class _UrlState extends State<Url> {
+class _UrlButtonState extends State<UrlButton> {
   bool _hasBeenPressed = false;
 
   @override
@@ -31,9 +31,20 @@ class _UrlState extends State<Url> {
   }
 
   Widget _urlMessageBuilder(dynamic url) {
+    final style = ButtonStyle(
+      foregroundColor:
+          MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+        if (states.contains(MaterialState.disabled)) {
+          return Colors.grey; // Disabled color
+        }
+        return widget.configuration.theme.primaryColor; // Enabled color
+      }),
+    );
+
     Widget button;
     if (url['type'] == 'url') {
       button = ElevatedButton(
+        style: style,
         onPressed: _hasBeenPressed
             ? null
             : () {
@@ -46,6 +57,7 @@ class _UrlState extends State<Url> {
       );
     } else if (url['type'] == 'scenario') {
       button = ElevatedButton(
+        style: style,
         onPressed: _hasBeenPressed
             ? null
             : () {
@@ -58,6 +70,7 @@ class _UrlState extends State<Url> {
       );
     } else if (url['type'] == 'variable') {
       button = ElevatedButton(
+        style: style,
         onPressed: _hasBeenPressed
             ? null
             : () {
