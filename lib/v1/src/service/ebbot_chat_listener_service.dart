@@ -1,6 +1,6 @@
 import 'package:ebbot_dart_client/ebbot_dart_client.dart';
-import 'package:ebbot_dart_client/entities/chat/chat.dart';
-import 'package:ebbot_dart_client/entities/message/message.dart';
+import 'package:ebbot_dart_client/entity/chat/chat.dart';
+import 'package:ebbot_dart_client/entity/message/message.dart';
 
 class EbbotChatListenerService {
   final EbbotDartClient _client;

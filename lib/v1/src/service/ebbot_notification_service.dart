@@ -1,4 +1,4 @@
-import 'package:ebbot_dart_client/entities/notifications/notification.dart';
+import 'package:ebbot_dart_client/entity/notification/notification.dart';
 
 class EbbotNotificationService {
   final List<Notification> _notifications;

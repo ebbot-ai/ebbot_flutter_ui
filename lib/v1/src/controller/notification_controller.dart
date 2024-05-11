@@ -1,7 +1,4 @@
-import 'package:ebbot_dart_client/entities/notifications/notification.dart'
-    as EbbotDartClientNotification;
 import 'package:ebbot_flutter_ui/v1/src/service/ebbot_notification_service.dart';
-import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 
 class NotificationController {

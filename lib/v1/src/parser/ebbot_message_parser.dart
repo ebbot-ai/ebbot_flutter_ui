@@ -1,4 +1,4 @@
-import 'package:ebbot_dart_client/entities/message/message.dart';
+import 'package:ebbot_dart_client/entity/message/message.dart';
 import 'package:logger/logger.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 
