@@ -6,7 +6,7 @@ import 'package:ebbot_flutter_ui/v1/src/controller/chat_input_controller.dart';
 import 'package:ebbot_flutter_ui/v1/src/controller/ebbot_message_stream_controller.dart';
 import 'package:ebbot_flutter_ui/v1/src/controller/ebbot_chat_stream_controller.dart';
 import 'package:ebbot_flutter_ui/v1/src/controller/notification_controller.dart';
-import 'package:ebbot_flutter_ui/v1/src/controller/ebbot_message_controller.dart';
+import 'package:ebbot_flutter_ui/v1/src/parser/ebbot_message_parser.dart';
 import 'package:ebbot_flutter_ui/v1/src/controller/chat_ui_custom_message_controller.dart';
 import 'package:ebbot_flutter_ui/v1/src/service/ebbot_chat_listener_service.dart';
 import 'package:ebbot_flutter_ui/v1/src/service/ebbot_notification_service.dart';
@@ -16,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:ebbot_dart_client/ebbot_dart_client.dart';
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
+import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
 import 'package:open_filex/open_filex.dart';
@@ -66,13 +67,9 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
   bool hasReceivedGPTMessageBefore = false;
   late ChatInputController _chatInputController;
   late NotificationController _notificationController;
-  late EbbotNotificationService _ebbotNotificationService;
   late ChatUiCustomMessageController _chatUiCustomMessageController;
-  late EbbotChatListenerService _ebbotChatListenerService;
   late EbbotMessageStreamController _ebbotMessageStreamController;
   late EbbotChatStreamController _ebbotChatStreamController;
-
-  late EbbotMessageController _ebbotMessageController;
 
   final logger = Logger(
     printer: PrettyPrinter(),
@@ -81,7 +78,6 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
   @override
   void initState() {
     super.initState();
-
     initialize();
   }
 
@@ -109,35 +105,33 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
     // Initialize the chat client
     await ebbotClient.initialize();
 
-    // Initialize the services
-    initalizeServices();
+    // Register the services in the service locator
+    registerServices();
     // Initialize the controllers
     initalizeControllers();
 
     // We are ready to start receiving messages
     // TODO: Should handle this more gracefully
-    _ebbotChatListenerService.client.startReceive();
+    GetIt.I.get<EbbotChatListenerService>().client.startReceive();
     _handleCanType(true);
     isInitialized = true;
   }
 
-  void initalizeServices() {
-    _ebbotNotificationService =
-        EbbotNotificationService(ebbotClient.notifications);
-    _ebbotChatListenerService = EbbotChatListenerService(ebbotClient);
+  void registerServices() {
+    GetIt.I.registerSingleton<EbbotNotificationService>(
+        EbbotNotificationService(ebbotClient.notifications));
+    GetIt.I.registerSingleton<EbbotChatListenerService>(
+        EbbotChatListenerService(ebbotClient));
   }
 
   void initalizeControllers() {
-    _ebbotMessageController = EbbotMessageController();
-
     _chatInputController = ChatInputController(
       enabled: true,
       enterPressedBehaviour: widget._configuration.behaviour.input.enterPressed,
       onTextChanged: _handleOnTextChanged,
     );
 
-    _notificationController =
-        NotificationController(_ebbotNotificationService, _handleNotification);
+    _notificationController = NotificationController(_handleNotification);
 
     _chatUiCustomMessageController = ChatUiCustomMessageController(
         client: ebbotClient,
@@ -146,21 +140,19 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
         canType: _handleCanType);
 
     _ebbotMessageStreamController = EbbotMessageStreamController(
-        _ebbotChatListenerService,
-        _handleTypingUsers,
-        _handleClearTypingUsers,
-        _handleAddMessage,
-        _handleCanType,
-        _ebbotMessageController);
+      _handleTypingUsers,
+      _handleClearTypingUsers,
+      _handleAddMessage,
+      _handleCanType,
+    );
 
     // Not currently used
     _ebbotChatStreamController = EbbotChatStreamController(
-        _ebbotChatListenerService,
-        _handleTypingUsers,
-        _handleClearTypingUsers,
-        _handleAddMessage,
-        _handleCanType,
-        _ebbotMessageController);
+      _handleTypingUsers,
+      _handleClearTypingUsers,
+      _handleAddMessage,
+      _handleCanType,
+    );
   }
 
   @override
@@ -242,31 +234,10 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
   }
 
   void _handleOnTextChanged(String text) {
-    if (text.isEmpty) {
-      logger.i("text is empty, so skipping..");
-      return;
-    }
-
-    if (_chatInputController.enterPressedBehaviour !=
-        EbbotBehaviourInputEnterPressed.sendMessage) {
-      logger.i(
-          "enterPressedBehaviour is ${_chatInputController.enterPressedBehaviour}, so skipping..");
-      return;
-    }
-
-    if (!text.endsWith('\n')) {
-      logger.i("text does not end with newline, so skipping..");
-      return;
-    }
-
-    logger.i("text does end with newline, so sending..");
-    text = text.substring(0, text.length - 1);
     _handleSendPressed(types.PartialText(text: text));
-
-    // clear the text field
-    _chatInputController.textEditingController.clear();
   }
 
+  // TODO: refactor this to a controller
   void _handleMessageTap(BuildContext _, types.Message message) async {
     if (message is types.FileMessage) {
       var localPath = message.uri;
@@ -314,6 +285,7 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
     }
   }
 
+  // TODO: refactor this to a controller
   void _handleSendPressed(types.PartialText message) {
     final textMessage = types.TextMessage(
       author: _user!,

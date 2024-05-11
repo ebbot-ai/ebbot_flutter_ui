@@ -2,60 +2,60 @@ import 'package:ebbot_dart_client/entities/message/message.dart';
 import 'package:logger/logger.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 
-/// A controller for processing incoming ebbot chat messages and generating corresponding types of messages.
+/// A parser for processing incoming ebbot chat messages and generating corresponding types of flutter chat ui messages.
 ///
 /// This class provides methods for processing various types of messages such as text, images, files, etc.
-class EbbotMessageController {
+class EbbotMessageParser {
   final logger = Logger(
     printer: PrettyPrinter(),
   );
 
-  /// Handles the incoming message and returns the corresponding message type.
+  /// Parses the incoming message and returns the corresponding message type.
   ///
   /// The method examines the type of the incoming message and delegates the processing to specific handlers.
   /// Returns `null` if the message type is unsupported.
-  types.Message? handle(Message message, types.User user, String id) {
+  types.Message? parse(Message message, types.User user, String id) {
     var messageType = message.data.message.type;
     switch (messageType) {
       case 'gpt':
-        logger.i("handling gpt message");
-        return handleGpt(message.data.message, user, id);
+        logger.i("parsing gpt message");
+        return _parseGpt(message.data.message, user, id);
       case 'image':
-        logger.i("handling image message");
-        return handleImage(message.data.message, user, id);
+        logger.i("parsing image message");
+        return _parseImage(message.data.message, user, id);
       case 'text':
-        logger.i("handling text message");
-        return handleText(message.data.message, user, id);
+        logger.i("parsing text message");
+        return _parseText(message.data.message, user, id);
       case 'file':
-        logger.i("handling file message");
-        return handleFile(message.data.message, user, id);
+        logger.i("parsing file message");
+        return _parseFile(message.data.message, user, id);
       case 'text_info':
-        logger.i("handling text info message");
-        return handleTextInfo(message.data.message, user, id);
+        logger.i("parsing text info message");
+        return _parseTextInfo(message.data.message, user, id);
       case 'url':
-        logger.i("handling url message");
-        return handleCustom(message.data.message, user, id);
+        logger.i("parsing url message");
+        return _parseCustom(message.data.message, user, id);
       case 'rating_request':
-        logger.i("handling rating request");
-        return handleCustom(message.data.message, user, id);
+        logger.i("parsing rating request");
+        return _parseCustom(message.data.message, user, id);
       case 'carousel':
-        logger.i("handling carousel message");
-        return handleCustom(message.data.message, user, id);
+        logger.i("parsing carousel message");
+        return _parseCustom(message.data.message, user, id);
       default:
         logger.w("Unsupported message type: $messageType");
         return null;
     }
   }
 
-  types.Message? handleCustom(
+  types.Message? _parseCustom(
       MessageContent message, types.User user, String id) {
     return types.CustomMessage(
         id: id, author: user, metadata: message.toJson());
   }
 
-  types.Message? handleTextInfo(
+  types.Message? _parseTextInfo(
       MessageContent message, types.User author, String id) {
-    // Add your message handling logic here
+    // Add your message parsing logic here
     var text = message.value is String ? message.value : message.value['text'];
 
     return types.SystemMessage(
@@ -65,9 +65,9 @@ class EbbotMessageController {
         text: text);
   }
 
-  types.Message? handleGpt(
+  types.Message? _parseGpt(
       MessageContent message, types.User author, String id) {
-    // Add your message handling logic here
+    // Add your message parsing logic here
     var text = message.value is String ? message.value : message.value['text'];
 
     return types.TextMessage(
@@ -78,10 +78,10 @@ class EbbotMessageController {
     );
   }
 
-  types.Message? handleImage(
+  types.Message? _parseImage(
       MessageContent message, types.User author, String id) {
-    // Add your message handling logic here
-    logger.i("Handling image message");
+    // Add your message parsing logic here
+    logger.i("parsing image message");
     if (message.value is! Map<String, dynamic>) {
       logger.i(
           "message is NOT a map, I don't know how to process this, so skipping.. type is ${message.value.runtimeType}");
@@ -99,9 +99,9 @@ class EbbotMessageController {
     );
   }
 
-  types.Message? handleText(
+  types.Message? _parseText(
       MessageContent message, types.User author, String id) {
-    logger.i("Handling text message");
+    logger.i("parsing text message of type");
 
     if (message.sender == 'user') {
       logger.i("message is from user, so skipping..");
@@ -120,9 +120,9 @@ class EbbotMessageController {
     );
   }
 
-  types.Message? handleFile(
+  types.Message? _parseFile(
       MessageContent message, types.User author, String id) {
-    logger.i("Handling file message");
+    logger.i("parsing file message");
     if (message.value is! Map<String, dynamic>) {
       logger.w(
           "message is NOT a map, I don't know how to process this, so skipping.. type is ${message.value.runtimeType}");
