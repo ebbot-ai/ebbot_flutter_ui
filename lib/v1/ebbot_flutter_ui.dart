@@ -1,16 +1,19 @@
 import 'dart:io';
 import 'package:ebbot_dart_client/configuration/configuration.dart';
+import 'package:ebbot_flutter_ui/v1/configuration/ebbot_behaviour.dart';
 import 'package:ebbot_flutter_ui/v1/configuration/ebbot_configuration.dart';
-import 'package:ebbot_flutter_ui/v1/src/handler/ebbot_message_handler.dart';
-import 'package:ebbot_flutter_ui/v1/src/handler/ebbot_custom_message_handler.dart';
+import 'package:ebbot_flutter_ui/v1/src/controller/chat_input_controller.dart';
+import 'package:ebbot_flutter_ui/v1/src/controller/notification_controller.dart';
+import 'package:ebbot_flutter_ui/v1/src/controller/ebbot_message_controller.dart';
+import 'package:ebbot_flutter_ui/v1/src/controller/chat_ui_custom_message_controller.dart';
+import 'package:ebbot_flutter_ui/v1/src/service/notification_service.dart';
+import 'package:ebbot_flutter_ui/v1/src/util/string_util.dart';
 import 'package:flutter/material.dart';
 import 'package:ebbot_dart_client/ebbot_dart_client.dart';
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
-import 'dart:math';
-import 'dart:convert';
 import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -44,12 +47,6 @@ class EbbotFlutterUi extends StatefulWidget {
   State<EbbotFlutterUi> createState() => EbbotFlutterUiState();
 }
 
-String _randomString() {
-  final random = Random.secure();
-  final values = List<int>.generate(16, (i) => random.nextInt(255));
-  return base64UrlEncode(values);
-}
-
 /// The state class for the [EbbotFlutterUi].
 ///
 /// Manages the internal state of the user interface, including message handling,
@@ -62,12 +59,14 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
 
   final _ebbotGPTUser =
       const types.User(id: 'ebbot-gpt', firstName: 'Ebbot Chat');
-  //final _agentUser = const types.User(id: 'agent', firstName: 'Agent');
   final _typingUsers = <types.User>[];
   late EbbotDartClient ebbotClient;
-  final ebbotMessageHandler = EbbotMessageHandler();
+  final ebbotMessageHandler = EbbotMessageController();
   bool hasReceivedGPTMessageBefore = false;
-  InputOptions _inputOptions = const InputOptions();
+  late ChatInputController _chatInputController;
+  late NotificationController _notificationController;
+  late NotificationService _notificationService;
+  late ChatUiCustomMessageController _chatUiCustomMessageController;
 
   final logger = Logger(
     printer: PrettyPrinter(),
@@ -92,39 +91,22 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
   void initialize() async {
     isInitialized = false;
     _messages.clear();
+
     var configuration = ConfigurationBuilder()
         .environment(widget._configuration.environment)
-        .userAttributes(widget._configuration.userAttributes)
+        .userAttributes(widget._configuration.userConfiguration.userAttributes)
         .build();
+
     ebbotClient = EbbotDartClient(widget._botId, configuration);
     _user = types.User(id: ebbotClient.chatId);
 
     // Initialize the chat client
     await ebbotClient.initialize();
 
-    // If the chatStyle.v2 has info_section_enabled and info_section_in_conversation set to true, we need to present a modal (dismissible) with the info section
-
-    if (ebbotClient.notifications.isNotEmpty) {
-      for (var notification in ebbotClient.notifications) {
-          showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return AlertDialog(
-                title: Text(notification.title),
-                content: Text(notification.text),
-                actions: <Widget>[
-                  TextButton(
-                    child: const Text('OK'),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                ],
-              );
-            },
-          );
-      }
-    }
+    // Initialize the services
+    initalizeServices();
+    // Initialize the controllers
+    initalizeControllers();
 
     ebbotClient.listener.chatStream.listen((chat) {
       logger.i('listener got chat: $chat');
@@ -155,7 +137,7 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
         hasReceivedGPTMessageBefore = true;
 
         var systemMessage = types.SystemMessage(
-            id: _randomString(),
+            id: StringUtil.randomString(),
             author: _ebbotGPTUser,
             text: "AI generated message");
         _addMessage(systemMessage);
@@ -168,7 +150,7 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
       }
 
       var message = ebbotMessageHandler.handle(
-          messageBody, _ebbotGPTUser, _randomString());
+          messageBody, _ebbotGPTUser, StringUtil.randomString());
       _addMessage(message);
     });
 
@@ -178,14 +160,30 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
     isInitialized = true;
   }
 
-  @override
-  Widget build(BuildContext context) {
-    super.build(context);
-    var customMessage = EbbotCustomMessageHandler(
+  void initalizeServices() {
+    _notificationService = NotificationService(ebbotClient.notifications);
+  }
+
+  void initalizeControllers() {
+    _chatInputController = ChatInputController(
+      enabled: true,
+      enterPressedBehaviour: widget._configuration.behaviour.input.enterPressed,
+      onTextChanged: handleOnTextChanged,
+    );
+
+    _notificationController =
+        NotificationController(_notificationService, _handleNotification);
+
+    _chatUiCustomMessageController = ChatUiCustomMessageController(
         client: ebbotClient,
         ebbotFlutterUiState: this,
         configuration: widget._configuration,
         canType: canType);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
 
     return Scaffold(
       body: !isInitialized
@@ -193,13 +191,14 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
               child: CircularProgressIndicator(
                   color: widget._configuration.theme.primaryColor))
           : Chat(
-              inputOptions: _inputOptions,
+              inputOptions: _chatInputController.inputOptions,
               theme: widget._configuration.theme,
               messages: _messages,
               onSendPressed: _handleSendPressed,
               onMessageTap: _handleMessageTap,
               user: _user!,
-              customMessageBuilder: customMessage.process,
+              customMessageBuilder:
+                  _chatUiCustomMessageController.processMessage,
               typingIndicatorOptions: TypingIndicatorOptions(
                   typingMode: TypingIndicatorMode.avatar,
                   typingUsers: _typingUsers),
@@ -207,9 +206,29 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
     );
   }
 
+  void _handleNotification(String title, String text) async {
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(text),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   void canType(bool canType) {
     setState(() {
-      _inputOptions = InputOptions(enabled: canType);
+      _chatInputController.enabled = canType;
     });
   }
 
@@ -222,6 +241,37 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
     setState(() {
       _messages.insert(0, message);
     });
+  }
+
+  void handleOnTextChanged(String text) {
+    if (text.isEmpty) {
+      logger.i("text is empty, so skipping..");
+      return;
+    }
+
+    if (_chatInputController.enterPressedBehaviour !=
+        EbbotBehaviourInputEnterPressed.sendMessage) {
+      logger.i(
+          "enterPressedBehaviour is ${_chatInputController.enterPressedBehaviour}, so skipping..");
+      return;
+    }
+
+    if (!text.endsWith('\n')) {
+      logger.i("text does not end with newline, so skipping..");
+      return;
+    }
+
+    logger.i("text does end with newline, so sending..");
+    text = text.substring(0, text.length - 1);
+    _handleSendPressed(types.PartialText(text: text));
+
+    // clear the text field
+    _chatInputController.textEditingController.clear();
+
+    /*if (_inputOptionsState.enterPressedBehaviour ==
+        EbbotBehaviourInputEnterPressed.send) {
+      _handleSendPressed(types.PartialText(text));
+    }*/
   }
 
   void _handleMessageTap(BuildContext _, types.Message message) async {
@@ -275,11 +325,12 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
     final textMessage = types.TextMessage(
       author: _user!,
       createdAt: DateTime.now().millisecondsSinceEpoch,
-      id: _randomString(),
+      id: StringUtil.randomString(),
       text: message.text,
     );
 
     _addMessage(textMessage);
     ebbotClient.sendTextMessage(textMessage.text);
+    _chatInputController.textEditingController.clear();
   }
 }

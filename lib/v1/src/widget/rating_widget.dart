@@ -2,13 +2,13 @@ import 'package:ebbot_dart_client/entities/message/message.dart';
 import 'package:ebbot_flutter_ui/v1/configuration/ebbot_configuration.dart';
 import 'package:flutter/material.dart';
 
-class Rating extends StatefulWidget {
+class RatingWidget extends StatefulWidget {
   final MessageContent content;
   final EbbotConfiguration configuration;
   final int initialRating;
   final void Function(int) onRatingChanged;
 
-  const Rating(
+  const RatingWidget(
       {super.key,
       this.initialRating = 0,
       required this.onRatingChanged,
@@ -16,10 +16,10 @@ class Rating extends StatefulWidget {
       required this.configuration});
 
   @override
-  _RatingState createState() => _RatingState();
+  _RatingWidgetState createState() => _RatingWidgetState();
 }
 
-class _RatingState extends State<Rating> {
+class _RatingWidgetState extends State<RatingWidget> {
   late int _rating;
   bool _hasRated = false;
 

@@ -1,17 +1,17 @@
 import 'package:ebbot_dart_client/entities/message/message.dart';
 import 'package:ebbot_flutter_ui/v1/configuration/ebbot_configuration.dart';
-import 'package:ebbot_flutter_ui/v1/src/widget/url_button.dart';
+import 'package:ebbot_flutter_ui/v1/src/widget/url_button_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 
-class Carousel extends StatefulWidget {
+class CarouselWidget extends StatefulWidget {
   final MessageContent content;
   final EbbotConfiguration configuration;
   final void Function(String) onURlPressed;
   final void Function(String) onScenarioPressed;
   final void Function(String, String) onVariablePressed;
 
-  Carousel(
+  CarouselWidget(
       {Key? key,
       required this.content,
       required this.configuration,
@@ -21,10 +21,10 @@ class Carousel extends StatefulWidget {
       : super(key: key);
 
   @override
-  _CarouselState createState() => _CarouselState();
+  _CarouselWidgetState createState() => _CarouselWidgetState();
 }
 
-class _CarouselState extends State<Carousel> {
+class _CarouselWidgetState extends State<CarouselWidget> {
   final PageController _controller = PageController(initialPage: 0);
   int _currentPage = 0;
 
@@ -59,11 +59,11 @@ class _CarouselState extends State<Carousel> {
 
             var urls = slide['urls'];
 
-            List<UrlButton> urlsList = [];
+            List<UrlButtonWidget> urlsList = [];
 
             if (urls is List) {
               urlsList = urls
-                  .map((url) => UrlButton(
+                  .map((url) => UrlButtonWidget(
                         url: url,
                         configuration: widget.configuration,
                         onURlPressed: (String url) {

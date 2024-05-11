@@ -1,16 +1,16 @@
 import 'package:ebbot_dart_client/entities/message/message.dart';
 import 'package:ebbot_flutter_ui/v1/configuration/ebbot_configuration.dart';
-import 'package:ebbot_flutter_ui/v1/src/widget/url_button.dart';
+import 'package:ebbot_flutter_ui/v1/src/widget/url_button_widget.dart';
 import 'package:flutter/material.dart';
 
-class UrlBox extends StatefulWidget {
+class UrlBoxWidget extends StatefulWidget {
   final MessageContent content;
   final EbbotConfiguration configuration;
   final void Function(String) onURlPressed;
   final void Function(String) onScenarioPressed;
   final void Function(String, String) onVariablePressed;
 
-  const UrlBox({
+  const UrlBoxWidget({
     Key? key,
     required this.content,
     required this.configuration,
@@ -20,10 +20,10 @@ class UrlBox extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _UrlBoxState createState() => _UrlBoxState();
+  _UrlBoxWidgetState createState() => _UrlBoxWidgetState();
 }
 
-class _UrlBoxState extends State<UrlBox> {
+class _UrlBoxWidgetState extends State<UrlBoxWidget> {
   @override
   Widget build(BuildContext context) {
     final content = widget.content;
@@ -42,7 +42,7 @@ class _UrlBoxState extends State<UrlBox> {
             textAlign: TextAlign.center,
             style: theme.receivedMessageBodyTextStyle),
       ),
-      ...(content.value['urls'] as List).map((url) => UrlButton(
+      ...(content.value['urls'] as List).map((url) => UrlButtonWidget(
             url: url,
             configuration: widget.configuration,
             onURlPressed: (String url) {

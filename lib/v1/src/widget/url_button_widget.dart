@@ -2,14 +2,14 @@ import 'package:ebbot_dart_client/entities/message/message.dart';
 import 'package:ebbot_flutter_ui/v1/configuration/ebbot_configuration.dart';
 import 'package:flutter/material.dart';
 
-class UrlButton extends StatefulWidget {
+class UrlButtonWidget extends StatefulWidget {
   final EbbotConfiguration configuration;
   final dynamic url;
   final void Function(String) onURlPressed;
   final void Function(String) onScenarioPressed;
   final void Function(String, String) onVariablePressed;
 
-  const UrlButton({
+  const UrlButtonWidget({
     Key? key,
     required this.url,
     required this.configuration,
@@ -19,10 +19,10 @@ class UrlButton extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _UrlButtonState createState() => _UrlButtonState();
+  _UrlButtonWidgetState createState() => _UrlButtonWidgetState();
 }
 
-class _UrlButtonState extends State<UrlButton> {
+class _UrlButtonWidgetState extends State<UrlButtonWidget> {
   bool _hasBeenPressed = false;
 
   @override

@@ -2,10 +2,10 @@ import 'package:ebbot_dart_client/entities/message/message.dart';
 import 'package:logger/logger.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 
-/// A class responsible for processing incoming messages and generating corresponding types of messages.
+/// A controller for processing incoming ebbot chat messages and generating corresponding types of messages.
 ///
 /// This class provides methods for processing various types of messages such as text, images, files, etc.
-class EbbotMessageHandler {
+class EbbotMessageController {
   final logger = Logger(
     printer: PrettyPrinter(),
   );
