@@ -1,10 +1,10 @@
 import 'package:ebbot_dart_client/entities/notifications/notification.dart'
     as EbbotDartClientNotification;
-import 'package:ebbot_flutter_ui/v1/src/service/notification_service.dart';
+import 'package:ebbot_flutter_ui/v1/src/service/ebbot_notification_service.dart';
 import 'package:flutter/material.dart';
 
 class NotificationController {
-  final NotificationService _notificationService;
+  final EbbotNotificationService _notificationService;
   final Function(String title, String text) _handleNotification;
   NotificationController(this._notificationService, this._handleNotification) {
     _processNotifications();

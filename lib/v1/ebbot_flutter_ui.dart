@@ -3,10 +3,14 @@ import 'package:ebbot_dart_client/configuration/configuration.dart';
 import 'package:ebbot_flutter_ui/v1/configuration/ebbot_behaviour.dart';
 import 'package:ebbot_flutter_ui/v1/configuration/ebbot_configuration.dart';
 import 'package:ebbot_flutter_ui/v1/src/controller/chat_input_controller.dart';
+import 'package:ebbot_flutter_ui/v1/src/controller/ebbot_message_stream_controller.dart';
+import 'package:ebbot_flutter_ui/v1/src/controller/ebbot_chat_stream_controller.dart';
 import 'package:ebbot_flutter_ui/v1/src/controller/notification_controller.dart';
 import 'package:ebbot_flutter_ui/v1/src/controller/ebbot_message_controller.dart';
 import 'package:ebbot_flutter_ui/v1/src/controller/chat_ui_custom_message_controller.dart';
-import 'package:ebbot_flutter_ui/v1/src/service/notification_service.dart';
+import 'package:ebbot_flutter_ui/v1/src/service/ebbot_chat_listener_service.dart';
+import 'package:ebbot_flutter_ui/v1/src/service/ebbot_notification_service.dart';
+import 'package:ebbot_flutter_ui/v1/src/util/ebbot_gpt_user.dart';
 import 'package:ebbot_flutter_ui/v1/src/util/string_util.dart';
 import 'package:flutter/material.dart';
 import 'package:ebbot_dart_client/ebbot_dart_client.dart';
@@ -57,16 +61,18 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
   types.User? _user;
   bool isInitialized = false;
 
-  final _ebbotGPTUser =
-      const types.User(id: 'ebbot-gpt', firstName: 'Ebbot Chat');
   final _typingUsers = <types.User>[];
   late EbbotDartClient ebbotClient;
-  final ebbotMessageHandler = EbbotMessageController();
   bool hasReceivedGPTMessageBefore = false;
   late ChatInputController _chatInputController;
   late NotificationController _notificationController;
-  late NotificationService _notificationService;
+  late EbbotNotificationService _ebbotNotificationService;
   late ChatUiCustomMessageController _chatUiCustomMessageController;
+  late EbbotChatListenerService _ebbotChatListenerService;
+  late EbbotMessageStreamController _ebbotMessageStreamController;
+  late EbbotChatStreamController _ebbotChatStreamController;
+
+  late EbbotMessageController _ebbotMessageController;
 
   final logger = Logger(
     printer: PrettyPrinter(),
@@ -108,77 +114,53 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
     // Initialize the controllers
     initalizeControllers();
 
-    ebbotClient.listener.chatStream.listen((chat) {
-      logger.i('listener got chat: $chat');
-    });
-
-    ebbotClient.listener.messageStream.listen((messageBody) {
-      var messageType = messageBody.data.message.type;
-      logger.i('listener got message of type: $messageType');
-
-      // Special case for typing, as we use Flyers typing indicator logic
-      if (messageType == 'typing') {
-        logger.i("handling typing message");
-        setState(() {
-          _typingUsers.clear();
-          _typingUsers.add(_ebbotGPTUser);
-        });
-        return;
-      }
-
-      setState(() {
-        //_typingUsers.remove((u) => _ebbotGPTUser.id == u.id);
-        _typingUsers
-            .clear(); // Maybe not the cleanest way to remove all typing users
-      });
-
-      // If this is the first time we get a GPT message, lets add a "AI generated message" system message
-      if (hasReceivedGPTMessageBefore == false && messageType == 'gpt') {
-        hasReceivedGPTMessageBefore = true;
-
-        var systemMessage = types.SystemMessage(
-            id: StringUtil.randomString(),
-            author: _ebbotGPTUser,
-            text: "AI generated message");
-        _addMessage(systemMessage);
-      }
-
-      // If the type is rating, the conversation has ended
-      // and we should disable the input field
-      if (messageType == 'rating') {
-        canType(false);
-      }
-
-      var message = ebbotMessageHandler.handle(
-          messageBody, _ebbotGPTUser, StringUtil.randomString());
-      _addMessage(message);
-    });
-
     // We are ready to start receiving messages
-    ebbotClient.startReceive();
-    canType(true);
+    // TODO: Should handle this more gracefully
+    _ebbotChatListenerService.client.startReceive();
+    _handleCanType(true);
     isInitialized = true;
   }
 
   void initalizeServices() {
-    _notificationService = NotificationService(ebbotClient.notifications);
+    _ebbotNotificationService =
+        EbbotNotificationService(ebbotClient.notifications);
+    _ebbotChatListenerService = EbbotChatListenerService(ebbotClient);
   }
 
   void initalizeControllers() {
+    _ebbotMessageController = EbbotMessageController();
+
     _chatInputController = ChatInputController(
       enabled: true,
       enterPressedBehaviour: widget._configuration.behaviour.input.enterPressed,
-      onTextChanged: handleOnTextChanged,
+      onTextChanged: _handleOnTextChanged,
     );
 
     _notificationController =
-        NotificationController(_notificationService, _handleNotification);
+        NotificationController(_ebbotNotificationService, _handleNotification);
 
     _chatUiCustomMessageController = ChatUiCustomMessageController(
         client: ebbotClient,
         ebbotFlutterUiState: this,
         configuration: widget._configuration,
-        canType: canType);
+        canType: _handleCanType);
+
+    _ebbotMessageStreamController = EbbotMessageStreamController(
+        _ebbotChatListenerService,
+        _handleTypingUsers,
+        _handleClearTypingUsers,
+        _handleAddMessage,
+        _handleCanType,
+        _ebbotMessageController);
+
+    // Not currently used
+    _ebbotChatStreamController = EbbotChatStreamController(
+        _ebbotChatListenerService,
+        _handleTypingUsers,
+        _handleClearTypingUsers,
+        _handleAddMessage,
+        _handleCanType,
+        _ebbotMessageController);
   }
 
   @override
@@ -206,6 +188,21 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
     );
   }
 
+  void _handleTypingUsers() {
+    logger.i("handling typing message");
+    setState(() {
+      _typingUsers.clear();
+      _typingUsers.add(ebbotGPTUser);
+    });
+  }
+
+  void _handleClearTypingUsers() {
+    logger.i("clearing typing users");
+    setState(() {
+      _typingUsers.clear();
+    });
+  }
+
   void _handleNotification(String title, String text) async {
     await showDialog(
       context: context,
@@ -226,13 +223,14 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
     );
   }
 
-  void canType(bool canType) {
+  void _handleCanType(bool canType) {
+    logger.i("canType: $canType");
     setState(() {
       _chatInputController.enabled = canType;
     });
   }
 
-  void _addMessage(types.Message? message) {
+  void _handleAddMessage(types.Message? message) {
     if (message == null) {
       logger.w("message is null, so skipping..");
       return;
@@ -243,7 +241,7 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
     });
   }
 
-  void handleOnTextChanged(String text) {
+  void _handleOnTextChanged(String text) {
     if (text.isEmpty) {
       logger.i("text is empty, so skipping..");
       return;
@@ -267,11 +265,6 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
 
     // clear the text field
     _chatInputController.textEditingController.clear();
-
-    /*if (_inputOptionsState.enterPressedBehaviour ==
-        EbbotBehaviourInputEnterPressed.send) {
-      _handleSendPressed(types.PartialText(text));
-    }*/
   }
 
   void _handleMessageTap(BuildContext _, types.Message message) async {
@@ -329,7 +322,7 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
       text: message.text,
     );
 
-    _addMessage(textMessage);
+    _handleAddMessage(textMessage);
     ebbotClient.sendTextMessage(textMessage.text);
     _chatInputController.textEditingController.clear();
   }
