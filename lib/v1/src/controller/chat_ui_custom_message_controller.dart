@@ -1,28 +1,30 @@
 import 'package:ebbot_dart_client/ebbot_dart_client.dart';
-import 'package:ebbot_dart_client/entities/message/message.dart';
+import 'package:ebbot_dart_client/entity/message/message.dart';
 import 'package:ebbot_flutter_ui/v1/configuration/ebbot_configuration.dart';
 import 'package:ebbot_flutter_ui/v1/ebbot_flutter_ui.dart';
-import 'package:ebbot_flutter_ui/v1/src/widget/carousel.dart';
-import 'package:ebbot_flutter_ui/v1/src/widget/rating.dart';
-import 'package:ebbot_flutter_ui/v1/src/widget/url_box.dart';
+import 'package:ebbot_flutter_ui/v1/src/widget/carousel_widget.dart';
+import 'package:ebbot_flutter_ui/v1/src/widget/rating_widget.dart';
+import 'package:ebbot_flutter_ui/v1/src/widget/url_box_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:url_launcher/url_launcher.dart';
 
-class EbbotCustomMessageHandler {
+// A controller for handling custom flutter chat ui messages
+class ChatUiCustomMessageController {
   final EbbotDartClient client;
   final EbbotFlutterUiState ebbotFlutterUiState;
   final EbbotConfiguration configuration;
   final void Function(bool) canType;
 
-  EbbotCustomMessageHandler({
+  ChatUiCustomMessageController({
     required this.client,
     required this.ebbotFlutterUiState,
     required this.configuration,
     required this.canType,
   });
 
-  Widget process(types.CustomMessage message, {required int messageWidth}) {
+  Widget processMessage(types.CustomMessage message,
+      {required int messageWidth}) {
     if (message.metadata == null) {
       return Container();
     }
@@ -31,22 +33,22 @@ class EbbotCustomMessageHandler {
 
     switch (content.type) {
       case 'url':
-        return handleUrl(content);
+        return _processUrl(content);
       case 'rating_request':
-        return handleRatingRequest(content);
+        return _processRatingRequest(content);
       case 'carousel':
-        return handleCarousel(content);
+        return _processCarousel(content);
       default:
         return Container();
     }
   }
 
-  Widget handleCarousel(MessageContent content) {
-    return Carousel(
+  Widget _processCarousel(MessageContent content) {
+    return CarouselWidget(
       content: content,
       configuration: configuration,
       onURlPressed: (String url) async {
-        handleUrlClick(url);
+        _processUrlClick(url);
       },
       onScenarioPressed: (String scenario) {
         client.sendScenarioMessage(scenario);
@@ -57,8 +59,8 @@ class EbbotCustomMessageHandler {
     );
   }
 
-  Widget handleRatingRequest(MessageContent content) {
-    return Rating(
+  Widget _processRatingRequest(MessageContent content) {
+    return RatingWidget(
       content: content,
       configuration: configuration,
       onRatingChanged: (rating) {
@@ -67,12 +69,12 @@ class EbbotCustomMessageHandler {
     );
   }
 
-  Widget handleUrl(MessageContent content) {
-    return UrlBox(
+  Widget _processUrl(MessageContent content) {
+    return UrlBoxWidget(
         content: content,
         configuration: configuration,
         onURlPressed: (url) async {
-          handleUrlClick(url);
+          _processUrlClick(url);
         },
         onScenarioPressed: (scenario) {
           client.sendScenarioMessage(scenario);
@@ -82,7 +84,7 @@ class EbbotCustomMessageHandler {
         });
   }
 
-  void handleUrlClick(String url) async {
+  void _processUrlClick(String url) async {
     var uri = Uri.parse(url);
 
     // If uri protocol is ebbot://reset, reset the conversation by letting the parent know
