@@ -13,14 +13,12 @@ class ChatInputFieldController extends InputTextFieldController {
   @override
   void clear() {
     super.clear();
-    logger.i('Clearing TextFieldController');
     _controller.clear();
   }
 
   @override
   void dispose() {
     super.dispose();
-    logger.i('Disposing TextFieldController');
     _controller.dispose();
   }
 }

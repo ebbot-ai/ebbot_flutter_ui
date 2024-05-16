@@ -14,14 +14,13 @@ class ChatUiCustomMessageController {
   final EbbotDartClient client;
   final EbbotFlutterUiState ebbotFlutterUiState;
   final EbbotConfiguration configuration;
-  final void Function(bool) canType;
+  final Function() handleRestartConversation;
 
-  ChatUiCustomMessageController({
-    required this.client,
-    required this.ebbotFlutterUiState,
-    required this.configuration,
-    required this.canType,
-  });
+  ChatUiCustomMessageController(
+      {required this.client,
+      required this.ebbotFlutterUiState,
+      required this.configuration,
+      required this.handleRestartConversation});
 
   Widget processMessage(types.CustomMessage message,
       {required int messageWidth}) {
@@ -91,8 +90,9 @@ class ChatUiCustomMessageController {
     if (uri.scheme == 'ebbot' && uri.host == 'reset') {
       ebbotFlutterUiState.isInitialized =
           false; // This should be moved out of this function to the parent, but i'll keep it here for now
-      await client.restart();
-      ebbotFlutterUiState.initialize();
+      //await client.restart();
+      //ebbotFlutterUiState.initialize();
+      handleRestartConversation();
       return;
     }
 

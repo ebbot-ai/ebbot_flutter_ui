@@ -12,7 +12,7 @@ class EbbotMessageStreamController {
   final Function _handleTypingUsers;
   final Function _handleClearTypingUsers;
   final Function(types.Message?) _handleAddMessage;
-  final Function(bool) _handleCanType;
+  final Function(String?) _handleInputMode;
   bool hasReceivedGPTMessageBefore = false;
 
   final _ebbotMessageParser = EbbotMessageParser();
@@ -21,7 +21,7 @@ class EbbotMessageStreamController {
     this._handleTypingUsers,
     this._handleClearTypingUsers,
     this._handleAddMessage,
-    this._handleCanType,
+    this._handleInputMode,
   ) {
     _chatListenerService = GetIt.I.get<EbbotChatListenerService>();
     startListening();
@@ -35,13 +35,15 @@ class EbbotMessageStreamController {
     _chatListenerService.messageStream.listen((message) {
       _handle(message);
     });
-    _handleCanType(true);
+    _handleInputMode("visible");
   }
 
   void _handle(Message message) {
     logger.i("handling message");
     // Handle the message
     var messageType = message.data.message.type;
+
+    _handleInputMode(message.data.message.input_field);
 
     if (messageType == 'typing') {
       _handleTypingUsers();

@@ -10,10 +10,10 @@ class EbbotChatStreamController {
   final Function _handleTypingMessage;
   final Function _handleClearTypingUsers;
   final Function(types.Message?) _handleAddMessage;
-  final Function(bool) _handleCanType;
+  final Function(String) _handleCanType;
   bool hasReceivedGPTMessageBefore = false;
 
-  final _ebbotMessageController = EbbotMessageParser();
+  final _ebbotMessageParser = EbbotMessageParser();
 
   EbbotChatStreamController(
     this._handleTypingMessage,
@@ -33,7 +33,7 @@ class EbbotChatStreamController {
     _chatListenerService.chatStream.listen((chat) {
       handle(chat);
     });
-    _handleCanType(true);
+    _handleCanType("visible");
   }
 
   void handle(Chat message) {

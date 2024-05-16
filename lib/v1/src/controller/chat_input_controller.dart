@@ -13,6 +13,16 @@ class ChatInputController {
   Function(String) onTextChanged;
   ChatInputFieldController textEditingController = ChatInputFieldController();
 
+  InputOptions setEnabled(bool isEnabled) {
+    enabled = isEnabled;
+    _inputOptions = InputOptions(
+        enabled: enabled,
+        onTextChanged: _inputOptions.onTextChanged,
+        textEditingController: _inputOptions.textEditingController);
+
+    return _inputOptions;
+  }
+
   final logger = Logger(
     printer: PrettyPrinter(),
   );
@@ -28,7 +38,7 @@ class ChatInputController {
         textEditingController: textEditingController);
 
     textEditingController.addListener(() {
-      onTextChanged(textEditingController.controller.text);
+      _handleOnTextChanged(textEditingController.controller.text);
     });
   }
 
@@ -38,10 +48,9 @@ class ChatInputController {
       return;
     }
 
-    if (enterPressedBehaviour !=
-        EbbotBehaviourInputEnterPressed.sendMessage) {
-      logger.i(
-          "enterPressedBehaviour is $enterPressedBehaviour, so skipping..");
+    if (enterPressedBehaviour != EbbotBehaviourInputEnterPressed.sendMessage) {
+      logger
+          .i("enterPressedBehaviour is $enterPressedBehaviour, so skipping..");
       return;
     }
 
