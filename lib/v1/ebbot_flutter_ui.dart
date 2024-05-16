@@ -5,7 +5,7 @@ import 'package:ebbot_flutter_ui/v1/configuration/ebbot_configuration.dart';
 import 'package:ebbot_flutter_ui/v1/src/controller/chat_input_controller.dart';
 import 'package:ebbot_flutter_ui/v1/src/controller/ebbot_message_stream_controller.dart';
 import 'package:ebbot_flutter_ui/v1/src/controller/ebbot_chat_stream_controller.dart';
-import 'package:ebbot_flutter_ui/v1/src/controller/notification_controller.dart';
+import 'package:ebbot_flutter_ui/v1/src/controller/ebbot_notification_controller.dart';
 import 'package:ebbot_flutter_ui/v1/src/parser/ebbot_message_parser.dart';
 import 'package:ebbot_flutter_ui/v1/src/controller/chat_ui_custom_message_controller.dart';
 import 'package:ebbot_flutter_ui/v1/src/service/ebbot_chat_listener_service.dart';
@@ -66,10 +66,18 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
   late EbbotDartClient ebbotClient;
   bool hasReceivedGPTMessageBefore = false;
   late ChatInputController _chatInputController;
-  late NotificationController _notificationController;
+  late EbbotNotificationController _notificationController;
   late ChatUiCustomMessageController _chatUiCustomMessageController;
   late EbbotMessageStreamController _ebbotMessageStreamController;
   late EbbotChatStreamController _ebbotChatStreamController;
+
+  late InputOptions _inputOptions;
+  late Visibility _customBottomWidgetVisibility = Visibility(
+    visible: false,
+    child: Container(),
+  ); // Slightly hacky way to make sure we have an initial widget
+  late bool _customBottomWidgetVisibilityVisible = false;
+  late Input _customBottomWidget;
 
   final logger = Logger(
     printer: PrettyPrinter(),
@@ -106,18 +114,27 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
     await ebbotClient.initialize();
 
     // Register the services in the service locator
-    registerServices();
+    await registerServices();
     // Initialize the controllers
     initalizeControllers();
 
     // We are ready to start receiving messages
     // TODO: Should handle this more gracefully
     GetIt.I.get<EbbotChatListenerService>().client.startReceive();
-    _handleCanType(true);
+    _handleInputMode("visible");
+
     isInitialized = true;
   }
 
-  void registerServices() {
+  Future<void> registerServices() async {
+    // Unregister any existing services, this happens if the widget is re-initialized
+    try {
+      await GetIt.I.unregister<EbbotNotificationService>();
+      await GetIt.I.unregister<EbbotChatListenerService>();
+    } catch (e) {
+      logger.w("Failed to unregister services: $e");
+    }
+
     GetIt.I.registerSingleton<EbbotNotificationService>(
         EbbotNotificationService(ebbotClient.notifications));
     GetIt.I.registerSingleton<EbbotChatListenerService>(
@@ -131,19 +148,19 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
       onTextChanged: _handleOnTextChanged,
     );
 
-    _notificationController = NotificationController(_handleNotification);
+    _notificationController = EbbotNotificationController(_handleNotification);
 
     _chatUiCustomMessageController = ChatUiCustomMessageController(
         client: ebbotClient,
         ebbotFlutterUiState: this,
         configuration: widget._configuration,
-        canType: _handleCanType);
+        handleRestartConversation: initialize);
 
     _ebbotMessageStreamController = EbbotMessageStreamController(
       _handleTypingUsers,
       _handleClearTypingUsers,
       _handleAddMessage,
-      _handleCanType,
+      _handleInputMode,
     );
 
     // Not currently used
@@ -151,7 +168,7 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
       _handleTypingUsers,
       _handleClearTypingUsers,
       _handleAddMessage,
-      _handleCanType,
+      _handleInputMode,
     );
   }
 
@@ -159,25 +176,47 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
   Widget build(BuildContext context) {
     super.build(context);
 
-    return Scaffold(
-      body: !isInitialized
-          ? Center(
-              child: CircularProgressIndicator(
-                  color: widget._configuration.theme.primaryColor))
-          : Chat(
-              inputOptions: _chatInputController.inputOptions,
-              theme: widget._configuration.theme,
-              messages: _messages,
-              onSendPressed: _handleSendPressed,
-              onMessageTap: _handleMessageTap,
-              user: _user!,
-              customMessageBuilder:
-                  _chatUiCustomMessageController.processMessage,
-              typingIndicatorOptions: TypingIndicatorOptions(
-                  typingMode: TypingIndicatorMode.avatar,
-                  typingUsers: _typingUsers),
-            ),
+    if (!isInitialized) {
+      return Scaffold(
+        body: circularProgressIndicator(),
+      );
+    }
+
+    _inputOptions = _chatInputController.inputOptions;
+
+    var chat = Chat(
+      inputOptions: _inputOptions,
+      theme: widget._configuration.theme,
+      messages: _messages,
+      onSendPressed: _handleSendPressed,
+      onMessageTap: _handleMessageTap,
+      user: _user!,
+      customBottomWidget: _customBottomWidgetVisibility,
+      customMessageBuilder: _chatUiCustomMessageController.processMessage,
+      typingIndicatorOptions: TypingIndicatorOptions(
+          typingMode: TypingIndicatorMode.avatar, typingUsers: _typingUsers),
     );
+
+    _customBottomWidget = Input(
+        onSendPressed: chat.onSendPressed,
+        onAttachmentPressed: chat.onAttachmentPressed,
+        options: _inputOptions);
+
+    _customBottomWidgetVisibility = Visibility(
+        //maintainSize: _customBottomWidgetVisibilityVisible,
+        //maintainAnimation: _customBottomWidgetVisibilityVisible,
+        visible: true,
+        child: _customBottomWidget);
+
+    return Scaffold(
+      body: chat,
+    );
+  }
+
+  Widget circularProgressIndicator() {
+    return Center(
+        child: CircularProgressIndicator(
+            color: widget._configuration.theme.primaryColor));
   }
 
   void _handleTypingUsers() {
@@ -215,10 +254,35 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
     );
   }
 
-  void _handleCanType(bool canType) {
-    logger.i("canType: $canType");
+  void _handleInputMode(String? inputMode) {
+    logger.i("_handleInputMode: $inputMode");
     setState(() {
-      _chatInputController.enabled = canType;
+      switch (inputMode) {
+        case 'hidden':
+          logger.i("setting input mode to hidden");
+          _inputOptions = _chatInputController.setEnabled(false);
+          _customBottomWidgetVisibilityVisible = false;
+          break;
+        case 'visible':
+          logger.i("setting input mode to visible");
+          _inputOptions = _chatInputController.setEnabled(true);
+          _customBottomWidgetVisibilityVisible = true;
+          break;
+        case 'disabled':
+          logger.i("setting input mode to disabled");
+          _inputOptions = _chatInputController.setEnabled(false);
+          _customBottomWidgetVisibilityVisible = true;
+          break;
+        default:
+          logger.i("got unknown input mode: $inputMode");
+          break;
+      }
+    });
+  }
+
+  void _setInputOptions(InputOptions options) {
+    setState(() {
+      _inputOptions = options;
     });
   }
 
