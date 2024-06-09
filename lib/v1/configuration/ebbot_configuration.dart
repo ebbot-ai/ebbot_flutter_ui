@@ -1,5 +1,6 @@
 import 'package:ebbot_dart_client/valueobjects/environment.dart';
 import 'package:ebbot_flutter_ui/v1/configuration/ebbot_behaviour.dart';
+import 'package:ebbot_flutter_ui/v1/configuration/ebbot_callback.dart';
 import 'package:ebbot_flutter_ui/v1/configuration/ebbot_user_configuration.dart';
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 
@@ -9,12 +10,14 @@ class EbbotConfiguration {
       environment; // This lives in the ebbot_dart_client package for now
   final EbbotUserConfiguration userConfiguration;
   final EbbotBehaviour behaviour;
+  final EbbotCallback callback;
 
   EbbotConfiguration._builder(EbbotConfigurationBuilder builder)
       : theme = builder._theme,
         environment = builder._environment,
         userConfiguration = builder._userConfiguration,
-        behaviour = builder._behaviour;
+        behaviour = builder._behaviour,
+        callback = builder._callback;
 
   factory EbbotConfiguration(EbbotConfigurationBuilder builder) {
     return EbbotConfiguration._builder(builder);
@@ -27,7 +30,7 @@ class EbbotConfigurationBuilder {
   EbbotUserConfiguration _userConfiguration =
       EbbotUserConfigurationBuilder().build();
   EbbotBehaviour _behaviour = EbbotBehaviourBuilder().build();
-
+  EbbotCallback _callback = EbbotCallbackBuilder().build();
   EbbotConfigurationBuilder theme(ChatTheme theme) {
     _theme = theme;
     return this;
@@ -46,6 +49,11 @@ class EbbotConfigurationBuilder {
   EbbotConfigurationBuilder userConfiguration(
       EbbotUserConfiguration userConfiguration) {
     _userConfiguration = userConfiguration;
+    return this;
+  }
+
+  EbbotConfigurationBuilder callback(EbbotCallback callback) {
+    _callback = callback;
     return this;
   }
 

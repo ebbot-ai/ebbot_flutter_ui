@@ -12,13 +12,11 @@ import 'package:url_launcher/url_launcher.dart';
 // A controller for handling custom flutter chat ui messages
 class ChatUiCustomMessageController {
   final EbbotDartClient client;
-  final EbbotFlutterUiState ebbotFlutterUiState;
   final EbbotConfiguration configuration;
   final Function() handleRestartConversation;
 
   ChatUiCustomMessageController(
       {required this.client,
-      required this.ebbotFlutterUiState,
       required this.configuration,
       required this.handleRestartConversation});
 
@@ -88,10 +86,6 @@ class ChatUiCustomMessageController {
 
     // If uri protocol is ebbot://reset, reset the conversation by letting the parent know
     if (uri.scheme == 'ebbot' && uri.host == 'reset') {
-      ebbotFlutterUiState.isInitialized =
-          false; // This should be moved out of this function to the parent, but i'll keep it here for now
-      //await client.restart();
-      //ebbotFlutterUiState.initialize();
       handleRestartConversation();
       return;
     }
