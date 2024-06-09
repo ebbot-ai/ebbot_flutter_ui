@@ -62,9 +62,9 @@ class EbbotFlutterUi extends StatefulWidget {
 /// user interactions, and communication with the Ebbot chat bot.
 class EbbotFlutterUiState extends State<EbbotFlutterUi>
     with AutomaticKeepAliveClientMixin
-    implements ControllerDelegates {
+    implements AbstractControllerDelegates {
   final List<types.Message> _messages = [];
-  types.User? _user;
+  late types.User _user;
   bool isInitialized = false;
 
   final _typingUsers = <types.User>[];
@@ -102,7 +102,6 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
   bool get wantKeepAlive => true;
 
   void initialize() async {
-    logger.d("initializing EbbotFlutterUiState");
     isInitialized = false;
     _messages.clear();
 
@@ -111,10 +110,7 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
         .userAttributes(widget._configuration.userConfiguration.userAttributes)
         .build();
 
-    //_ebbotClientService = EbbotClientService(widget._botId, configuration);
-
     // Initialize the chat client
-    //await _ebbotClientService.initialize();
 
     _ebbotServiceInitializer = EbbotServiceInitializer(
         widget._botId, widget._configuration, configuration);
@@ -138,10 +134,13 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
 
     // We are ready to start receiving messages
     // TODO: Should handle this more gracefully
-    GetIt.I.get<EbbotChatListenerService>().client.startReceive();
+    ebbotClientService.client.startReceive();
     handleInputMode("visible");
 
     isInitialized = true;
+
+    final ebbotCallbackService = GetIt.I.get<EbbotCallbackService>();
+    ebbotCallbackService.dispatchOnLoad();
   }
 
   @override
@@ -161,8 +160,8 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
       inputOptions: _inputOptions,
       theme: widget._configuration.theme,
       messages: _messages,
-      onSendPressed: _handleSendPressed,
-      onMessageTap: _handleMessageTap,
+      onSendPressed: handleSendPressed,
+      onMessageTap: handleMessageTap,
       user: _user!,
       customBottomWidget: _customBottomWidgetVisibility,
       customMessageBuilder: _ebbotControllerInitializer
@@ -262,17 +261,22 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
     });
   }
 
-  void _setInputOptions(InputOptions options) {
-    setState(() {
-      _inputOptions = options;
-    });
-  }
-
   @override
   void handleAddMessage(types.Message? message) {
     if (message == null) {
       logger.w("message is null, so skipping..");
       return;
+    }
+
+    final ebbotCallbackService = GetIt.I.get<EbbotCallbackService>();
+    if (message is types.TextMessage) {
+      if (message.author == ebbotGPTUser) {
+        ebbotCallbackService.dispatchOnBotMessage(message.text);
+      }
+
+      if (message.author == _user) {
+        ebbotCallbackService.dispatchOnUserMessage(message.text);
+      }
     }
 
     setState(() {
@@ -282,10 +286,11 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
 
   @override
   void handleOnTextChanged(String text) {
-    _handleSendPressed(types.PartialText(text: text));
+    handleSendPressed(types.PartialText(text: text));
   }
 
-  void _handleMessageTap(BuildContext _, types.Message message) async {
+  @override
+  void handleMessageTap(BuildContext _, types.Message message) async {
     if (message is types.FileMessage) {
       var localPath = message.uri;
 
@@ -332,9 +337,10 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
     }
   }
 
-  void _handleSendPressed(types.PartialText message) {
+  @override
+  void handleSendPressed(types.PartialText message) {
     final textMessage = types.TextMessage(
-      author: _user!,
+      author: _user,
       createdAt: DateTime.now().millisecondsSinceEpoch,
       id: StringUtil.randomString(),
       text: message.text,
@@ -351,6 +357,11 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
   @override
   void restartConversation() {
     isInitialized = false;
+
     // TODO: implement restartConversation
+
+    // and finally dispatch the onReset event
+    final ebbotCallbackService = GetIt.I.get<EbbotCallbackService>();
+    ebbotCallbackService.dispatchOnReset();
   }
 }
