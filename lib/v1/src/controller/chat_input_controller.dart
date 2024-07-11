@@ -8,20 +8,8 @@ import 'package:logger/logger.dart';
 class ChatInputController {
   bool enabled;
   EbbotBehaviourInputEnterPressed enterPressedBehaviour;
-  late InputOptions _inputOptions;
-  InputOptions get inputOptions => _inputOptions;
   Function(String) onTextChanged;
-  ChatInputFieldController textEditingController = ChatInputFieldController();
-
-  InputOptions setEnabled(bool isEnabled) {
-    enabled = isEnabled;
-    _inputOptions = InputOptions(
-        enabled: enabled,
-        onTextChanged: _inputOptions.onTextChanged,
-        textEditingController: _inputOptions.textEditingController);
-
-    return _inputOptions;
-  }
+  late ChatInputFieldController chatInputFieldController;
 
   final logger = Logger(
     printer: PrettyPrinter(),
@@ -32,14 +20,28 @@ class ChatInputController {
     required this.enterPressedBehaviour,
     required this.onTextChanged,
   }) {
-    _inputOptions = InputOptions(
+    logger.i("ChatInputController initialized with enabled: $enabled, "
+        "enterPressedBehaviour: $enterPressedBehaviour");
+
+    _initializeController();
+  }
+
+  void _initializeController() {
+    chatInputFieldController = ChatInputFieldController();
+    chatInputFieldController.addListener(() {
+      _handleOnTextChanged(chatInputFieldController.controller.text);
+    });
+  }
+
+  InputOptions get inputOptions {
+    if (chatInputFieldController.isDisposed) {
+      _initializeController();
+    }
+
+    return InputOptions(
         enabled: enabled,
         onTextChanged: _handleOnTextChanged,
-        textEditingController: textEditingController);
-
-    textEditingController.addListener(() {
-      _handleOnTextChanged(textEditingController.controller.text);
-    });
+        textEditingController: chatInputFieldController);
   }
 
   void _handleOnTextChanged(String text) {
@@ -64,6 +66,6 @@ class ChatInputController {
 
     onTextChanged(text);
 
-    textEditingController.clear();
+    chatInputFieldController.clear();
   }
 }

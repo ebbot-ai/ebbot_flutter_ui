@@ -1,15 +1,18 @@
 import 'dart:io';
+import 'dart:math';
 import 'package:ebbot_dart_client/configuration/configuration.dart';
-import 'package:ebbot_flutter_ui/v1/configuration/ebbot_behaviour.dart';
 import 'package:ebbot_flutter_ui/v1/configuration/ebbot_configuration.dart';
 import 'package:ebbot_flutter_ui/v1/src/controller/chat_input_controller.dart';
 import 'package:ebbot_flutter_ui/v1/src/controller/ebbot_message_stream_controller.dart';
 import 'package:ebbot_flutter_ui/v1/src/controller/ebbot_chat_stream_controller.dart';
 import 'package:ebbot_flutter_ui/v1/src/controller/ebbot_notification_controller.dart';
-import 'package:ebbot_flutter_ui/v1/src/parser/ebbot_message_parser.dart';
 import 'package:ebbot_flutter_ui/v1/src/controller/chat_ui_custom_message_controller.dart';
+import 'package:ebbot_flutter_ui/v1/src/initializer/ebbot_controller_initializer.dart';
+import 'package:ebbot_flutter_ui/v1/src/service/ebbot_callback_service.dart';
 import 'package:ebbot_flutter_ui/v1/src/service/ebbot_chat_listener_service.dart';
+import 'package:ebbot_flutter_ui/v1/src/service/ebbot_dart_client_service.dart';
 import 'package:ebbot_flutter_ui/v1/src/service/ebbot_notification_service.dart';
+import 'package:ebbot_flutter_ui/v1/src/initializer/ebbot_service_initializer.dart';
 import 'package:ebbot_flutter_ui/v1/src/util/ebbot_gpt_user.dart';
 import 'package:ebbot_flutter_ui/v1/src/util/string_util.dart';
 import 'package:flutter/material.dart';
@@ -22,24 +25,10 @@ import 'package:logger/logger.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
 
-/// A Flutter widget for integrating Ebbot chat bot functionality into the UI.
-///
-/// This widget facilitates communication between the user interface and
-/// the Ebbot chat system. It manages sending and receiving messages, handling
-/// typing indicators, and displaying messages within the UI.
 class EbbotFlutterUi extends StatefulWidget {
-  /// The ID of the Ebbot Chat Bot to connect to.
   final String _botId;
-
-  /// Configuration settings for the Ebbot chat.
   final EbbotConfiguration _configuration;
 
-  /// Constructs an instance of [EbbotFlutterUi].
-  ///
-  /// The [botId] parameter is required and represents the ID of the bot
-  /// that this user interface will interact with. The [configuration] parameter
-  /// allows specifying custom configuration settings for the Ebbot chat.
-  /// If not provided, default configuration settings will be used.
   EbbotFlutterUi({
     Key? key,
     required String botId,
@@ -52,30 +41,24 @@ class EbbotFlutterUi extends StatefulWidget {
   State<EbbotFlutterUi> createState() => EbbotFlutterUiState();
 }
 
-/// The state class for the [EbbotFlutterUi].
-///
-/// Manages the internal state of the user interface, including message handling,
-/// user interactions, and communication with the Ebbot chat bot.
 class EbbotFlutterUiState extends State<EbbotFlutterUi>
-    with AutomaticKeepAliveClientMixin {
+    with AutomaticKeepAliveClientMixin
+    implements AbstractControllerDelegate {
   final List<types.Message> _messages = [];
-  types.User? _user;
-  bool isInitialized = false;
+  types.User _user = const types.User(id: '0'); // Use dummy user before init
+  bool _isInitialized = false;
+  bool get isInitialized => _isInitialized;
 
   final _typingUsers = <types.User>[];
-  late EbbotDartClient ebbotClient;
   bool hasReceivedGPTMessageBefore = false;
-  late ChatInputController _chatInputController;
-  late EbbotNotificationController _notificationController;
-  late ChatUiCustomMessageController _chatUiCustomMessageController;
-  late EbbotMessageStreamController _ebbotMessageStreamController;
-  late EbbotChatStreamController _ebbotChatStreamController;
 
-  late InputOptions _inputOptions;
+  late EbbotServiceInitializer _ebbotServiceInitializer;
+  late EbbotControllerInitializer _ebbotControllerInitializer;
+
   late Visibility _customBottomWidgetVisibility = Visibility(
     visible: false,
     child: Container(),
-  ); // Slightly hacky way to make sure we have an initial widget
+  );
   late bool _customBottomWidgetVisibilityVisible = false;
   late Input _customBottomWidget;
 
@@ -86,113 +69,73 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
   @override
   void initState() {
     super.initState();
-    initialize();
+    _initialize();
   }
 
   @override
   void dispose() {
-    ebbotClient.dispose();
     super.dispose();
+    GetIt.I.get<EbbotDartClientService>().client.closeAsync();
   }
 
   @override
   bool get wantKeepAlive => true;
 
-  void initialize() async {
-    isInitialized = false;
-    _messages.clear();
-
+  void _initialize() async {
     var configuration = ConfigurationBuilder()
         .environment(widget._configuration.environment)
-        .userAttributes(widget._configuration.userConfiguration.userAttributes)
         .build();
 
-    ebbotClient = EbbotDartClient(widget._botId, configuration);
-    _user = types.User(id: ebbotClient.chatId);
+    _ebbotServiceInitializer = EbbotServiceInitializer(
+        widget._botId, widget._configuration, configuration);
 
-    // Initialize the chat client
-    await ebbotClient.initialize();
+    _ebbotControllerInitializer =
+        EbbotControllerInitializer(this, widget._configuration);
 
-    // Register the services in the service locator
-    await registerServices();
-    // Initialize the controllers
-    initalizeControllers();
+    await _ebbotServiceInitializer.registerServices();
+    _ebbotControllerInitializer.intializeControllers();
 
-    // We are ready to start receiving messages
-    // TODO: Should handle this more gracefully
-    GetIt.I.get<EbbotChatListenerService>().client.startReceive();
-    _handleInputMode("visible");
+    widget._configuration.apiController.attach(this);
 
-    isInitialized = true;
+    _setup();
   }
 
-  Future<void> registerServices() async {
-    // Unregister any existing services, this happens if the widget is re-initialized
-    try {
-      await GetIt.I.unregister<EbbotNotificationService>();
-      await GetIt.I.unregister<EbbotChatListenerService>();
-    } catch (e) {
-      logger.w("Failed to unregister services: $e");
-    }
+  void _setup() {
+    final ebbotClientService = GetIt.I.get<EbbotDartClientService>();
+    _user = types.User(id: ebbotClientService.client.chatId);
 
-    GetIt.I.registerSingleton<EbbotNotificationService>(
-        EbbotNotificationService(ebbotClient.notifications));
-    GetIt.I.registerSingleton<EbbotChatListenerService>(
-        EbbotChatListenerService(ebbotClient));
-  }
+    ebbotClientService.client.startReceive();
+    handleInputMode("visible");
 
-  void initalizeControllers() {
-    _chatInputController = ChatInputController(
-      enabled: true,
-      enterPressedBehaviour: widget._configuration.behaviour.input.enterPressed,
-      onTextChanged: _handleOnTextChanged,
-    );
+    final ebbotCallbackService = GetIt.I.get<EbbotCallbackService>();
 
-    _notificationController = EbbotNotificationController(_handleNotification);
-
-    _chatUiCustomMessageController = ChatUiCustomMessageController(
-        client: ebbotClient,
-        ebbotFlutterUiState: this,
-        configuration: widget._configuration,
-        handleRestartConversation: initialize);
-
-    _ebbotMessageStreamController = EbbotMessageStreamController(
-      _handleTypingUsers,
-      _handleClearTypingUsers,
-      _handleAddMessage,
-      _handleInputMode,
-    );
-
-    // Not currently used
-    _ebbotChatStreamController = EbbotChatStreamController(
-      _handleTypingUsers,
-      _handleClearTypingUsers,
-      _handleAddMessage,
-      _handleInputMode,
-    );
+    ebbotCallbackService.dispatchOnLoad();
+    setState(() {
+      _isInitialized = true;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
 
-    if (!isInitialized) {
-      return Scaffold(
-        body: circularProgressIndicator(),
-      );
-    }
-
-    _inputOptions = _chatInputController.inputOptions;
+    final inputOptions =
+        _ebbotControllerInitializer.chatInputController?.inputOptions ??
+            const InputOptions();
 
     var chat = Chat(
-      inputOptions: _inputOptions,
+      inputOptions: inputOptions,
       theme: widget._configuration.theme,
       messages: _messages,
-      onSendPressed: _handleSendPressed,
-      onMessageTap: _handleMessageTap,
-      user: _user!,
+      onSendPressed: handleSendPressed,
+      onMessageTap: handleMessageTap,
+      emptyState: Container(
+          alignment: Alignment
+              .center), // For now, only show an empty container when no messages are present
+      user: _user, // Use dummy user before init
       customBottomWidget: _customBottomWidgetVisibility,
-      customMessageBuilder: _chatUiCustomMessageController.processMessage,
+      customMessageBuilder: _ebbotControllerInitializer
+          .chatUiCustomMessageController?.processMessage,
       typingIndicatorOptions: TypingIndicatorOptions(
           typingMode: TypingIndicatorMode.avatar, typingUsers: _typingUsers),
     );
@@ -200,16 +143,23 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
     _customBottomWidget = Input(
         onSendPressed: chat.onSendPressed,
         onAttachmentPressed: chat.onAttachmentPressed,
-        options: _inputOptions);
+        options: inputOptions);
 
     _customBottomWidgetVisibility = Visibility(
-        //maintainSize: _customBottomWidgetVisibilityVisible,
-        //maintainAnimation: _customBottomWidgetVisibilityVisible,
-        visible: true,
+        visible: _customBottomWidgetVisibilityVisible,
         child: _customBottomWidget);
 
     return Scaffold(
-      body: chat,
+      body: Stack(
+        children: [
+          chat,
+          if (!isInitialized)
+            Container(
+              color: Color.fromARGB(85, 255, 255, 255),
+              child: circularProgressIndicator(),
+            ),
+        ],
+      ),
     );
   }
 
@@ -219,7 +169,8 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
             color: widget._configuration.theme.primaryColor));
   }
 
-  void _handleTypingUsers() {
+  @override
+  void handleTypingUsers() {
     logger.i("handling typing message");
     setState(() {
       _typingUsers.clear();
@@ -227,14 +178,17 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
     });
   }
 
-  void _handleClearTypingUsers() {
+  @override
+  void handleClearTypingUsers() {
     logger.i("clearing typing users");
     setState(() {
       _typingUsers.clear();
     });
   }
 
-  void _handleNotification(String title, String text) async {
+  @override
+  void handleNotification(String title, String text) async {
+    logger.d("handling notification: $title, $text");
     await showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -254,42 +208,73 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
     );
   }
 
-  void _handleInputMode(String? inputMode) {
-    logger.i("_handleInputMode: $inputMode");
+  void handleInputMode(String? inputMode) {
+    logger.d("handling input mode: $inputMode");
+
+    late bool newCustomBottomWidgetVisibilityVisible;
+
+    switch (inputMode) {
+      case 'hidden':
+        logger.i("setting input mode to hidden");
+
+        newCustomBottomWidgetVisibilityVisible = false;
+        break;
+      case 'visible':
+        logger.i("setting input mode to visible");
+
+        newCustomBottomWidgetVisibilityVisible = true;
+        break;
+      case 'disabled':
+        logger.i("setting input mode to disabled");
+
+        newCustomBottomWidgetVisibilityVisible = false;
+        break;
+      default:
+        logger.i("got unknown input mode: $inputMode");
+        return;
+    }
+
     setState(() {
-      switch (inputMode) {
-        case 'hidden':
-          logger.i("setting input mode to hidden");
-          _inputOptions = _chatInputController.setEnabled(false);
-          _customBottomWidgetVisibilityVisible = false;
-          break;
-        case 'visible':
-          logger.i("setting input mode to visible");
-          _inputOptions = _chatInputController.setEnabled(true);
-          _customBottomWidgetVisibilityVisible = true;
-          break;
-        case 'disabled':
-          logger.i("setting input mode to disabled");
-          _inputOptions = _chatInputController.setEnabled(false);
-          _customBottomWidgetVisibilityVisible = true;
-          break;
-        default:
-          logger.i("got unknown input mode: $inputMode");
-          break;
-      }
+      _customBottomWidgetVisibilityVisible =
+          newCustomBottomWidgetVisibilityVisible;
     });
   }
 
-  void _setInputOptions(InputOptions options) {
-    setState(() {
-      _inputOptions = options;
-    });
+  void handleAddMessageFromString(String message) {
+    final textMessage = types.TextMessage(
+      author: _user,
+      createdAt: DateTime.now().millisecondsSinceEpoch,
+      id: StringUtil.randomString(),
+      text: message,
+    );
+    handleAddMessage(textMessage);
+    EbbotDartClient ebbotClient = GetIt.I.get<EbbotDartClientService>().client;
+    ebbotClient.sendTextMessage(textMessage.text);
   }
 
-  void _handleAddMessage(types.Message? message) {
+  @override
+  void handleAddMessage(types.Message? message) {
     if (message == null) {
       logger.w("message is null, so skipping..");
       return;
+    }
+
+    final ebbotCallbackService = GetIt.I.get<EbbotCallbackService>();
+
+    if (message is types.TextMessage) {
+      if (_messages.length == 0) {
+        ebbotCallbackService.dispatchOnStartConversation(message.text);
+      }
+
+      ebbotCallbackService.dispatchOnMessage(message.text);
+
+      if (message.author == ebbotGPTUser) {
+        ebbotCallbackService.dispatchOnBotMessage(message.text);
+      }
+
+      if (message.author == _user) {
+        ebbotCallbackService.dispatchOnUserMessage(message.text);
+      }
     }
 
     setState(() {
@@ -297,18 +282,18 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
     });
   }
 
-  void _handleOnTextChanged(String text) {
-    _handleSendPressed(types.PartialText(text: text));
+  @override
+  void handleOnTextChanged(String text) {
+    handleSendPressed(types.PartialText(text: text));
   }
 
-  // TODO: refactor this to a controller
-  void _handleMessageTap(BuildContext _, types.Message message) async {
+  @override
+  void handleMessageTap(BuildContext _, types.Message message) async {
     if (message is types.FileMessage) {
       var localPath = message.uri;
 
       if (message.uri.startsWith('http')) {
         try {
-          // Update tapped file message to show loading spinner
           final index =
               _messages.indexWhere((element) => element.id == message.id);
           final updatedMessage =
@@ -331,7 +316,6 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
             await file.writeAsBytes(bytes);
           }
         } finally {
-          // In case of error or success, reset loading spinner
           final index =
               _messages.indexWhere((element) => element.id == message.id);
           final updatedMessage =
@@ -349,17 +333,51 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
     }
   }
 
-  // TODO: refactor this to a controller
-  void _handleSendPressed(types.PartialText message) {
+  @override
+  void handleSendPressed(types.PartialText message) {
     final textMessage = types.TextMessage(
-      author: _user!,
+      author: _user,
       createdAt: DateTime.now().millisecondsSinceEpoch,
       id: StringUtil.randomString(),
       text: message.text,
     );
 
-    _handleAddMessage(textMessage);
+    handleAddMessage(textMessage);
+    EbbotDartClient ebbotClient = GetIt.I.get<EbbotDartClientService>().client;
     ebbotClient.sendTextMessage(textMessage.text);
-    _chatInputController.textEditingController.clear();
+    _ebbotControllerInitializer.chatInputController?.chatInputFieldController
+        .clear();
+  }
+
+  @override
+  void handleRestartConversation() async {
+    setState(() {
+      _customBottomWidgetVisibilityVisible = false;
+      _isInitialized = false;
+      _messages.clear();
+    });
+
+    final ebbotClientService = GetIt.I.get<EbbotDartClientService>();
+    await ebbotClientService.restartAsync();
+
+    _ebbotControllerInitializer.resetControllers();
+
+    _setup();
+
+    setState(() {
+      _isInitialized = true;
+    });
+
+    final ebbotCallbackService = GetIt.I.get<EbbotCallbackService>();
+    ebbotCallbackService.dispatchOnRestartConversation();
+  }
+
+  @override
+  void handleEndConversation() {
+    final ebbotClientService = GetIt.I.get<EbbotDartClientService>();
+    ebbotClientService.endSession();
+
+    final ebbotCallbackService = GetIt.I.get<EbbotCallbackService>();
+    ebbotCallbackService.dispatchOnEndConversation();
   }
 }

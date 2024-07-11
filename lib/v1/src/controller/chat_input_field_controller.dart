@@ -4,6 +4,7 @@ import 'package:logger/logger.dart';
 
 class ChatInputFieldController extends InputTextFieldController {
   final TextEditingController _controller = TextEditingController();
+  bool isDisposed = false;
   final logger = Logger(
     printer: PrettyPrinter(),
   );
@@ -20,5 +21,6 @@ class ChatInputFieldController extends InputTextFieldController {
   void dispose() {
     super.dispose();
     _controller.dispose();
+    isDisposed = true;
   }
 }
