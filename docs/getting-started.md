@@ -16,7 +16,7 @@ To integrate the Ebbot Flutter UI into your Flutter application, follow these st
      ebbot_flutter_ui:
         git:
             url: https://github.com/ebbot-ai/ebbot_flutter_ui
-            ref: v0.0.9
+            ref: v0.1.0
 
 1. **Install the package**: Run the following command in your terminal to install the package:
     ```
