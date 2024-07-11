@@ -21,7 +21,6 @@ class EbbotCallbackService {
   }
 
   void dispatchOnMessage(String message) {
-    // TODO: Implement
     _callback.dispatchOnMessage(message);
   }
 
@@ -34,7 +33,6 @@ class EbbotCallbackService {
   }
 
   void dispatchOnStartConversation(String message) {
-    // TODO: Implement
     _callback.dispatchOnStartConversation(message);
   }
 }

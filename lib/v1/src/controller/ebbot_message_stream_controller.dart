@@ -32,8 +32,6 @@ class EbbotMessageStreamController extends AbstractResettableController {
     printer: PrettyPrinter(),
   );
 
-  
-
   void _handle(Message message) {
     logger.i("handling message");
     // Handle the message
@@ -63,13 +61,12 @@ class EbbotMessageStreamController extends AbstractResettableController {
         message, ebbotGPTUser, StringUtil.randomString());
     _handleAddMessage(chatMessage);
   }
-  
+
   @override
   void reset() {
-    // TODO: implement reset
     startListening();
   }
-  
+
   void startListening() {
     _chatListenerService.messageStream.listen((message) {
       _handle(message);
