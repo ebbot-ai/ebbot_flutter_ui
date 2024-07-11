@@ -4,16 +4,20 @@ class EbbotCallbackService {
   final EbbotCallback _callback;
   EbbotCallbackService(this._callback);
 
-  void dispatchInitializationError(EbbotInitializationError error) {
-    _callback.dispatchInitializationError(error);
+  void dispatchInitializationError(EbbotLoadError error) {
+    _callback.dispatchLoadError(error);
   }
 
   void dispatchOnLoad() {
     _callback.dispatchOnLoad();
   }
 
-  void dispatchOnReset() {
-    _callback.dispatchOnReset();
+  void dispatchOnRestartConversation() {
+    _callback.dispatchOnRestartConversation();
+  }
+
+  void dispatchOnEndConversation() {
+    _callback.dispatchOnEndConversation();
   }
 
   void dispatchOnMessage(String message) {

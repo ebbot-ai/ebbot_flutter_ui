@@ -1,17 +1,19 @@
 class EbbotCallback extends AbstractEbbotCallback {
-  final void Function(EbbotInitializationError error) onInitializationError;
+  final void Function(EbbotLoadError error) onLoadError;
 
   final void Function() onLoad;
-  final void Function() onReset;
+  final void Function() onRestartConversation;
+  final void Function() onEndConversation;
   final void Function(String message) onMessage;
   final void Function(String message) onBotMessage;
   final void Function(String message) onUserMessage;
   final void Function(String message) onStartConversation;
 
   EbbotCallback({
-    required this.onInitializationError,
+    required this.onLoadError,
     required this.onLoad,
-    required this.onReset,
+    required this.onRestartConversation,
+    required this.onEndConversation,
     required this.onMessage,
     required this.onBotMessage,
     required this.onUserMessage,
@@ -19,8 +21,8 @@ class EbbotCallback extends AbstractEbbotCallback {
   });
 
   @override
-  void dispatchInitializationError(EbbotInitializationError error) async {
-    onInitializationError(error);
+  void dispatchLoadError(EbbotLoadError error) async {
+    onLoadError(error);
   }
 
   @override
@@ -29,8 +31,13 @@ class EbbotCallback extends AbstractEbbotCallback {
   }
 
   @override
-  void dispatchOnReset() async {
-    onReset();
+  void dispatchOnRestartConversation() async {
+    onRestartConversation();
+  }
+
+  @override
+  void dispatchOnEndConversation() async {
+    onEndConversation();
   }
 
   @override
@@ -55,9 +62,10 @@ class EbbotCallback extends AbstractEbbotCallback {
 }
 
 abstract class AbstractEbbotCallback {
-  void dispatchInitializationError(EbbotInitializationError error);
+  void dispatchLoadError(EbbotLoadError error);
   void dispatchOnLoad();
-  void dispatchOnReset();
+  void dispatchOnRestartConversation();
+  void dispatchOnEndConversation();
   void dispatchOnMessage(String message);
   void dispatchOnBotMessage(String message);
   void dispatchOnUserMessage(String message);
@@ -65,18 +73,18 @@ abstract class AbstractEbbotCallback {
 }
 
 class EbbotCallbackBuilder {
-  void Function(EbbotInitializationError error) _onInitializationError =
-      (error) {};
+  void Function(EbbotLoadError error) _onLoadError = (error) {};
   void Function() _onLoad = () {};
-  void Function() _onReset = () {};
+  void Function() _onRestartConversation = () {};
+  void Function() _onEndConversation = () {};
   void Function(String message) _onMessage = (message) {};
   void Function(String message) _onBotMessage = (message) {};
   void Function(String message) _onUserMessage = (message) {};
   void Function(String message) _onStartConversation = (message) {};
 
-  EbbotCallbackBuilder onInitializationError(
-      void Function(EbbotInitializationError error) onInitializationError) {
-    _onInitializationError = onInitializationError;
+  EbbotCallbackBuilder onLoadError(
+      void Function(EbbotLoadError error) onLoadError) {
+    _onLoadError = onLoadError;
     return this;
   }
 
@@ -85,8 +93,14 @@ class EbbotCallbackBuilder {
     return this;
   }
 
-  EbbotCallbackBuilder onReset(void Function() onReset) {
-    _onReset = onReset;
+  EbbotCallbackBuilder onRestartConversation(
+      void Function() onRestartConversation) {
+    _onRestartConversation = onRestartConversation;
+    return this;
+  }
+
+  EbbotCallbackBuilder onEndConversation(void Function() onEndConversation) {
+    _onEndConversation = onEndConversation;
     return this;
   }
 
@@ -115,9 +129,10 @@ class EbbotCallbackBuilder {
 
   EbbotCallback build() {
     return EbbotCallback(
-      onInitializationError: _onInitializationError,
+      onLoadError: _onLoadError,
       onLoad: _onLoad,
-      onReset: _onReset,
+      onRestartConversation: _onRestartConversation,
+      onEndConversation: _onEndConversation,
       onMessage: _onMessage,
       onBotMessage: _onBotMessage,
       onUserMessage: _onUserMessage,
@@ -132,9 +147,9 @@ enum EbbotInitializationErrorType {
   initialization,
 }
 
-class EbbotInitializationError {
+class EbbotLoadError {
   final EbbotInitializationErrorType type;
   final dynamic cause;
   final StackTrace? stackTrace;
-  EbbotInitializationError(this.type, this.cause, this.stackTrace);
+  EbbotLoadError(this.type, this.cause, this.stackTrace);
 }

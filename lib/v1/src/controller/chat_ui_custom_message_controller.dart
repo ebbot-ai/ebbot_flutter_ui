@@ -2,23 +2,23 @@ import 'package:ebbot_dart_client/ebbot_dart_client.dart';
 import 'package:ebbot_dart_client/entity/message/message.dart';
 import 'package:ebbot_flutter_ui/v1/configuration/ebbot_configuration.dart';
 import 'package:ebbot_flutter_ui/v1/ebbot_flutter_ui.dart';
+import 'package:ebbot_flutter_ui/v1/src/service/ebbot_dart_client_service.dart';
 import 'package:ebbot_flutter_ui/v1/src/widget/carousel_widget.dart';
 import 'package:ebbot_flutter_ui/v1/src/widget/rating_widget.dart';
 import 'package:ebbot_flutter_ui/v1/src/widget/url_box_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
+import 'package:get_it/get_it.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 // A controller for handling custom flutter chat ui messages
 class ChatUiCustomMessageController {
-  final EbbotDartClient client;
+  EbbotDartClient get client => GetIt.I.get<EbbotDartClientService>().client;
   final EbbotConfiguration configuration;
   final Function() handleRestartConversation;
 
   ChatUiCustomMessageController(
-      {required this.client,
-      required this.configuration,
-      required this.handleRestartConversation});
+      {required this.configuration, required this.handleRestartConversation});
 
   Widget processMessage(types.CustomMessage message,
       {required int messageWidth}) {
