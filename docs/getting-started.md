@@ -1,3 +1,8 @@
+- [Getting started](#getting-started)
+  - [How to Implement Ebbot Flutter UI in Your App](#how-to-implement-ebbot-flutter-ui-in-your-app)
+  - [Demo app](#demo-app)
+
+
 # Getting started
 
 Ebbot Flutter UI is a flutter ui widget for implementing the Ebbot chat bot.

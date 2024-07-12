@@ -1,3 +1,14 @@
+- [Configuration](#configuration)
+  - [Styling and theming](#styling-and-theming)
+  - [Passing custom user specific attributes](#passing-custom-user-specific-attributes)
+  - [Configuring the cloud environment](#configuring-the-cloud-environment)
+  - [Enter pressed behaviour](#enter-pressed-behaviour)
+  - [Adding a callback handler](#adding-a-callback-handler)
+    - [Callback function descriptions](#callback-function-descriptions)
+  - [API Controller](#api-controller)
+  - [Putting everything together](#putting-everything-together)
+
+
 # Configuration
 
 Configuring Ebbot Flutter UI is done by passing a `EbbotConfiguration` instance to the the `EbbotFlutterUi` widget.
@@ -162,7 +173,7 @@ var configuration = EbbotConfigurationBuilder()
 | `triggerScenario`     | Triggers a specific scenario in the conversation. | `scenarioId`: A `String` identifying the scenario to be triggered.                       |
 
 
-# Putting everything together
+## Putting everything together
 
 The following is a full fledged example with all configurable options passed to the widget:
 
