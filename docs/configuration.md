@@ -145,8 +145,11 @@ Future<void> onStartConversation(String message) async {
 In order to communciate with the widget, you can pass an instance of an API controller:
 ```dart
 var apiController = EbbotApiController();
+var configuration = EbbotConfigurationBuilder()
+      .apiController(apiController)
+      .build();
 ```
->Note: The API controller can only be called once the widget has been fully loaded, which is known when  `onLoad` callback has been invoked or by calling the `isInitialized` method.
+> [!IMPORTANT] The API controller can only be called once the widget has been fully loaded, which is known when  `onLoad` callback has been invoked or by calling the `isInitialized` method.
 
 | Method                | Description                                       | Parameters                                                                               |
 | --------------------- | ------------------------------------------------- | ---------------------------------------------------------------------------------------- |
