@@ -149,7 +149,8 @@ var configuration = EbbotConfigurationBuilder()
       .apiController(apiController)
       .build();
 ```
-> [!IMPORTANT] The API controller can only be called once the widget has been fully loaded, which is known when  `onLoad` callback has been invoked or by calling the `isInitialized` method.
+> [!IMPORTANT]
+> The API controller can only be called once the widget has been fully loaded, which is known when  `onLoad` callback has been invoked or by calling the `isInitialized` method.
 
 | Method                | Description                                       | Parameters                                                                               |
 | --------------------- | ------------------------------------------------- | ---------------------------------------------------------------------------------------- |
