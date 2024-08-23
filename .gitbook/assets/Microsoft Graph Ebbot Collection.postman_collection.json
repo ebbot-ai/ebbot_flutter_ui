@@ -1,0 +1,384 @@
+{
+	"info": {
+		"_postman_id": "c68ee025-d8dc-42c1-9612-6db4fcfec1bb",
+		"name": "Microsoft Graph (Sharepoint)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "8536907"
+	},
+	"item": [
+		{
+			"name": "FullControl app token request",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Set jwt token variable after login\", function () {",
+							"    pm.response.to.have.status(200);",
+							"    var jsonData = pm.response.json();",
+							"    pm.collectionVariables.set(\"jwt_token\", jsonData.access_token);",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "client_id",
+							"value": "{{client_id}}",
+							"type": "text"
+						},
+						{
+							"key": "scope",
+							"value": "https://graph.microsoft.com/.default",
+							"type": "text"
+						},
+						{
+							"key": "client_secret",
+							"value": "{{client_secret}}",
+							"type": "text"
+						},
+						{
+							"key": "grant_type",
+							"value": "client_credentials",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://login.microsoftonline.com/{{tenantId}}/oauth2/v2.0/token",
+					"protocol": "https",
+					"host": [
+						"login",
+						"microsoftonline",
+						"com"
+					],
+					"path": [
+						"{{tenantId}}",
+						"oauth2",
+						"v2.0",
+						"token"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get All Sites",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://graph.microsoft.com/v1.0/sites/getAllSites",
+					"protocol": "https",
+					"host": [
+						"graph",
+						"microsoft",
+						"com"
+					],
+					"path": [
+						"v1.0",
+						"sites",
+						"getAllSites"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Set permissions to sites",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"roles\": [\"read\"],\n  \"grantedToIdentities\": [{\n    \"application\": {\n      \"id\": \"{{ebbot_app_id}}\",\n      \"displayName\": \"Ebbot Scraper\"\n    }\n  }]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://graph.microsoft.com/v1.0/sites/{{siteId}}/permissions",
+					"protocol": "https",
+					"host": [
+						"graph",
+						"microsoft",
+						"com"
+					],
+					"path": [
+						"v1.0",
+						"sites",
+						"{{siteId}}",
+						"permissions"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Set permissions to pages",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"roles\": [\"read\"],\n  \"grantedToIdentities\": [{\n    \"application\": {\n      \"id\": \"{{ebbot_app_id}}\",\n      \"displayName\": \"Ebbot Scraper\"\n    }\n  }]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://graph.microsoft.com/v1.0/sites/{{siteId}}/pages/42b88c52-db50-4c99-8eb6-afef986b643a/permissions",
+					"protocol": "https",
+					"host": [
+						"graph",
+						"microsoft",
+						"com"
+					],
+					"path": [
+						"v1.0",
+						"sites",
+						"{{siteId}}",
+						"pages",
+						"42b88c52-db50-4c99-8eb6-afef986b643a",
+						"permissions"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get site content",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://graph.microsoft.com/v1.0/sites/{{siteId}}/pages",
+					"protocol": "https",
+					"host": [
+						"graph",
+						"microsoft",
+						"com"
+					],
+					"path": [
+						"v1.0",
+						"sites",
+						"{{siteId}}",
+						"pages"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Search sites",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://graph.microsoft.com/v1.0/sites?search=",
+					"protocol": "https",
+					"host": [
+						"graph",
+						"microsoft",
+						"com"
+					],
+					"path": [
+						"v1.0",
+						"sites"
+					],
+					"query": [
+						{
+							"key": "search",
+							"value": ""
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get webparts",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://graph.microsoft.com/v1.0/sites/{{siteId}}/pages/{{pageId}}/microsoft.graph.sitepage/webparts/",
+					"protocol": "https",
+					"host": [
+						"graph",
+						"microsoft",
+						"com"
+					],
+					"path": [
+						"v1.0",
+						"sites",
+						"{{siteId}}",
+						"pages",
+						"{{pageId}}",
+						"microsoft.graph.sitepage",
+						"webparts",
+						""
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{jwt_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "client_secret",
+			"value": "// Sites.FullControl app client_id",
+			"type": "string"
+		},
+		{
+			"key": "client_id",
+			"value": "// Sites.FullControl app client_id",
+			"type": "string"
+		},
+		{
+			"key": "ebbot_app_id",
+			"value": "cb3957e9-f7e1-4290-9eda-d00bdbfc9c8d",
+			"type": "string"
+		},
+		{
+			"key": "siteId",
+			"value": "// The siteID to set permissions for",
+			"type": "string"
+		},
+		{
+			"key": "tenantId",
+			"value": "// Tenant ID for your app",
+			"type": "string"
+		},
+		{
+			"key": "pageId",
+			"value": "// Specific page you want to check webParts of, fetched from get site content",
+			"type": "string"
+		},
+		{
+			"key": "jwt_token",
+			"value": ""
+		}
+	]
+}

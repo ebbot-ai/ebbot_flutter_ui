@@ -1,18 +1,31 @@
-# Ebbot Flutter UI
+# Introduction to the Ebbot Platform
 
-Ebbot Flutter UI is a flutter ui widget for implementing the Ebbot chat bot.
-This widget encapsulates the logic in the `ebbot-dart-client` package and provides an drop-in ready solution for rendering a Ebbot Chat in your Flutter App.
+![](<.gitbook/assets/image (19).png>)
 
-## Notable technical dependencies
+This documents will help you get started with Ebbot app. If you are new to Ebbot we suggest you to read the introduction section to get a grip of what possibilities we do offer and how you can create and integrate ebbot.&#x20;
 
-- This widget depends on the `flutter-chat-ui` package for rendering the chat ui
-- It also depends on the `ebbot-dart-client` client library which wraps the business logic of the Ebbot Chat bot
+{% hint style="info" %}
+We recommend all new users to read the basic concept before moving on to other topics. To get the most out of the documentation you need to be familiar with the basic principles around Ebbot.&#x20;
+{% endhint %}
 
-## Demo app
+{% content-ref url="untitled/" %}
+[untitled](untitled/)
+{% endcontent-ref %}
 
-A demo app that implements the `ebbot-flutter-ui` can be found in this repository: https://github.com/ebbot-ai/ebbot_flutter_ui_demo
-This is a good starting point for anyone implementing the chat for the first time.
+### I'm a bot builder
 
-## Documentation
+As a bot builder you need to know how to create new scenarios and train the bot to answer accordingly. Your new home will be the Studio.&#x20;
 
-For more detailed documentation, please see the [documentation index page](docs/index.md).
+{% content-ref url="introduction-1.md" %}
+[introduction-1.md](introduction-1.md)
+{% endcontent-ref %}
+
+
+
+### I'm a developer
+
+As a developer you most likely would like to head directly into the documentation with as less graphical elements as possible. In this area you will learn all about how to talk with our api:s.&#x20;
+
+{% content-ref url="introduction.md" %}
+[introduction.md](introduction.md)
+{% endcontent-ref %}
