@@ -15,6 +15,7 @@ import 'package:ebbot_flutter_ui/v1/src/service/ebbot_notification_service.dart'
 import 'package:ebbot_flutter_ui/v1/src/initializer/ebbot_service_initializer.dart';
 import 'package:ebbot_flutter_ui/v1/src/util/ebbot_gpt_user.dart';
 import 'package:ebbot_flutter_ui/v1/src/util/string_util.dart';
+import 'package:ebbot_flutter_ui/v1/src/widget/popup_menu_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:ebbot_dart_client/ebbot_dart_client.dart';
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
@@ -48,6 +49,8 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
   types.User _user = const types.User(id: '0'); // Use dummy user before init
   bool _isInitialized = false;
   bool get isInitialized => _isInitialized;
+  bool _isChatStarted =
+      false; // This is toggled when the user sends their first chat messaage
 
   final _typingUsers = <types.User>[];
   bool hasReceivedGPTMessageBefore = false;
@@ -158,6 +161,16 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
               color: Color.fromARGB(85, 255, 255, 255),
               child: circularProgressIndicator(),
             ),
+          if (isInitialized)
+            Positioned(
+              top: 10,
+              right: 10,
+              child: AnimatedOpacity(
+                opacity: _isChatStarted ? 1.0 : 0.0,
+                duration: const Duration(milliseconds: 300),
+                child: PopupMenuWidget(onSelected: handleOnPopupMenuSelected),
+              ),
+            ),
         ],
       ),
     );
@@ -262,7 +275,7 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
     final ebbotCallbackService = GetIt.I.get<EbbotCallbackService>();
 
     if (message is types.TextMessage) {
-      if (_messages.length == 0) {
+      if (_messages.isEmpty) {
         ebbotCallbackService.dispatchOnStartConversation(message.text);
       }
 
@@ -274,6 +287,16 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
 
       if (message.author == _user) {
         ebbotCallbackService.dispatchOnUserMessage(message.text);
+      }
+
+      // We want to show the chat after the user sends their first message
+      // If the sender is configuration, this means that we still have not
+      // an active chat going
+      logger.i("SUUPPPPP" + message.metadata.toString());
+      if (message.metadata?['sender'] != 'configuration') {
+        setState(() {
+          _isChatStarted = true;
+        });
       }
     }
 
@@ -355,6 +378,7 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
       _customBottomWidgetVisibilityVisible = false;
       _isInitialized = false;
       _messages.clear();
+      _isChatStarted = false;
     });
 
     final ebbotClientService = GetIt.I.get<EbbotDartClientService>();
@@ -379,5 +403,70 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
 
     final ebbotCallbackService = GetIt.I.get<EbbotCallbackService>();
     ebbotCallbackService.dispatchOnEndConversation();
+  }
+
+  @override
+  void handleDownloadTranscript() async {
+    final documentsDir = (await getApplicationDocumentsDirectory()).path;
+    final fileName = 'transcript-${DateTime.now().toIso8601String()}.txt';
+    final filePath = '$documentsDir/$fileName';
+
+    final file = File(filePath);
+    var data = "";
+    // Write todays date as ---- 2024-01-01 ----
+    await file.writeAsString('---- ${DateTime.now().toIso8601String()} ----\n');
+    // Write messages with author first, then the message
+    for (var message in _messages) {
+      // Create a friendly name for the author
+      var author = message.author.id == _user.id
+          ? 'User'
+          : 'Bot'; // TODO: substitute bot for company name
+      var dateTime =
+          DateTime.fromMillisecondsSinceEpoch(message.createdAt ?? 0);
+
+      String formattedTime = "${dateTime.hour.toString().padLeft(2, '0')}:"
+          "${dateTime.minute.toString().padLeft(2, '0')}:"
+          "${dateTime.second.toString().padLeft(2, '0')}";
+
+      switch (message.type) {
+        case types.MessageType.text:
+          data += '${formattedTime} ${author}:\n';
+          data += '${(message as types.TextMessage).text}\n';
+          break;
+        case types.MessageType.image:
+          data += '${formattedTime} ${author}:\n';
+          data += '${(message as types.ImageMessage).name}\n';
+          break;
+        case types.MessageType.file:
+          data += '${formattedTime} ${author}:\n';
+          data += '${(message as types.FileMessage).name}\n';
+          break;
+        case types.MessageType.custom:
+          var customMessage = message as types.CustomMessage;
+
+        default:
+          logger.i("Unknown message type: ${message.type}");
+
+          break;
+      }
+      await file.writeAsString(data);
+      //await file.writeAsString(_messages.map((e) => e.toJson()).join('\n'));
+    }
+    await OpenFilex.open(filePath);
+  }
+
+  @override
+  void handleOnPopupMenuSelected(PopupMenuOptions option) {
+    switch (option) {
+      case PopupMenuOptions.restartChat:
+        handleRestartConversation();
+        break;
+      case PopupMenuOptions.downloadTranscript:
+        handleDownloadTranscript();
+        break;
+      case PopupMenuOptions.endConversation:
+        handleEndConversation();
+        break;
+    }
   }
 }

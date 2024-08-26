@@ -62,7 +62,8 @@ class EbbotMessageParser {
         id: id,
         author: author,
         createdAt: DateTime.now().millisecondsSinceEpoch,
-        text: text);
+        text: text,
+        metadata: message.toJson());
   }
 
   types.Message? _parseGpt(
@@ -75,6 +76,7 @@ class EbbotMessageParser {
       createdAt: DateTime.now().millisecondsSinceEpoch,
       id: id,
       text: text,
+      metadata: message.toJson(),
     );
   }
 
@@ -96,11 +98,12 @@ class EbbotMessageParser {
       name: image['filename'],
       uri: image['url'],
       size: image['size'],
+      metadata: message.toJson(),
     );
   }
 
   types.Message? _parseText(
-      MessageContent message, types.User author, String id) {
+      MessageContent message, types.User user, String id) {
     logger.i("parsing text message of type");
 
     if (message.sender == 'user') {
@@ -113,10 +116,11 @@ class EbbotMessageParser {
     logger.i("message is correct type, so adding it: $text");
 
     return types.TextMessage(
-      author: author,
+      author: user,
       createdAt: DateTime.now().millisecondsSinceEpoch,
       id: id,
       text: text,
+      metadata: message.toJson(),
     );
   }
 
@@ -138,6 +142,7 @@ class EbbotMessageParser {
       size: file['size'],
       uri: file['url'],
       type: types.MessageType.file,
+      metadata: message.toJson(),
     );
   }
 }
