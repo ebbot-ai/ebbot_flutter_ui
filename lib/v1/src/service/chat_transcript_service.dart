@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:ebbot_dart_client/entity/message/message.dart';
 import 'package:ebbot_flutter_ui/v1/src/service/log_service.dart';
 import 'package:get_it/get_it.dart';

@@ -1,15 +1,12 @@
 import 'package:ebbot_flutter_ui/v1/configuration/ebbot_configuration.dart';
-import 'package:ebbot_flutter_ui/v1/ebbot_flutter_ui.dart';
 import 'package:ebbot_flutter_ui/v1/src/controller/chat_input_controller.dart';
 import 'package:ebbot_flutter_ui/v1/src/controller/chat_transcript_controller.dart';
 import 'package:ebbot_flutter_ui/v1/src/controller/chat_ui_custom_message_controller.dart';
 import 'package:ebbot_flutter_ui/v1/src/controller/ebbot_chat_stream_controller.dart';
 import 'package:ebbot_flutter_ui/v1/src/controller/ebbot_message_stream_controller.dart';
 import 'package:ebbot_flutter_ui/v1/src/controller/ebbot_notification_controller.dart';
-import 'package:ebbot_flutter_ui/v1/src/service/ebbot_dart_client_service.dart';
 import 'package:ebbot_flutter_ui/v1/src/widget/popup_menu_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:get_it/get_it.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 
 class EbbotControllerInitializer {

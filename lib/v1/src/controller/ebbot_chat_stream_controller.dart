@@ -3,8 +3,8 @@ import 'package:ebbot_flutter_ui/v1/src/controller/resettable_controller.dart';
 import 'package:ebbot_flutter_ui/v1/src/parser/ebbot_message_parser.dart';
 import 'package:ebbot_flutter_ui/v1/src/service/ebbot_chat_listener_service.dart';
 import 'package:ebbot_flutter_ui/v1/src/service/log_service.dart';
-import 'package:get_it/get_it.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
+import 'package:get_it/get_it.dart';
 
 class EbbotChatStreamController extends ResettableController {
   final Function _handleTypingMessage;

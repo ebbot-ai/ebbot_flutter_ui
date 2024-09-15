@@ -1,6 +1,5 @@
 import 'package:ebbot_flutter_ui/v1/configuration/ebbot_configuration.dart';
 import 'package:ebbot_flutter_ui/v1/configuration/ebbot_log_configuration.dart';
-import 'package:get_it/get_it.dart';
 import 'package:logger/logger.dart';
 
 class LogService {

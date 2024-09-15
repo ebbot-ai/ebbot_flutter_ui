@@ -1,8 +1,6 @@
 import 'package:ebbot_flutter_ui/v1/configuration/ebbot_behaviour.dart';
 import 'package:ebbot_flutter_ui/v1/src/controller/chat_input_field_controller.dart';
 import 'package:ebbot_flutter_ui/v1/src/service/log_service.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 import 'package:get_it/get_it.dart';
 

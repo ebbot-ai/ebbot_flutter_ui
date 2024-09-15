@@ -1,5 +1,4 @@
 import 'package:ebbot_dart_client/configuration/configuration.dart';
-import 'package:ebbot_dart_client/ebbot_dart_client.dart';
 import 'package:ebbot_flutter_ui/v1/configuration/ebbot_configuration.dart';
 import 'package:ebbot_flutter_ui/v1/src/service/chat_transcript_service.dart';
 import 'package:ebbot_flutter_ui/v1/src/service/ebbot_callback_service.dart';
