@@ -8,12 +8,11 @@ typedef MessageParserResolver = String? Function(MessageContent);
 
 class ChatTranscriptService {
   final logger = GetIt.I.get<LogService>().logger;
-  final List<String> _chatTranscript = [];
 
-  final Map<double, String> _chatTranscriptMap = {};
+  final Map<double, String> _chatTranscript = {};
 
   String getChatTranscripts() {
-    final sortedTranscripts = _chatTranscriptMap.entries.toList()
+    final sortedTranscripts = _chatTranscript.entries.toList()
       ..sort((a, b) => a.key.compareTo(b.key));
     final transcriptValues = sortedTranscripts.map((entry) => entry.value);
     return '${_getHeader()}\n\n${transcriptValues.join('\n')}';
@@ -76,8 +75,7 @@ class ChatTranscriptService {
     if (parsedMessage != null) {
       final timestamp = message.data.message.timestamp;
       final key = parseTimestampToDouble(timestamp);
-      _chatTranscriptMap[key] = parsedMessage;
-      _chatTranscript.add(parsedMessage);
+      _chatTranscript[key] = parsedMessage;
     }
   }
 

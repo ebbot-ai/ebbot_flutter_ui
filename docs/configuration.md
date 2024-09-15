@@ -6,6 +6,7 @@
   - [Adding a callback handler](#adding-a-callback-handler)
     - [Callback function descriptions](#callback-function-descriptions)
   - [API Controller](#api-controller)
+  - [Configuring logging](#configuring-logging)
   - [Putting everything together](#putting-everything-together)
 
 
@@ -173,12 +174,16 @@ var configuration = EbbotConfigurationBuilder()
 | `triggerScenario`     | Triggers a specific scenario in the conversation. | `scenarioId`: A `String` identifying the scenario to be triggered.                       |
 
 
+## Configuring logging
+```dart
+var logConfiguration = EbbotLogConfigurationBuilder().logLevel(Level.info).enabled(true).build();
+```
+
 ## Putting everything together
 
 The following is a full fledged example with all configurable options passed to the widget:
 
 ```dart
-
 
 Future<void> onLoadError(EbbotLoadError error) async {
   print(
@@ -241,6 +246,8 @@ var userAttributes = {
       .build();
   var behaviour = EbbotBehaviourBuilder().input(ebbotBehaviourInput).build();
 
+  var logConfiguration = EbbotLogConfigurationBuilder().logLevel(EbbotLogLevel.info).enabled(true).build();
+
   var configuration = EbbotConfigurationBuilder()
       .apiController(apiController)
       .environment(Environment.ovhEUProduction)
@@ -248,6 +255,7 @@ var userAttributes = {
       .behaviour(behaviour)
       .theme(const DarkChatTheme())
       .callback(callback)
+      .logConfiguration(logConfiguration)
       .build();
 
 
