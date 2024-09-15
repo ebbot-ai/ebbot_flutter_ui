@@ -1,6 +1,7 @@
 import 'package:ebbot_dart_client/valueobjects/environment.dart';
 import 'package:ebbot_flutter_ui/v1/configuration/ebbot_behaviour.dart';
 import 'package:ebbot_flutter_ui/v1/configuration/ebbot_callback.dart';
+import 'package:ebbot_flutter_ui/v1/configuration/ebbot_log_configuration.dart';
 import 'package:ebbot_flutter_ui/v1/configuration/ebbot_user_configuration.dart';
 import 'package:ebbot_flutter_ui/v1/controller/ebbot_api_controller.dart';
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
@@ -13,6 +14,7 @@ class EbbotConfiguration {
   final EbbotBehaviour behaviour;
   final EbbotCallback callback;
   final EbbotApiController apiController;
+  final EbbotLogConfiguration logConfiguration;
 
   EbbotConfiguration._builder(EbbotConfigurationBuilder builder)
       : theme = builder._theme,
@@ -20,7 +22,8 @@ class EbbotConfiguration {
         userConfiguration = builder._userConfiguration,
         behaviour = builder._behaviour,
         callback = builder._callback,
-        apiController = builder._apiController;
+        apiController = builder._apiController,
+        logConfiguration = builder._logConfiguration;
 
   factory EbbotConfiguration(EbbotConfigurationBuilder builder) {
     return EbbotConfiguration._builder(builder);
@@ -35,6 +38,8 @@ class EbbotConfigurationBuilder {
   EbbotBehaviour _behaviour = EbbotBehaviourBuilder().build();
   EbbotCallback _callback = EbbotCallbackBuilder().build();
   EbbotApiController _apiController = EbbotApiController();
+  EbbotLogConfiguration _logConfiguration =
+      EbbotLogConfigurationBuilder().build();
 
   EbbotConfigurationBuilder theme(ChatTheme theme) {
     _theme = theme;
@@ -64,6 +69,12 @@ class EbbotConfigurationBuilder {
 
   EbbotConfigurationBuilder apiController(EbbotApiController apiController) {
     _apiController = apiController;
+    return this;
+  }
+
+  EbbotConfigurationBuilder logConfiguration(
+      EbbotLogConfiguration logConfiguration) {
+    _logConfiguration = logConfiguration;
     return this;
   }
 

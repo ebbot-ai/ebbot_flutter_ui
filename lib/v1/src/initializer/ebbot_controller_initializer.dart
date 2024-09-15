@@ -1,6 +1,7 @@
 import 'package:ebbot_flutter_ui/v1/configuration/ebbot_configuration.dart';
 import 'package:ebbot_flutter_ui/v1/ebbot_flutter_ui.dart';
 import 'package:ebbot_flutter_ui/v1/src/controller/chat_input_controller.dart';
+import 'package:ebbot_flutter_ui/v1/src/controller/chat_transcript_controller.dart';
 import 'package:ebbot_flutter_ui/v1/src/controller/chat_ui_custom_message_controller.dart';
 import 'package:ebbot_flutter_ui/v1/src/controller/ebbot_chat_stream_controller.dart';
 import 'package:ebbot_flutter_ui/v1/src/controller/ebbot_message_stream_controller.dart';
@@ -21,6 +22,7 @@ class EbbotControllerInitializer {
   ChatUiCustomMessageController? chatUiCustomMessageController;
   EbbotMessageStreamController? ebbotMessageStreamController;
   EbbotChatStreamController? ebbotChatStreamController;
+  ChatTranscriptController? chatTranscriptController;
 
   EbbotControllerInitializer(
     this.controllerDelegates,
@@ -55,6 +57,8 @@ class EbbotControllerInitializer {
       controllerDelegates.handleAddMessage,
       controllerDelegates.handleInputMode,
     );
+
+    chatTranscriptController = ChatTranscriptController();
   }
 
   // updateControllers is called when the controllers need to reset themselves
@@ -78,8 +82,4 @@ abstract class AbstractControllerDelegate {
   void handleEndConversation();
   void handleDownloadTranscript();
   void handleOnPopupMenuSelected(PopupMenuOptions option);
-}
-
-abstract class AbstractResettableController {
-  void reset();
 }

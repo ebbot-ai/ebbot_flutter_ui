@@ -1,8 +1,9 @@
 import 'package:ebbot_dart_client/entity/message/message.dart';
 import 'package:ebbot_flutter_ui/v1/configuration/ebbot_configuration.dart';
+import 'package:ebbot_flutter_ui/v1/src/service/log_service.dart';
 import 'package:ebbot_flutter_ui/v1/src/widget/url_button_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:logger/logger.dart';
+import 'package:get_it/get_it.dart';
 
 class CarouselWidget extends StatefulWidget {
   final MessageContent content;
@@ -11,7 +12,7 @@ class CarouselWidget extends StatefulWidget {
   final void Function(String) onScenarioPressed;
   final void Function(String, String) onVariablePressed;
 
-  CarouselWidget(
+  const CarouselWidget(
       {Key? key,
       required this.content,
       required this.configuration,
@@ -28,13 +29,11 @@ class _CarouselWidgetState extends State<CarouselWidget> {
   final PageController _controller = PageController(initialPage: 0);
   int _currentPage = 0;
 
-  final logger = Logger(
-    printer: PrettyPrinter(),
-  );
+  final logger = GetIt.I.get<LogService>().logger;
 
   @override
   Widget build(BuildContext context) {
-    logger.i("Building carousel, page: $_currentPage");
+    logger?.i("Building carousel, page: $_currentPage");
     final content = widget.content;
 
     if (content.value['slides'] is! List) {
@@ -49,7 +48,7 @@ class _CarouselWidgetState extends State<CarouselWidget> {
           itemCount: slides.length,
           controller: _controller,
           onPageChanged: (int page) {
-            logger.i("Page changed to $page, current page: $_currentPage");
+            logger?.i("Page changed to $page, current page: $_currentPage");
             setState(() {
               _currentPage = page;
             });
@@ -75,6 +74,9 @@ class _CarouselWidgetState extends State<CarouselWidget> {
                         onVariablePressed: (String name, String value) {
                           widget.onVariablePressed(name, value);
                         },
+                        onButtonClickPressed: (String buttonId, String value) {
+                          widget.onVariablePressed(buttonId, value);
+                        },
                       ))
                   .toList();
             }
@@ -85,7 +87,7 @@ class _CarouselWidgetState extends State<CarouselWidget> {
                 padding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
                 child: Text(
                   slides[index]["title"],
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
                   ),
@@ -125,7 +127,7 @@ class _CarouselWidgetState extends State<CarouselWidget> {
 
     if (slides.length > 1) {
       pageChildren.add(Padding(
-        padding: EdgeInsets.fromLTRB(0, 10, 0, 10),
+        padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: _buildDots(slides),

@@ -43,7 +43,7 @@ class EbbotApiController extends AbstractEbbotApiController {
   @override
   void setUserAttributes(Map<String, dynamic> attributes) {
     _throwIfNotAttached();
-    _client.sendUpdateConversationInfo(attributes);
+    _client.sendUpdateConversationInfoMessage(attributes);
   }
 
   @override
