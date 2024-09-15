@@ -24,7 +24,7 @@ class EbbotDartClientService {
   }
 
   void endSession() {
-    _client.sendCloseChat();
+    _client.sendCloseChatMessage();
   }
 
   Future<void> restartAsync() async {
@@ -49,7 +49,7 @@ class EbbotDartClientService {
 
     // Send user attributes to the server on initialization
     if (_userAttributes.isNotEmpty) {
-      _client.sendUpdateConversationInfo(this._userAttributes);
+      _client.sendUpdateConversationInfoMessage(_userAttributes);
     }
 
     _isInitialized = true;

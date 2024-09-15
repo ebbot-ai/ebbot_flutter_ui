@@ -1,25 +1,22 @@
 import 'dart:io';
-import 'dart:math';
+
 import 'package:ebbot_dart_client/configuration/configuration.dart';
+import 'package:ebbot_dart_client/configuration/log_configuration.dart';
+import 'package:ebbot_dart_client/ebbot_dart_client.dart';
 import 'package:ebbot_flutter_ui/v1/configuration/ebbot_configuration.dart';
-import 'package:ebbot_flutter_ui/v1/src/controller/chat_input_controller.dart';
-import 'package:ebbot_flutter_ui/v1/src/controller/ebbot_message_stream_controller.dart';
-import 'package:ebbot_flutter_ui/v1/src/controller/ebbot_chat_stream_controller.dart';
-import 'package:ebbot_flutter_ui/v1/src/controller/ebbot_notification_controller.dart';
-import 'package:ebbot_flutter_ui/v1/src/controller/chat_ui_custom_message_controller.dart';
+import 'package:ebbot_flutter_ui/v1/configuration/ebbot_log_configuration.dart';
 import 'package:ebbot_flutter_ui/v1/src/initializer/ebbot_controller_initializer.dart';
-import 'package:ebbot_flutter_ui/v1/src/service/ebbot_callback_service.dart';
-import 'package:ebbot_flutter_ui/v1/src/service/ebbot_chat_listener_service.dart';
-import 'package:ebbot_flutter_ui/v1/src/service/ebbot_dart_client_service.dart';
-import 'package:ebbot_flutter_ui/v1/src/service/ebbot_notification_service.dart';
 import 'package:ebbot_flutter_ui/v1/src/initializer/ebbot_service_initializer.dart';
+import 'package:ebbot_flutter_ui/v1/src/service/chat_transcript_service.dart';
+import 'package:ebbot_flutter_ui/v1/src/service/ebbot_callback_service.dart';
+import 'package:ebbot_flutter_ui/v1/src/service/ebbot_dart_client_service.dart';
+import 'package:ebbot_flutter_ui/v1/src/service/log_service.dart';
 import 'package:ebbot_flutter_ui/v1/src/util/ebbot_gpt_user.dart';
 import 'package:ebbot_flutter_ui/v1/src/util/string_util.dart';
 import 'package:ebbot_flutter_ui/v1/src/widget/popup_menu_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:ebbot_dart_client/ebbot_dart_client.dart';
-import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
+import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
@@ -65,9 +62,7 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
   late bool _customBottomWidgetVisibilityVisible = false;
   late Input _customBottomWidget;
 
-  final logger = Logger(
-    printer: PrettyPrinter(),
-  );
+  Logger? logger;
 
   @override
   void initState() {
@@ -87,6 +82,10 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
   void _initialize() async {
     var configuration = ConfigurationBuilder()
         .environment(widget._configuration.environment)
+        .logConfiguration(LogConfigurationBuilder()
+            .enabled(widget._configuration.logConfiguration.enabled)
+            .logLevel(widget._configuration.logConfiguration.logLevel.level)
+            .build())
         .build();
 
     _ebbotServiceInitializer = EbbotServiceInitializer(
@@ -99,6 +98,8 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
     _ebbotControllerInitializer.intializeControllers();
 
     widget._configuration.apiController.attach(this);
+
+    logger = GetIt.I.get<LogService>().logger;
 
     _setup();
   }
@@ -158,7 +159,7 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
           chat,
           if (!isInitialized)
             Container(
-              color: Color.fromARGB(85, 255, 255, 255),
+              color: const Color.fromARGB(85, 255, 255, 255),
               child: circularProgressIndicator(),
             ),
           if (isInitialized)
@@ -184,7 +185,6 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
 
   @override
   void handleTypingUsers() {
-    logger.i("handling typing message");
     setState(() {
       _typingUsers.clear();
       _typingUsers.add(ebbotGPTUser);
@@ -193,7 +193,6 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
 
   @override
   void handleClearTypingUsers() {
-    logger.i("clearing typing users");
     setState(() {
       _typingUsers.clear();
     });
@@ -201,7 +200,7 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
 
   @override
   void handleNotification(String title, String text) async {
-    logger.d("handling notification: $title, $text");
+    logger?.d("handling notification: $title, $text");
     await showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -221,29 +220,30 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
     );
   }
 
+  @override
   void handleInputMode(String? inputMode) {
-    logger.d("handling input mode: $inputMode");
+    logger?.d("handling input mode: $inputMode");
 
     late bool newCustomBottomWidgetVisibilityVisible;
 
     switch (inputMode) {
       case 'hidden':
-        logger.i("setting input mode to hidden");
+        logger?.i("setting input mode to hidden");
 
         newCustomBottomWidgetVisibilityVisible = false;
         break;
       case 'visible':
-        logger.i("setting input mode to visible");
+        logger?.i("setting input mode to visible");
 
         newCustomBottomWidgetVisibilityVisible = true;
         break;
       case 'disabled':
-        logger.i("setting input mode to disabled");
+        logger?.i("setting input mode to disabled");
 
         newCustomBottomWidgetVisibilityVisible = false;
         break;
       default:
-        logger.i("got unknown input mode: $inputMode");
+        logger?.i("got unknown input mode: $inputMode");
         return;
     }
 
@@ -268,7 +268,7 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
   @override
   void handleAddMessage(types.Message? message) {
     if (message == null) {
-      logger.w("message is null, so skipping..");
+      logger?.w("message is null, so skipping..");
       return;
     }
 
@@ -292,7 +292,6 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
       // We want to show the chat after the user sends their first message
       // If the sender is configuration, this means that we still have not
       // an active chat going
-      logger.i("SUUPPPPP" + message.metadata.toString());
       if (message.metadata?['sender'] != 'configuration') {
         setState(() {
           _isChatStarted = true;
@@ -412,46 +411,11 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
     final filePath = '$documentsDir/$fileName';
 
     final file = File(filePath);
-    var data = "";
-    // Write todays date as ---- 2024-01-01 ----
-    await file.writeAsString('---- ${DateTime.now().toIso8601String()} ----\n');
-    // Write messages with author first, then the message
-    for (var message in _messages) {
-      // Create a friendly name for the author
-      var author = message.author.id == _user.id
-          ? 'User'
-          : 'Bot'; // TODO: substitute bot for company name
-      var dateTime =
-          DateTime.fromMillisecondsSinceEpoch(message.createdAt ?? 0);
 
-      String formattedTime = "${dateTime.hour.toString().padLeft(2, '0')}:"
-          "${dateTime.minute.toString().padLeft(2, '0')}:"
-          "${dateTime.second.toString().padLeft(2, '0')}";
+    final chatTranscriptService = GetIt.I.get<ChatTranscriptService>();
+    final transcripts = chatTranscriptService.getChatTranscripts();
 
-      switch (message.type) {
-        case types.MessageType.text:
-          data += '${formattedTime} ${author}:\n';
-          data += '${(message as types.TextMessage).text}\n';
-          break;
-        case types.MessageType.image:
-          data += '${formattedTime} ${author}:\n';
-          data += '${(message as types.ImageMessage).name}\n';
-          break;
-        case types.MessageType.file:
-          data += '${formattedTime} ${author}:\n';
-          data += '${(message as types.FileMessage).name}\n';
-          break;
-        case types.MessageType.custom:
-          var customMessage = message as types.CustomMessage;
-
-        default:
-          logger.i("Unknown message type: ${message.type}");
-
-          break;
-      }
-      await file.writeAsString(data);
-      //await file.writeAsString(_messages.map((e) => e.toJson()).join('\n'));
-    }
+    await file.writeAsString(transcripts);
     await OpenFilex.open(filePath);
   }
 

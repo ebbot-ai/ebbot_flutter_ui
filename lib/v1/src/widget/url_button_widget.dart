@@ -1,4 +1,3 @@
-import 'package:ebbot_dart_client/entity/message/message.dart';
 import 'package:ebbot_flutter_ui/v1/configuration/ebbot_configuration.dart';
 import 'package:flutter/material.dart';
 
@@ -8,6 +7,7 @@ class UrlButtonWidget extends StatefulWidget {
   final void Function(String) onURlPressed;
   final void Function(String) onScenarioPressed;
   final void Function(String, String) onVariablePressed;
+  final void Function(String, String) onButtonClickPressed;
 
   const UrlButtonWidget({
     Key? key,
@@ -16,6 +16,7 @@ class UrlButtonWidget extends StatefulWidget {
     required this.onURlPressed,
     required this.onScenarioPressed,
     required this.onVariablePressed,
+    required this.onButtonClickPressed,
   }) : super(key: key);
 
   @override
@@ -51,6 +52,7 @@ class _UrlButtonWidgetState extends State<UrlButtonWidget> {
                 setState(() {
                   _hasBeenPressed = true;
                 });
+                widget.onButtonClickPressed(url['buttonId'], url['label']);
                 widget.onURlPressed(url['value']);
               },
         child: Text(url['label']),
@@ -64,6 +66,7 @@ class _UrlButtonWidgetState extends State<UrlButtonWidget> {
                 setState(() {
                   _hasBeenPressed = true;
                 });
+                widget.onButtonClickPressed(url['buttonId'], url['label']);
                 widget.onScenarioPressed(url['next']['scenario']);
               },
         child: Text(url['label']),
@@ -77,6 +80,7 @@ class _UrlButtonWidgetState extends State<UrlButtonWidget> {
                 setState(() {
                   _hasBeenPressed = true;
                 });
+                widget.onButtonClickPressed(url['buttonId'], url['label']);
                 widget.onVariablePressed(url['name'], url['value']);
               },
         child: Text(url['label']),
@@ -86,7 +90,7 @@ class _UrlButtonWidgetState extends State<UrlButtonWidget> {
     }
 
     return Padding(
-      padding: EdgeInsets.only(top: 10.0),
+      padding: const EdgeInsets.only(top: 10.0),
       child: button,
     );
   }

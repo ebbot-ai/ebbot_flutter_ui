@@ -1,8 +1,8 @@
 import 'package:ebbot_dart_client/ebbot_dart_client.dart';
 import 'package:ebbot_dart_client/entity/message/message.dart';
 import 'package:ebbot_flutter_ui/v1/configuration/ebbot_configuration.dart';
-import 'package:ebbot_flutter_ui/v1/ebbot_flutter_ui.dart';
 import 'package:ebbot_flutter_ui/v1/src/service/ebbot_dart_client_service.dart';
+import 'package:ebbot_flutter_ui/v1/src/service/log_service.dart';
 import 'package:ebbot_flutter_ui/v1/src/widget/carousel_widget.dart';
 import 'package:ebbot_flutter_ui/v1/src/widget/rating_widget.dart';
 import 'package:ebbot_flutter_ui/v1/src/widget/url_box_widget.dart';
@@ -16,6 +16,8 @@ class ChatUiCustomMessageController {
   EbbotDartClient get client => GetIt.I.get<EbbotDartClientService>().client;
   final EbbotConfiguration configuration;
   final Function() handleRestartConversation;
+
+  final logger = GetIt.I.get<LogService>().logger;
 
   ChatUiCustomMessageController(
       {required this.configuration, required this.handleRestartConversation});
@@ -78,6 +80,10 @@ class ChatUiCustomMessageController {
         },
         onVariablePressed: (name, value) {
           client.sendVariableMessage(name, value);
+        },
+        onButtonClickPressed: (buttonId, label) {
+          logger?.d("Button clicked: $buttonId, $label");
+          client.sendButtonClickedMessage(buttonId, label);
         });
   }
 

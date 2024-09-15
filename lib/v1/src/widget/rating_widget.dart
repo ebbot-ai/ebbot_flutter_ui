@@ -32,8 +32,8 @@ class _RatingWidgetState extends State<RatingWidget> {
   @override
   Widget build(BuildContext context) {
     final theme = widget.configuration.theme;
-    final textString = widget.content.value['question'];
-    final text = Text(textString,
+    final question = widget.content.value['question'];
+    final text = Text(question,
         textAlign: TextAlign.center, style: theme.receivedMessageBodyTextStyle);
     return Padding(
         padding: const EdgeInsets.all(12.0),

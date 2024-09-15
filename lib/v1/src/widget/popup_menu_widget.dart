@@ -26,14 +26,14 @@ class PopupMenuWidget extends StatelessWidget {
             leading: Icon(Icons.refresh),
             title: Text('Restart chat'),
           ),
-        ) /*,
+        ),
         const PopupMenuItem(
           value: PopupMenuOptions.downloadTranscript,
           child: ListTile(
             leading: Icon(Icons.download),
             title: Text('Download transcript'),
           ),
-        ),*/
+        ),
       ],
     );
   }

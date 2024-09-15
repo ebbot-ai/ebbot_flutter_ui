@@ -9,6 +9,7 @@ class UrlBoxWidget extends StatefulWidget {
   final void Function(String) onURlPressed;
   final void Function(String) onScenarioPressed;
   final void Function(String, String) onVariablePressed;
+  final void Function(String, String) onButtonClickPressed;
 
   const UrlBoxWidget({
     Key? key,
@@ -17,6 +18,7 @@ class UrlBoxWidget extends StatefulWidget {
     required this.onURlPressed,
     required this.onScenarioPressed,
     required this.onVariablePressed,
+    required this.onButtonClickPressed,
   }) : super(key: key);
 
   @override
@@ -53,6 +55,9 @@ class _UrlBoxWidgetState extends State<UrlBoxWidget> {
             },
             onVariablePressed: (String name, String value) {
               widget.onVariablePressed(name, value);
+            },
+            onButtonClickPressed: (String buttonId, String label) {
+              widget.onButtonClickPressed(buttonId, label);
             },
           )),
     ];
