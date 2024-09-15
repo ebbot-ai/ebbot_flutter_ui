@@ -84,7 +84,7 @@ class _CarouselWidgetState extends State<CarouselWidget> {
             return Column(children: [
               // Title
               Padding(
-                padding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
+                padding: const EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
                 child: Text(
                   slides[index]["title"],
                   style: const TextStyle(
@@ -95,7 +95,7 @@ class _CarouselWidgetState extends State<CarouselWidget> {
               ),
               // Description
               Padding(
-                padding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
+                padding: const EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
                 child: Text(
                   slides[index]["description"],
                   textAlign: TextAlign.center,
@@ -104,7 +104,7 @@ class _CarouselWidgetState extends State<CarouselWidget> {
               // Image
               Expanded(
                 child: Container(
-                  padding: EdgeInsets.fromLTRB(10.0, 0, 10.0, 0),
+                  padding: const EdgeInsets.fromLTRB(10.0, 0, 10.0, 0),
                   width: double.infinity,
                   child: Image.network(
                     slides[index]["url"],
@@ -114,10 +114,10 @@ class _CarouselWidgetState extends State<CarouselWidget> {
               ),
               // List of urls
               Padding(
-                  padding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
+                  padding: const EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
                   child: Column(
-                    children: urlsList,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: urlsList,
                   ))
             ]);
           },
@@ -135,7 +135,7 @@ class _CarouselWidgetState extends State<CarouselWidget> {
       ));
     }
 
-    return Container(
+    return SizedBox(
       height: 500,
       child: Column(
         children: pageChildren,
@@ -150,7 +150,7 @@ class _CarouselWidgetState extends State<CarouselWidget> {
     for (int i = 0; i < slides.length; i++) {
       dots.add(
         Container(
-          margin: EdgeInsets.all(5),
+          margin: const EdgeInsets.all(5),
           width: 10,
           height: 10,
           decoration: BoxDecoration(

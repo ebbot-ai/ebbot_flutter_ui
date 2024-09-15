@@ -2,7 +2,6 @@ import 'package:ebbot_dart_client/ebbot_dart_client.dart';
 import 'package:ebbot_flutter_ui/v1/ebbot_flutter_ui.dart';
 import 'package:ebbot_flutter_ui/v1/src/service/ebbot_dart_client_service.dart';
 import 'package:get_it/get_it.dart';
-import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 
 class EbbotApiController extends AbstractEbbotApiController {
   EbbotFlutterUiState? _ebbotFlutterUiState;

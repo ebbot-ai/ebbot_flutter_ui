@@ -159,7 +159,7 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
           chat,
           if (!isInitialized)
             Container(
-              color: Color.fromARGB(85, 255, 255, 255),
+              color: const Color.fromARGB(85, 255, 255, 255),
               child: circularProgressIndicator(),
             ),
           if (isInitialized)
@@ -220,6 +220,7 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
     );
   }
 
+  @override
   void handleInputMode(String? inputMode) {
     logger?.d("handling input mode: $inputMode");
 
