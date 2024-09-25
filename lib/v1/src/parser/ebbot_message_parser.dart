@@ -1,7 +1,7 @@
 import 'package:ebbot_dart_client/entity/message/message.dart';
 import 'package:ebbot_flutter_ui/v1/src/service/log_service.dart';
-import 'package:get_it/get_it.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
+import 'package:get_it/get_it.dart';
 
 /// A parser for processing incoming ebbot chat messages and generating corresponding types of flutter chat ui messages.
 ///
@@ -80,10 +80,8 @@ class EbbotMessageParser {
 
   types.Message? _parseImage(
       MessageContent message, types.User user, String id) {
-    // Add your message parsing logic here
-    logger?.i("parsing image message");
     if (message.value is! Map<String, dynamic>) {
-      logger?.i(
+      logger?.d(
           "message is NOT a map, I don't know how to process this, so skipping.. type is ${message.value.runtimeType}");
       return null;
     }
@@ -91,8 +89,7 @@ class EbbotMessageParser {
     Map<String, dynamic> image = message.value;
     return types.ImageMessage(
       id: image['key'],
-      author:
-          user, // No good placeholder for author, should probably figure out how to get the actual author
+      author: user,
       name: image['filename'],
       uri: image['url'],
       size: image['size'],

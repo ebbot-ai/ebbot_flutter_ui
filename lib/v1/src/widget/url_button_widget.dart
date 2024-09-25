@@ -1,13 +1,16 @@
+import 'package:ebbot_dart_client/entity/button_data/button_data.dart';
 import 'package:ebbot_flutter_ui/v1/configuration/ebbot_configuration.dart';
 import 'package:flutter/material.dart';
 
 class UrlButtonWidget extends StatefulWidget {
   final EbbotConfiguration configuration;
   final dynamic url;
-  final void Function(String) onURlPressed;
-  final void Function(String) onScenarioPressed;
-  final void Function(String, String) onVariablePressed;
-  final void Function(String, String) onButtonClickPressed;
+  final void Function(String, {ButtonData? buttonData}) onURlPressed;
+  final void Function(String, {ButtonData? buttonData}) onScenarioPressed;
+  final void Function(String, String, {ButtonData? buttonData})
+      onVariablePressed;
+  //final void Function(String, String, {ButtonData? buttonData})
+  //    onButtonClickPressed;
 
   const UrlButtonWidget({
     Key? key,
@@ -16,7 +19,7 @@ class UrlButtonWidget extends StatefulWidget {
     required this.onURlPressed,
     required this.onScenarioPressed,
     required this.onVariablePressed,
-    required this.onButtonClickPressed,
+    // required this.onButtonClickPressed,
   }) : super(key: key);
 
   @override
@@ -52,8 +55,9 @@ class _UrlButtonWidgetState extends State<UrlButtonWidget> {
                 setState(() {
                   _hasBeenPressed = true;
                 });
-                widget.onButtonClickPressed(url['buttonId'], url['label']);
-                widget.onURlPressed(url['value']);
+                final buttonData =
+                    ButtonData(buttonId: url['buttonId'], label: url['label']);
+                widget.onURlPressed(url['value'], buttonData: buttonData);
               },
         child: Text(url['label']),
       );
@@ -66,8 +70,10 @@ class _UrlButtonWidgetState extends State<UrlButtonWidget> {
                 setState(() {
                   _hasBeenPressed = true;
                 });
-                widget.onButtonClickPressed(url['buttonId'], url['label']);
-                widget.onScenarioPressed(url['next']['scenario']);
+                final buttonData =
+                    ButtonData(buttonId: url['buttonId'], label: url['label']);
+                widget.onScenarioPressed(url['next']['scenario'],
+                    buttonData: buttonData);
               },
         child: Text(url['label']),
       );
@@ -80,8 +86,10 @@ class _UrlButtonWidgetState extends State<UrlButtonWidget> {
                 setState(() {
                   _hasBeenPressed = true;
                 });
-                widget.onButtonClickPressed(url['buttonId'], url['label']);
-                widget.onVariablePressed(url['name'], url['value']);
+                final buttonData =
+                    ButtonData(buttonId: url['buttonId'], label: url['label']);
+                widget.onVariablePressed(url['name'], url['value'],
+                    buttonData: buttonData);
               },
         child: Text(url['label']),
       );

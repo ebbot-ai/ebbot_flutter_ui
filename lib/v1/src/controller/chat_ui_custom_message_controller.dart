@@ -1,4 +1,5 @@
 import 'package:ebbot_dart_client/ebbot_dart_client.dart';
+import 'package:ebbot_dart_client/entity/button_data/button_data.dart';
 import 'package:ebbot_dart_client/entity/message/message.dart';
 import 'package:ebbot_flutter_ui/v1/configuration/ebbot_configuration.dart';
 import 'package:ebbot_flutter_ui/v1/src/service/ebbot_dart_client_service.dart';
@@ -46,14 +47,14 @@ class ChatUiCustomMessageController {
     return CarouselWidget(
       content: content,
       configuration: configuration,
-      onURlPressed: (String url) async {
-        _processUrlClick(url);
+      onURlPressed: (String url, {ButtonData? buttonData}) async {
+        _processUrlClick(url, buttonData: buttonData);
       },
-      onScenarioPressed: (String scenario) {
-        client.sendScenarioMessage(scenario);
+      onScenarioPressed: (String scenario, {ButtonData? buttonData}) {
+        client.sendScenarioMessage(scenario, buttonData: buttonData);
       },
-      onVariablePressed: (String name, String value) {
-        client.sendVariableMessage(name, value);
+      onVariablePressed: (String name, String value, {ButtonData? buttonData}) {
+        client.sendVariableMessage(name, value, buttonData: buttonData);
       },
     );
   }
@@ -72,23 +73,26 @@ class ChatUiCustomMessageController {
     return UrlBoxWidget(
         content: content,
         configuration: configuration,
-        onURlPressed: (url) async {
-          _processUrlClick(url);
+        onURlPressed: (url, {ButtonData? buttonData}) async {
+          _processUrlClick(url, buttonData: buttonData);
         },
-        onScenarioPressed: (scenario) {
-          client.sendScenarioMessage(scenario);
+        onScenarioPressed: (scenario, {ButtonData? buttonData}) {
+          client.sendScenarioMessage(scenario, buttonData: buttonData);
         },
-        onVariablePressed: (name, value) {
-          client.sendVariableMessage(name, value);
-        },
-        onButtonClickPressed: (buttonId, label) {
-          logger?.d("Button clicked: $buttonId, $label");
-          client.sendButtonClickedMessage(buttonId, label);
+        onVariablePressed: (name, value, {ButtonData? buttonData}) {
+          client.sendVariableMessage(name, value, buttonData: buttonData);
         });
   }
 
-  void _processUrlClick(String url) async {
+  void _processUrlClick(String url, {ButtonData? buttonData}) async {
     var uri = Uri.parse(url);
+
+    // This is a bit hacky, for the other types of buttons we send a message back over the websocket
+    // which contains the button data, but for url buttons we just open the url directly
+    // so we need to send the button data here
+    if (buttonData != null) {
+      client.sendButtonClickedMessage(buttonData);
+    }
 
     // If uri protocol is ebbot://reset, reset the conversation by letting the parent know
     if (uri.scheme == 'ebbot' && uri.host == 'reset') {
