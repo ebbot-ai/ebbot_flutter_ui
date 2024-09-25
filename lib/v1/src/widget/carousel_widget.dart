@@ -1,3 +1,4 @@
+import 'package:ebbot_dart_client/entity/button_data/button_data.dart';
 import 'package:ebbot_dart_client/entity/message/message.dart';
 import 'package:ebbot_flutter_ui/v1/configuration/ebbot_configuration.dart';
 import 'package:ebbot_flutter_ui/v1/src/service/log_service.dart';
@@ -8,9 +9,10 @@ import 'package:get_it/get_it.dart';
 class CarouselWidget extends StatefulWidget {
   final MessageContent content;
   final EbbotConfiguration configuration;
-  final void Function(String) onURlPressed;
-  final void Function(String) onScenarioPressed;
-  final void Function(String, String) onVariablePressed;
+  final void Function(String, {ButtonData? buttonData}) onURlPressed;
+  final void Function(String, {ButtonData? buttonData}) onScenarioPressed;
+  final void Function(String, String, {ButtonData? buttonData})
+      onVariablePressed;
 
   const CarouselWidget(
       {Key? key,
@@ -63,20 +65,24 @@ class _CarouselWidgetState extends State<CarouselWidget> {
             if (urls is List) {
               urlsList = urls
                   .map((url) => UrlButtonWidget(
-                        url: url,
-                        configuration: widget.configuration,
-                        onURlPressed: (String url) {
-                          widget.onURlPressed(url);
-                        },
-                        onScenarioPressed: (String scenario) {
-                          widget.onScenarioPressed(scenario);
-                        },
-                        onVariablePressed: (String name, String value) {
-                          widget.onVariablePressed(name, value);
-                        },
+                      url: url,
+                      configuration: widget.configuration,
+                      onURlPressed: (String url, {ButtonData? buttonData}) {
+                        widget.onURlPressed(url, buttonData: buttonData);
+                      },
+                      onScenarioPressed: (String scenario,
+                          {ButtonData? buttonData}) {
+                        widget.onScenarioPressed(scenario,
+                            buttonData: buttonData);
+                      },
+                      onVariablePressed: (String name, String value,
+                          {ButtonData? buttonData}) {
+                        widget.onVariablePressed(name, value,
+                            buttonData: buttonData);
+                      } /*,
                         onButtonClickPressed: (String buttonId, String value) {
                           widget.onVariablePressed(buttonId, value);
-                        },
+                        },*/
                       ))
                   .toList();
             }

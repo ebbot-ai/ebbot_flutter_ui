@@ -61,6 +61,7 @@ class EbbotControllerInitializer {
   // updateControllers is called when the controllers need to reset themselves
   // usually when the the api has been reset and the controllers need to be reset as a result
   void resetControllers() {
+    chatTranscriptController?.reset();
     ebbotMessageStreamController?.startListening();
     ebbotChatStreamController?.startListening();
   }
@@ -79,4 +80,5 @@ abstract class AbstractControllerDelegate {
   void handleEndConversation();
   void handleDownloadTranscript();
   void handleOnPopupMenuSelected(PopupMenuOptions option);
+  void handleOnAttachmentPressed();
 }

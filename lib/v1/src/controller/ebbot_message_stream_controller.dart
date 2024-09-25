@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:ebbot_dart_client/entity/message/message.dart';
 import 'package:ebbot_flutter_ui/v1/src/controller/resettable_controller.dart';
 import 'package:ebbot_flutter_ui/v1/src/parser/ebbot_message_parser.dart';
@@ -5,8 +7,8 @@ import 'package:ebbot_flutter_ui/v1/src/service/ebbot_chat_listener_service.dart
 import 'package:ebbot_flutter_ui/v1/src/service/log_service.dart';
 import 'package:ebbot_flutter_ui/v1/src/util/ebbot_gpt_user.dart';
 import 'package:ebbot_flutter_ui/v1/src/util/string_util.dart';
-import 'package:get_it/get_it.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
+import 'package:get_it/get_it.dart';
 
 class EbbotMessageStreamController extends ResettableController {
   final Function _handleTypingUsers;
@@ -28,6 +30,7 @@ class EbbotMessageStreamController extends ResettableController {
     startListening();
   }
 
+  StreamSubscription<Message>? _messageStreamSubscription;
   final logger = GetIt.I.get<LogService>().logger;
 
   void _handle(Message message) {
@@ -36,6 +39,9 @@ class EbbotMessageStreamController extends ResettableController {
     var messageType = message.data.message.type;
 
     _handleInputMode(message.data.message.input_field);
+
+    final author =
+        message.data.message.sender == 'user' ? chatUser : ebbotGPTUser;
 
     if (messageType == 'typing') {
       _handleTypingUsers();
@@ -55,8 +61,8 @@ class EbbotMessageStreamController extends ResettableController {
       _handleAddMessage(systemMessage);
     }
 
-    var chatMessage = _ebbotMessageParser.parse(
-        message, ebbotGPTUser, StringUtil.randomString());
+    var chatMessage =
+        _ebbotMessageParser.parse(message, author, StringUtil.randomString());
     _handleAddMessage(chatMessage);
   }
 
@@ -66,7 +72,11 @@ class EbbotMessageStreamController extends ResettableController {
   }
 
   void startListening() {
-    _chatListenerService.messageStream.listen((message) {
+    if (_messageStreamSubscription != null) {
+      _messageStreamSubscription?.cancel();
+    }
+    _messageStreamSubscription =
+        _chatListenerService.messageStream.listen((message) {
       _handle(message);
     });
     _handleInputMode("visible");

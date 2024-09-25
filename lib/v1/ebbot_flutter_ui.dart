@@ -16,9 +16,11 @@ import 'package:ebbot_flutter_ui/v1/src/util/string_util.dart';
 import 'package:ebbot_flutter_ui/v1/src/widget/popup_menu_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
+import 'package:flutter_chat_types/flutter_chat_types.dart';
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
 import 'package:logger/logger.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
@@ -43,11 +45,11 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
     with AutomaticKeepAliveClientMixin
     implements AbstractControllerDelegate {
   final List<types.Message> _messages = [];
-  types.User _user = const types.User(id: '0'); // Use dummy user before init
+
   bool _isInitialized = false;
   bool get isInitialized => _isInitialized;
   bool _isChatStarted =
-      false; // This is toggled when the user sends their first chat messaage
+      false; // This is toggled when the user sends their first chat message
 
   final _typingUsers = <types.User>[];
   bool hasReceivedGPTMessageBefore = false;
@@ -62,7 +64,7 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
   late bool _customBottomWidgetVisibilityVisible = false;
   late Input _customBottomWidget;
 
-  Logger? logger;
+  Logger? _logger;
 
   @override
   void initState() {
@@ -99,14 +101,14 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
 
     widget._configuration.apiController.attach(this);
 
-    logger = GetIt.I.get<LogService>().logger;
+    _logger = GetIt.I.get<LogService>().logger;
 
     _setup();
   }
 
   void _setup() {
     final ebbotClientService = GetIt.I.get<EbbotDartClientService>();
-    _user = types.User(id: ebbotClientService.client.chatId);
+    //_user = types.User(id: ebbotClientService.client.chatId);
 
     ebbotClientService.client.startReceive();
     handleInputMode("visible");
@@ -133,10 +135,11 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
       messages: _messages,
       onSendPressed: handleSendPressed,
       onMessageTap: handleMessageTap,
+      onAttachmentPressed: handleOnAttachmentPressed,
       emptyState: Container(
           alignment: Alignment
               .center), // For now, only show an empty container when no messages are present
-      user: _user, // Use dummy user before init
+      user: chatUser, // Use dummy user before init
       customBottomWidget: _customBottomWidgetVisibility,
       customMessageBuilder: _ebbotControllerInitializer
           .chatUiCustomMessageController?.processMessage,
@@ -200,7 +203,7 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
 
   @override
   void handleNotification(String title, String text) async {
-    logger?.d("handling notification: $title, $text");
+    _logger?.d("handling notification: $title, $text");
     await showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -222,28 +225,28 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
 
   @override
   void handleInputMode(String? inputMode) {
-    logger?.d("handling input mode: $inputMode");
+    _logger?.d("handling input mode: $inputMode");
 
     late bool newCustomBottomWidgetVisibilityVisible;
 
     switch (inputMode) {
       case 'hidden':
-        logger?.i("setting input mode to hidden");
+        _logger?.i("setting input mode to hidden");
 
         newCustomBottomWidgetVisibilityVisible = false;
         break;
       case 'visible':
-        logger?.i("setting input mode to visible");
+        _logger?.i("setting input mode to visible");
 
         newCustomBottomWidgetVisibilityVisible = true;
         break;
       case 'disabled':
-        logger?.i("setting input mode to disabled");
+        _logger?.i("setting input mode to disabled");
 
         newCustomBottomWidgetVisibilityVisible = false;
         break;
       default:
-        logger?.i("got unknown input mode: $inputMode");
+        _logger?.i("got unknown input mode: $inputMode");
         return;
     }
 
@@ -255,7 +258,7 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
 
   void handleAddMessageFromString(String message) {
     final textMessage = types.TextMessage(
-      author: _user,
+      author: chatUser,
       createdAt: DateTime.now().millisecondsSinceEpoch,
       id: StringUtil.randomString(),
       text: message,
@@ -268,7 +271,7 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
   @override
   void handleAddMessage(types.Message? message) {
     if (message == null) {
-      logger?.w("message is null, so skipping..");
+      _logger?.w("message is null, so skipping..");
       return;
     }
 
@@ -285,7 +288,7 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
         ebbotCallbackService.dispatchOnBotMessage(message.text);
       }
 
-      if (message.author == _user) {
+      if (message.author == chatUser) {
         ebbotCallbackService.dispatchOnUserMessage(message.text);
       }
 
@@ -299,7 +302,21 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
       }
     }
 
+    // If we have a image uploaded, we need to remove it first, to avoid duplicate messages.
+    bool hasPreUploadedImage =
+        _messages.any((message) => message.id == 'pre-uploaded-image');
+    bool isFromChatUser =
+        message.type == MessageType.image && message.author == chatUser;
+    if (hasPreUploadedImage && isFromChatUser) {
+      _logger?.d(
+          "This image has already been added to the message list as it is a uploaded image, skipping");
+      return;
+    }
+
     setState(() {
+      _logger?.d(
+          "adding message of type ${message.type} from user ${message.author.id}");
+
       _messages.insert(0, message);
     });
   }
@@ -358,7 +375,7 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
   @override
   void handleSendPressed(types.PartialText message) {
     final textMessage = types.TextMessage(
-      author: _user,
+      author: chatUser,
       createdAt: DateTime.now().millisecondsSinceEpoch,
       id: StringUtil.randomString(),
       text: message.text,
@@ -431,6 +448,35 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
       case PopupMenuOptions.endConversation:
         handleEndConversation();
         break;
+    }
+  }
+
+  @override
+  void handleOnAttachmentPressed() async {
+    final result = await ImagePicker().pickImage(
+      imageQuality: 70,
+      maxWidth: 1440,
+      source: ImageSource.gallery,
+    );
+
+    if (result != null) {
+      final bytes = await result.readAsBytes();
+
+      EbbotDartClient client = GetIt.I.get<EbbotDartClientService>().client;
+
+      types.ImageMessage localImageMessage = types.ImageMessage(
+        id: "pre-uploaded-image",
+        author: chatUser,
+        uri: result.path, // Local file path
+        name: 'Local Image',
+        size: bytes.length, // Size in bytes, if known
+      );
+
+      setState(() {
+        _messages.insert(0, localImageMessage);
+      });
+
+      await client.uploadImage(bytes, result.path);
     }
   }
 }

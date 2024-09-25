@@ -175,7 +175,8 @@ class ChatTranscriptService {
   }
 
   String _parseButtonClick(MessageContent content) {
-    logger?.i(content.value);
+    logger?.d(content.toJson());
+
     return content.value;
   }
 
