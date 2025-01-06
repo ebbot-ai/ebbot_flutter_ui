@@ -1,15 +1,18 @@
 import 'package:ebbot_dart_client/ebbot_dart_client.dart';
 import 'package:ebbot_flutter_ui/v1/ebbot_flutter_ui.dart';
+import 'package:ebbot_flutter_ui/v1/src/initializer/service_locator.dart';
 import 'package:ebbot_flutter_ui/v1/src/service/ebbot_dart_client_service.dart';
 import 'package:get_it/get_it.dart';
 
 class EbbotApiController extends AbstractEbbotApiController {
   EbbotFlutterUiState? _ebbotFlutterUiState;
+  final ServiceLocator _serviceLocator = ServiceLocator();
 
   final String _ebbotClientServiceNotInitializedMessage =
       "EbbotClientService is not initialized";
 
-  EbbotDartClient get _client => GetIt.I.get<EbbotDartClientService>().client;
+  EbbotDartClient get _client =>
+      _serviceLocator.getService<EbbotDartClientService>().client;
 
   void attach(EbbotFlutterUiState ebbotFlutterUiState) {
     _ebbotFlutterUiState = ebbotFlutterUiState;

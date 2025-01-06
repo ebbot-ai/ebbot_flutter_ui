@@ -1,13 +1,14 @@
 import 'package:ebbot_dart_client/entity/message/message.dart';
+import 'package:ebbot_flutter_ui/v1/src/initializer/service_locator.dart';
 import 'package:ebbot_flutter_ui/v1/src/service/log_service.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
-import 'package:get_it/get_it.dart';
 
 /// A parser for processing incoming ebbot chat messages and generating corresponding types of flutter chat ui messages.
 ///
 /// This class provides methods for processing various types of messages such as text, images, files, etc.
 class EbbotMessageParser {
-  final logger = GetIt.I.get<LogService>().logger;
+  final _serviceLocator = ServiceLocator();
+  get _logger => _serviceLocator.getService<LogService>().logger;
 
   /// Parses the incoming message and returns the corresponding message type.
   ///
@@ -15,33 +16,34 @@ class EbbotMessageParser {
   /// Returns `null` if the message type is unsupported.
   types.Message? parse(Message message, types.User user, String id) {
     final messageType = message.data.message.type;
+
     switch (messageType) {
       case 'gpt':
-        logger?.i("parsing gpt message");
+        _logger?.i("parsing gpt message");
         return _parseGpt(message.data.message, user, id);
       case 'image':
-        logger?.i("parsing image message");
+        _logger?.i("parsing image message");
         return _parseImage(message.data.message, user, id);
       case 'text':
-        logger?.i("parsing text message");
+        _logger?.i("parsing text message");
         return _parseText(message.data.message, user, id);
       case 'file':
-        logger?.i("parsing file message");
+        _logger?.i("parsing file message");
         return _parseFile(message.data.message, user, id);
       case 'text_info':
-        logger?.i("parsing text info message");
+        _logger?.i("parsing text info message");
         return _parseTextInfo(message.data.message, user, id);
       case 'url':
-        logger?.i("parsing url message");
+        _logger?.i("parsing url message");
         return _parseCustom(message.data.message, user, id);
       case 'rating_request':
-        logger?.i("parsing rating request");
+        _logger?.i("parsing rating request");
         return _parseCustom(message.data.message, user, id);
       case 'carousel':
-        logger?.i("parsing carousel message");
+        _logger?.i("parsing carousel message");
         return _parseCustom(message.data.message, user, id);
       default:
-        logger?.w("Unsupported message type: $messageType");
+        _logger?.w("Unsupported message type: $messageType");
         return null;
     }
   }
@@ -81,7 +83,7 @@ class EbbotMessageParser {
   types.Message? _parseImage(
       MessageContent message, types.User user, String id) {
     if (message.value is! Map<String, dynamic>) {
-      logger?.d(
+      _logger?.d(
           "message is NOT a map, I don't know how to process this, so skipping.. type is ${message.value.runtimeType}");
       return null;
     }
@@ -99,16 +101,16 @@ class EbbotMessageParser {
 
   types.Message? _parseText(
       MessageContent message, types.User user, String id) {
-    logger?.i("parsing text message of type");
+    _logger?.i("parsing text message of type");
 
     if (message.sender == 'user') {
-      logger?.i("message is from user, so skipping..");
+      _logger?.i("message is from user, so skipping..");
       return null;
     }
 
     var text = message.value is String ? message.value : message.value['text'];
 
-    logger?.i("message is correct type, so adding it: $text");
+    _logger?.i("message is correct type, so adding it: $text");
 
     return types.TextMessage(
       author: user,
@@ -121,9 +123,9 @@ class EbbotMessageParser {
 
   types.Message? _parseFile(
       MessageContent message, types.User user, String id) {
-    logger?.i("parsing file message");
+    _logger?.i("parsing file message");
     if (message.value is! Map<String, dynamic>) {
-      logger?.w(
+      _logger?.w(
           "message is NOT a map, I don't know how to process this, so skipping.. type is ${message.value.runtimeType}");
       return null;
     }

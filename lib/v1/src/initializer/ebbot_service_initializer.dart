@@ -1,27 +1,29 @@
 import 'package:ebbot_dart_client/configuration/configuration.dart';
 import 'package:ebbot_flutter_ui/v1/configuration/ebbot_configuration.dart';
+import 'package:ebbot_flutter_ui/v1/src/initializer/service_locator.dart';
 import 'package:ebbot_flutter_ui/v1/src/service/chat_transcript_service.dart';
 import 'package:ebbot_flutter_ui/v1/src/service/ebbot_callback_service.dart';
 import 'package:ebbot_flutter_ui/v1/src/service/ebbot_chat_listener_service.dart';
 import 'package:ebbot_flutter_ui/v1/src/service/ebbot_dart_client_service.dart';
 import 'package:ebbot_flutter_ui/v1/src/service/ebbot_notification_service.dart';
 import 'package:ebbot_flutter_ui/v1/src/service/log_service.dart';
-import 'package:get_it/get_it.dart';
 
 class EbbotServiceInitializer {
   final String _botId;
   final EbbotConfiguration _ebbotConfiguration;
   final Configuration _dartClientConfiguration;
+  final ServiceLocator _serviceLocator = ServiceLocator();
 
   EbbotServiceInitializer(
       this._botId, this._ebbotConfiguration, this._dartClientConfiguration);
 
   Future<void> _registerLogService() async {
-    GetIt.I.registerSingleton<LogService>(LogService(_ebbotConfiguration));
+    _serviceLocator
+        .registerService<LogService>(LogService(_ebbotConfiguration));
   }
 
   Future<void> _registerEbbotCallBackService() async {
-    GetIt.I.registerSingleton<EbbotCallbackService>(
+    _serviceLocator.registerService<EbbotCallbackService>(
         EbbotCallbackService(_ebbotConfiguration.callback));
   }
 
@@ -30,22 +32,23 @@ class EbbotServiceInitializer {
         _botId,
         _dartClientConfiguration,
         _ebbotConfiguration.userConfiguration.userAttributes);
-    GetIt.I.registerSingleton<EbbotDartClientService>(service);
+    _serviceLocator.registerService<EbbotDartClientService>(service);
     await service.initialize();
   }
 
   Future<void> _registerEbbotNotificationService() async {
-    GetIt.I.registerSingleton<EbbotNotificationService>(
-        EbbotNotificationService());
+    _serviceLocator
+        .registerService<EbbotNotificationService>(EbbotNotificationService());
   }
 
   Future<void> _registerEbbotChatListenerService() async {
-    GetIt.I.registerSingleton<EbbotChatListenerService>(
-        EbbotChatListenerService());
+    _serviceLocator
+        .registerService<EbbotChatListenerService>(EbbotChatListenerService());
   }
 
   Future<void> _registerChatTranscriptService() async {
-    GetIt.I.registerSingleton<ChatTranscriptService>(ChatTranscriptService());
+    _serviceLocator
+        .registerService<ChatTranscriptService>(ChatTranscriptService());
   }
 
   Future<void> registerServices() async {
