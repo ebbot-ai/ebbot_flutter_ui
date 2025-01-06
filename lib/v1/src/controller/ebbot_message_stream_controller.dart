@@ -2,22 +2,22 @@ import 'dart:async';
 
 import 'package:ebbot_dart_client/entity/message/message.dart';
 import 'package:ebbot_flutter_ui/v1/src/controller/resettable_controller.dart';
+import 'package:ebbot_flutter_ui/v1/src/initializer/service_locator.dart';
 import 'package:ebbot_flutter_ui/v1/src/parser/ebbot_message_parser.dart';
 import 'package:ebbot_flutter_ui/v1/src/service/ebbot_chat_listener_service.dart';
 import 'package:ebbot_flutter_ui/v1/src/service/log_service.dart';
 import 'package:ebbot_flutter_ui/v1/src/util/ebbot_gpt_user.dart';
 import 'package:ebbot_flutter_ui/v1/src/util/string_util.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
-import 'package:get_it/get_it.dart';
 
 class EbbotMessageStreamController extends ResettableController {
+  final _serviceLocator = ServiceLocator();
+  get _logger => _serviceLocator.getService<LogService>().logger;
   final Function _handleTypingUsers;
   final Function _handleClearTypingUsers;
   final Function(types.Message?) _handleAddMessage;
   final Function(String?) _handleInputMode;
   bool hasReceivedGPTMessageBefore = false;
-  EbbotChatListenerService get _chatListenerService =>
-      GetIt.I.get<EbbotChatListenerService>();
 
   final _ebbotMessageParser = EbbotMessageParser();
 
@@ -31,10 +31,9 @@ class EbbotMessageStreamController extends ResettableController {
   }
 
   StreamSubscription<Message>? _messageStreamSubscription;
-  final logger = GetIt.I.get<LogService>().logger;
 
   void _handle(Message message) {
-    logger?.i("handling message");
+    _logger?.i("handling message");
     // Handle the message
     var messageType = message.data.message.type;
 
@@ -75,8 +74,10 @@ class EbbotMessageStreamController extends ResettableController {
     if (_messageStreamSubscription != null) {
       _messageStreamSubscription?.cancel();
     }
+    final chatListenerService =
+        _serviceLocator.getService<EbbotChatListenerService>();
     _messageStreamSubscription =
-        _chatListenerService.messageStream.listen((message) {
+        chatListenerService.messageStream.listen((message) {
       _handle(message);
     });
     _handleInputMode("visible");

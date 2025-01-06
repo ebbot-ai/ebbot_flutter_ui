@@ -1,6 +1,7 @@
 import 'package:ebbot_dart_client/entity/button_data/button_data.dart';
 import 'package:ebbot_dart_client/entity/message/message.dart';
 import 'package:ebbot_flutter_ui/v1/configuration/ebbot_configuration.dart';
+import 'package:ebbot_flutter_ui/v1/src/initializer/service_locator.dart';
 import 'package:ebbot_flutter_ui/v1/src/service/log_service.dart';
 import 'package:ebbot_flutter_ui/v1/src/widget/url_button_widget.dart';
 import 'package:flutter/material.dart';
@@ -31,11 +32,11 @@ class _CarouselWidgetState extends State<CarouselWidget> {
   final PageController _controller = PageController(initialPage: 0);
   int _currentPage = 0;
 
-  final logger = GetIt.I.get<LogService>().logger;
-
+  final _serviceLocator = ServiceLocator();
+  get _logger => _serviceLocator.getService<LogService>().logger;
   @override
   Widget build(BuildContext context) {
-    logger?.i("Building carousel, page: $_currentPage");
+    _logger?.i("Building carousel, page: $_currentPage");
     final content = widget.content;
 
     if (content.value['slides'] is! List) {
@@ -50,7 +51,7 @@ class _CarouselWidgetState extends State<CarouselWidget> {
           itemCount: slides.length,
           controller: _controller,
           onPageChanged: (int page) {
-            logger?.i("Page changed to $page, current page: $_currentPage");
+            _logger?.i("Page changed to $page, current page: $_currentPage");
             setState(() {
               _currentPage = page;
             });

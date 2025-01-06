@@ -1,11 +1,12 @@
 import 'package:ebbot_dart_client/entity/message/message.dart';
+import 'package:ebbot_flutter_ui/v1/src/initializer/service_locator.dart';
 import 'package:ebbot_flutter_ui/v1/src/service/log_service.dart';
-import 'package:get_it/get_it.dart';
 
 typedef MessageParserResolver = String? Function(MessageContent);
 
 class ChatTranscriptService {
-  final logger = GetIt.I.get<LogService>().logger;
+  final _serviceLocator = ServiceLocator();
+  get _logger => _serviceLocator.getService<LogService>().logger;
 
   final Map<double, String> _chatTranscript = {};
 
@@ -22,51 +23,52 @@ class ChatTranscriptService {
 
   void save(Message message) {
     final messageType = message.data.message.type;
+
     String? parsedMessage;
     switch (messageType) {
       case 'gpt':
-        logger?.i("Parsing GPT message");
+        _logger?.i("Parsing GPT message");
         parsedMessage = _composeMessage(message, _parseGpt);
         break;
       case 'image':
-        logger?.i("Parsing image message");
+        _logger?.i("Parsing image message");
         parsedMessage = _composeMessage(message, _parseImage);
         break;
       case 'text':
-        logger?.i("Parsing text message");
+        _logger?.i("Parsing text message");
         parsedMessage = _composeMessage(message, _parseText);
         break;
       case 'file':
-        logger?.i("Parsing file message");
+        _logger?.i("Parsing file message");
         parsedMessage = _composeMessage(message, _parseFile);
         break;
       case 'text_info':
-        logger?.i("Parsing text info message");
+        _logger?.i("Parsing text info message");
         parsedMessage = _composeMessage(message, _parseTextInfo);
         break;
       case 'url':
-        logger?.i("Parsing URL message");
+        _logger?.i("Parsing URL message");
         parsedMessage = _composeMessage(message, _parseUrl);
         break;
       case 'rating_request':
-        logger?.i("Parsing rating request message");
+        _logger?.i("Parsing rating request message");
         parsedMessage = _composeMessage(message, _parseRatingRequest);
         break;
       case 'carousel':
-        logger?.i("Parsing carousel message");
+        _logger?.i("Parsing carousel message");
         parsedMessage = _composeMessage(message, _parseCarousel);
         break;
       // Feedback types
       case 'button_click':
-        logger?.i("Parsing button click message");
+        _logger?.i("Parsing button click message");
         parsedMessage = _composeMessage(message, _parseButtonClick);
         break;
       case 'rating':
-        logger?.i("Parsing rating message");
+        _logger?.i("Parsing rating message");
         parsedMessage = _composeMessage(message, _getRating);
         break;
       default:
-        logger?.w("Unsupported message type: $messageType");
+        _logger?.w("Unsupported message type: $messageType");
         break;
     }
 
@@ -84,8 +86,9 @@ class ChatTranscriptService {
   }
 
   String? _parseImage(MessageContent content) {
+
     if (content.value is! Map<String, dynamic>) {
-      logger?.i(
+      _logger?.i(
           "message is NOT a map, I don't know how to process this, so skipping.. type is ${content.value.runtimeType}");
       return null;
     }
@@ -102,8 +105,9 @@ class ChatTranscriptService {
   }
 
   String _parseFile(MessageContent content) {
+
     if (content.value is! Map<String, dynamic>) {
-      logger?.w('value is not a map');
+      _logger?.w('value is not a map');
       return '';
     }
     Map<String, dynamic> file = content.value;
@@ -117,8 +121,9 @@ class ChatTranscriptService {
   }
 
   String _parseUrl(MessageContent content) {
+
     if (content.value['urls'] is! List) {
-      logger?.w('URLs is not a list');
+      _logger?.w('URLs is not a list');
       return '';
     }
 
@@ -139,8 +144,9 @@ class ChatTranscriptService {
   }
 
   String _parseCarousel(MessageContent content) {
+
     if (content.value['slides'] is! List) {
-      logger?.w('Carousel slides is not a list');
+      _logger?.w('Carousel slides is not a list');
       return '';
     }
 
@@ -168,14 +174,16 @@ class ChatTranscriptService {
   }
 
   String _getRating(MessageContent content) {
-    logger?.d(content.value);
+
+    _logger?.d(content.value);
 
     final rating = content.value['rating'];
     return rating.toString();
   }
 
   String _parseButtonClick(MessageContent content) {
-    logger?.d(content.toJson());
+
+    _logger?.d(content.toJson());
 
     return content.value;
   }
@@ -193,6 +201,7 @@ class ChatTranscriptService {
   }
 
   String _getSubHeader(Message message) {
+
     try {
       final int timestamp =
           parseTimestampToMillis(message.data.message.timestamp);
@@ -211,7 +220,7 @@ class ChatTranscriptService {
 
       return '$formattedTime $author';
     } catch (e) {
-      logger?.e('Error parsing timestamp: $e');
+      _logger?.e('Error parsing timestamp: $e');
       return "";
     }
   }

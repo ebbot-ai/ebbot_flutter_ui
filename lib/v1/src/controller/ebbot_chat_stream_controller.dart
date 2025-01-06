@@ -2,12 +2,12 @@ import 'dart:async';
 
 import 'package:ebbot_dart_client/entity/chat/chat.dart';
 import 'package:ebbot_flutter_ui/v1/src/controller/resettable_controller.dart';
+import 'package:ebbot_flutter_ui/v1/src/initializer/service_locator.dart';
 import 'package:ebbot_flutter_ui/v1/src/service/ebbot_chat_listener_service.dart';
-import 'package:ebbot_flutter_ui/v1/src/service/log_service.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
-import 'package:get_it/get_it.dart';
 
 class EbbotChatStreamController extends ResettableController {
+  final _serviceLocator = ServiceLocator();
   final Function _handleTypingMessage;
   final Function _handleClearTypingUsers;
   final Function(types.Message?) _handleAddMessage;
@@ -15,9 +15,6 @@ class EbbotChatStreamController extends ResettableController {
   bool hasReceivedGPTMessageBefore = false;
 
   StreamSubscription<Chat>? _chatStreamSubscription;
-
-  EbbotChatListenerService get _chatListenerService =>
-      GetIt.I.get<EbbotChatListenerService>();
 
   EbbotChatStreamController(
     this._handleTypingMessage,
@@ -27,8 +24,6 @@ class EbbotChatStreamController extends ResettableController {
   ) {
     startListening();
   }
-
-  final logger = GetIt.I.get<LogService>().logger;
 
   void handle(Chat message) {
     //logger?.i("handling chat");
@@ -43,7 +38,11 @@ class EbbotChatStreamController extends ResettableController {
     if (_chatStreamSubscription != null) {
       _chatStreamSubscription?.cancel();
     }
-    _chatStreamSubscription = _chatListenerService.chatStream.listen((chat) {
+
+    final chatListenerService =
+        _serviceLocator.getService<EbbotChatListenerService>();
+
+    _chatStreamSubscription = chatListenerService.chatStream.listen((chat) {
       handle(chat);
     });
     _handleCanType("visible");

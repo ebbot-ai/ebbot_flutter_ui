@@ -7,6 +7,7 @@ import 'package:ebbot_flutter_ui/v1/configuration/ebbot_configuration.dart';
 import 'package:ebbot_flutter_ui/v1/configuration/ebbot_log_configuration.dart';
 import 'package:ebbot_flutter_ui/v1/src/initializer/ebbot_controller_initializer.dart';
 import 'package:ebbot_flutter_ui/v1/src/initializer/ebbot_service_initializer.dart';
+import 'package:ebbot_flutter_ui/v1/src/initializer/service_locator.dart';
 import 'package:ebbot_flutter_ui/v1/src/service/chat_transcript_service.dart';
 import 'package:ebbot_flutter_ui/v1/src/service/ebbot_callback_service.dart';
 import 'package:ebbot_flutter_ui/v1/src/service/ebbot_dart_client_service.dart';
@@ -18,7 +19,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_chat_types/flutter_chat_types.dart';
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
-import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:logger/logger.dart';
@@ -44,6 +44,7 @@ class EbbotFlutterUi extends StatefulWidget {
 class EbbotFlutterUiState extends State<EbbotFlutterUi>
     with AutomaticKeepAliveClientMixin
     implements AbstractControllerDelegate {
+  final ServiceLocator _serviceLocator = ServiceLocator();
   final List<types.Message> _messages = [];
 
   bool _isInitialized = false;
@@ -75,7 +76,8 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
   @override
   void dispose() {
     super.dispose();
-    GetIt.I.get<EbbotDartClientService>().client.closeAsync();
+    _serviceLocator.getService<EbbotDartClientService>().client.closeAsync();
+    _serviceLocator.reset();
   }
 
   @override
@@ -101,19 +103,21 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
 
     widget._configuration.apiController.attach(this);
 
-    _logger = GetIt.I.get<LogService>().logger;
+    _logger = _serviceLocator.getService<LogService>().logger;
 
     _setup();
   }
 
   void _setup() {
-    final ebbotClientService = GetIt.I.get<EbbotDartClientService>();
+    final ebbotClientService =
+        _serviceLocator.getService<EbbotDartClientService>();
     //_user = types.User(id: ebbotClientService.client.chatId);
 
     ebbotClientService.client.startReceive();
     handleInputMode("visible");
 
-    final ebbotCallbackService = GetIt.I.get<EbbotCallbackService>();
+    final ebbotCallbackService =
+        _serviceLocator.getService<EbbotCallbackService>();
 
     ebbotCallbackService.dispatchOnLoad();
     setState(() {
@@ -264,7 +268,8 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
       text: message,
     );
     handleAddMessage(textMessage);
-    EbbotDartClient ebbotClient = GetIt.I.get<EbbotDartClientService>().client;
+    EbbotDartClient ebbotClient =
+        _serviceLocator.getService<EbbotDartClientService>().client;
     ebbotClient.sendTextMessage(textMessage.text);
   }
 
@@ -275,7 +280,8 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
       return;
     }
 
-    final ebbotCallbackService = GetIt.I.get<EbbotCallbackService>();
+    final ebbotCallbackService =
+        _serviceLocator.getService<EbbotCallbackService>();
 
     if (message is types.TextMessage) {
       if (_messages.isEmpty) {
@@ -382,7 +388,8 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
     );
 
     handleAddMessage(textMessage);
-    EbbotDartClient ebbotClient = GetIt.I.get<EbbotDartClientService>().client;
+    EbbotDartClient ebbotClient =
+        _serviceLocator.getService<EbbotDartClientService>().client;
     ebbotClient.sendTextMessage(textMessage.text);
     _ebbotControllerInitializer.chatInputController?.chatInputFieldController
         .clear();
@@ -397,7 +404,8 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
       _isChatStarted = false;
     });
 
-    final ebbotClientService = GetIt.I.get<EbbotDartClientService>();
+    final ebbotClientService =
+        _serviceLocator.getService<EbbotDartClientService>();
     await ebbotClientService.restartAsync();
 
     _ebbotControllerInitializer.resetControllers();
@@ -408,16 +416,19 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
       _isInitialized = true;
     });
 
-    final ebbotCallbackService = GetIt.I.get<EbbotCallbackService>();
+    final ebbotCallbackService =
+        _serviceLocator.getService<EbbotCallbackService>();
     ebbotCallbackService.dispatchOnRestartConversation();
   }
 
   @override
   void handleEndConversation() {
-    final ebbotClientService = GetIt.I.get<EbbotDartClientService>();
+    final ebbotClientService =
+        _serviceLocator.getService<EbbotDartClientService>();
     ebbotClientService.endSession();
 
-    final ebbotCallbackService = GetIt.I.get<EbbotCallbackService>();
+    final ebbotCallbackService =
+        _serviceLocator.getService<EbbotCallbackService>();
     ebbotCallbackService.dispatchOnEndConversation();
   }
 
@@ -429,7 +440,8 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
 
     final file = File(filePath);
 
-    final chatTranscriptService = GetIt.I.get<ChatTranscriptService>();
+    final chatTranscriptService =
+        _serviceLocator.getService<ChatTranscriptService>();
     final transcripts = chatTranscriptService.getChatTranscripts();
 
     await file.writeAsString(transcripts);
@@ -462,7 +474,8 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
     if (result != null) {
       final bytes = await result.readAsBytes();
 
-      EbbotDartClient client = GetIt.I.get<EbbotDartClientService>().client;
+      EbbotDartClient client =
+          _serviceLocator.getService<EbbotDartClientService>().client;
 
       types.ImageMessage localImageMessage = types.ImageMessage(
         id: "pre-uploaded-image",

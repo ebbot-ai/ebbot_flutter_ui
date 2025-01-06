@@ -1,24 +1,20 @@
-import 'package:ebbot_dart_client/ebbot_dart_client.dart';
 import 'package:ebbot_dart_client/entity/button_data/button_data.dart';
 import 'package:ebbot_dart_client/entity/message/message.dart';
 import 'package:ebbot_flutter_ui/v1/configuration/ebbot_configuration.dart';
+import 'package:ebbot_flutter_ui/v1/src/initializer/service_locator.dart';
 import 'package:ebbot_flutter_ui/v1/src/service/ebbot_dart_client_service.dart';
-import 'package:ebbot_flutter_ui/v1/src/service/log_service.dart';
 import 'package:ebbot_flutter_ui/v1/src/widget/carousel_widget.dart';
 import 'package:ebbot_flutter_ui/v1/src/widget/rating_widget.dart';
 import 'package:ebbot_flutter_ui/v1/src/widget/url_box_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
-import 'package:get_it/get_it.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 // A controller for handling custom flutter chat ui messages
 class ChatUiCustomMessageController {
-  EbbotDartClient get client => GetIt.I.get<EbbotDartClientService>().client;
   final EbbotConfiguration configuration;
   final Function() handleRestartConversation;
-
-  final logger = GetIt.I.get<LogService>().logger;
+  final _serviceLocator = ServiceLocator();
 
   ChatUiCustomMessageController(
       {required this.configuration, required this.handleRestartConversation});
@@ -44,6 +40,7 @@ class ChatUiCustomMessageController {
   }
 
   Widget _processCarousel(MessageContent content) {
+    final client = _serviceLocator.getService<EbbotDartClientService>().client;
     return CarouselWidget(
       content: content,
       configuration: configuration,
@@ -60,6 +57,7 @@ class ChatUiCustomMessageController {
   }
 
   Widget _processRatingRequest(MessageContent content) {
+    final client = _serviceLocator.getService<EbbotDartClientService>().client;
     return RatingWidget(
       content: content,
       configuration: configuration,
@@ -70,6 +68,7 @@ class ChatUiCustomMessageController {
   }
 
   Widget _processUrl(MessageContent content) {
+    final client = _serviceLocator.getService<EbbotDartClientService>().client;
     return UrlBoxWidget(
         content: content,
         configuration: configuration,
@@ -85,6 +84,7 @@ class ChatUiCustomMessageController {
   }
 
   void _processUrlClick(String url, {ButtonData? buttonData}) async {
+    final client = _serviceLocator.getService<EbbotDartClientService>().client;
     var uri = Uri.parse(url);
 
     // This is a bit hacky, for the other types of buttons we send a message back over the websocket
