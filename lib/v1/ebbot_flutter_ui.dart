@@ -18,6 +18,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_chat_types/flutter_chat_types.dart';
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
@@ -25,7 +26,9 @@ import 'package:logger/logger.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
 
-class EbbotFlutterUi extends StatefulWidget {
+final isInitializedProvider = StateProvider<bool>((ref) => false);
+
+class EbbotFlutterUi extends ConsumerStatefulWidget {
   final String _botId;
   final EbbotConfiguration _configuration;
 
@@ -38,10 +41,10 @@ class EbbotFlutterUi extends StatefulWidget {
         super(key: key);
 
   @override
-  State<EbbotFlutterUi> createState() => EbbotFlutterUiState();
+  ConsumerState<EbbotFlutterUi> createState() => EbbotFlutterUiState();
 }
 
-class EbbotFlutterUiState extends State<EbbotFlutterUi>
+class EbbotFlutterUiState extends ConsumerState<EbbotFlutterUi>
     with AutomaticKeepAliveClientMixin
     implements AbstractControllerDelegate {
   final List<types.Message> _messages = [];
@@ -156,7 +159,7 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
         visible: _customBottomWidgetVisibilityVisible,
         child: _customBottomWidget);
 
-    return Scaffold(
+    final scaffoldWidget = Scaffold(
       body: Stack(
         children: [
           chat,
@@ -178,6 +181,9 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
         ],
       ),
     );
+    final widgetScope = ProviderScope(child: scaffoldWidget);
+
+    return widgetScope;
   }
 
   Widget circularProgressIndicator() {

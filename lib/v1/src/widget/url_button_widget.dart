@@ -23,10 +23,10 @@ class UrlButtonWidget extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _UrlButtonWidgetState createState() => _UrlButtonWidgetState();
+  UrlButtonWidgetState createState() => UrlButtonWidgetState();
 }
 
-class _UrlButtonWidgetState extends State<UrlButtonWidget> {
+class UrlButtonWidgetState extends State<UrlButtonWidget> {
   bool _hasBeenPressed = false;
 
   @override

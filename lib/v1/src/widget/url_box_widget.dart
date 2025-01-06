@@ -24,10 +24,10 @@ class UrlBoxWidget extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _UrlBoxWidgetState createState() => _UrlBoxWidgetState();
+  UrlBoxWidgetState createState() => UrlBoxWidgetState();
 }
 
-class _UrlBoxWidgetState extends State<UrlBoxWidget> {
+class UrlBoxWidgetState extends State<UrlBoxWidget> {
   @override
   Widget build(BuildContext context) {
     final content = widget.content;

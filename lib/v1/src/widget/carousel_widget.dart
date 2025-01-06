@@ -24,10 +24,10 @@ class CarouselWidget extends StatefulWidget {
       : super(key: key);
 
   @override
-  _CarouselWidgetState createState() => _CarouselWidgetState();
+  CarouselWidgetState createState() => CarouselWidgetState();
 }
 
-class _CarouselWidgetState extends State<CarouselWidget> {
+class CarouselWidgetState extends State<CarouselWidget> {
   final PageController _controller = PageController(initialPage: 0);
   int _currentPage = 0;
 

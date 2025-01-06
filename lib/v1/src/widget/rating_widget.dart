@@ -16,10 +16,10 @@ class RatingWidget extends StatefulWidget {
       required this.configuration});
 
   @override
-  _RatingWidgetState createState() => _RatingWidgetState();
+  RatingWidgetState createState() => RatingWidgetState();
 }
 
-class _RatingWidgetState extends State<RatingWidget> {
+class RatingWidgetState extends State<RatingWidget> {
   late int _rating;
   bool _hasRated = false;
 
