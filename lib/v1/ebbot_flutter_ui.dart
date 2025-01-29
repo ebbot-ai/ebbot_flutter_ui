@@ -133,37 +133,36 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
         _ebbotControllerInitializer.chatInputController?.inputOptions ??
             const InputOptions();
 
-    var chat = Chat(
-      inputOptions: inputOptions,
-      theme: widget._configuration.theme,
-      messages: _messages,
-      onSendPressed: handleSendPressed,
-      onMessageTap: handleMessageTap,
-      onAttachmentPressed: handleOnAttachmentPressed,
-      emptyState: Container(
-          alignment: Alignment
-              .center), // For now, only show an empty container when no messages are present
-      user: chatUser, // Use dummy user before init
-      customBottomWidget: _customBottomWidgetVisibility,
-      customMessageBuilder: _ebbotControllerInitializer
-          .chatUiCustomMessageController?.processMessage,
-      typingIndicatorOptions: TypingIndicatorOptions(
-          typingMode: TypingIndicatorMode.avatar, typingUsers: _typingUsers),
-    );
-
-    _customBottomWidget = Input(
-        onSendPressed: chat.onSendPressed,
-        onAttachmentPressed: chat.onAttachmentPressed,
-        options: inputOptions);
-
-    _customBottomWidgetVisibility = Visibility(
-        visible: _customBottomWidgetVisibilityVisible,
-        child: _customBottomWidget);
+    _logger?.d(
+        "custom bottom widget visibility: $_customBottomWidgetVisibilityVisible");
 
     return Scaffold(
       body: Stack(
         children: [
-          chat,
+          Chat(
+            inputOptions: inputOptions,
+            theme: widget._configuration.theme,
+            messages: _messages,
+            onSendPressed: handleSendPressed,
+            onMessageTap: handleMessageTap,
+            onAttachmentPressed: handleOnAttachmentPressed,
+            emptyState: Container(alignment: Alignment.center),
+            user: chatUser,
+            customBottomWidget: Visibility(
+              visible: _customBottomWidgetVisibilityVisible,
+              child: Input(
+                onSendPressed: handleSendPressed,
+                onAttachmentPressed: handleOnAttachmentPressed,
+                options: inputOptions,
+              ),
+            ),
+            customMessageBuilder: _ebbotControllerInitializer
+                .chatUiCustomMessageController?.processMessage,
+            typingIndicatorOptions: TypingIndicatorOptions(
+              typingMode: TypingIndicatorMode.avatar,
+              typingUsers: _typingUsers,
+            ),
+          ),
           if (!isInitialized)
             Container(
               color: const Color.fromARGB(85, 255, 255, 255),
