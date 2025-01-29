@@ -31,10 +31,38 @@ class _RatingWidgetState extends State<RatingWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final chatBehaviour = widget.configuration.chat;
+
+    Widget rating = Icon(
+      Icons.star_border,
+      color: widget.configuration.theme.primaryColor,
+      size: 30,
+    );
+
+    Widget ratingSelected = Icon(
+      Icons.star,
+      color: widget.configuration.theme.primaryColor,
+      size: 30,
+    );
+
+    if (chatBehaviour.rating != null && chatBehaviour.ratingSelected != null) {
+      rating = SizedBox(
+        width: 30,
+        height: 30,
+        child: chatBehaviour.rating!,
+      );
+      ratingSelected = SizedBox(
+        width: 30,
+        height: 30,
+        child: chatBehaviour.ratingSelected!,
+      );
+    }
+
     final theme = widget.configuration.theme;
     final question = widget.content.value['question'];
     final text = Text(question,
         textAlign: TextAlign.center, style: theme.receivedMessageBodyTextStyle);
+
     return Padding(
         padding: const EdgeInsets.all(12.0),
         child: Column(children: [
@@ -56,11 +84,7 @@ class _RatingWidgetState extends State<RatingWidget> {
                     widget.onRatingChanged(_rating);
                   });
                 },
-                child: Icon(
-                  index < _rating ? Icons.star : Icons.star_border,
-                  color: widget.configuration.theme.primaryColor,
-                  size: 30,
-                ),
+                child: index < _rating ? ratingSelected : rating,
               );
             }),
           )
