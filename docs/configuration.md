@@ -7,6 +7,7 @@
     - [Callback function descriptions](#callback-function-descriptions)
   - [API Controller](#api-controller)
   - [Configuring logging](#configuring-logging)
+  - [Configuring chat behaviour](#configuring-chat-behaviour)
   - [Putting everything together](#putting-everything-together)
 
 
@@ -179,6 +180,17 @@ var configuration = EbbotConfigurationBuilder()
 var logConfiguration = EbbotLogConfigurationBuilder().logLevel(Level.info).enabled(true).build();
 ```
 
+## Configuring chat behaviour
+Currently, there is basic support for customizing the rating icons from the default stars, basically whatever that is a widget. Please note that the provided widget will be sized to fit within 30x30.
+```dart
+final ratingSelected = Image.asset("assets/sunglasses.png");
+final rating =
+      Opacity(opacity: 0.5, child: Image.asset("assets/sunglasses.png"));
+
+var chat =
+      EbbotChatBuilder().rating(rating).ratingSelected(ratingSelected).build();
+```
+
 ## Putting everything together
 
 The following is a full fledged example with all configurable options passed to the widget:
@@ -248,6 +260,13 @@ var userAttributes = {
 
   var logConfiguration = EbbotLogConfigurationBuilder().logLevel(EbbotLogLevel.info).enabled(true).build();
 
+  final ratingSelected = Image.asset("assets/sunglasses.png");
+  final rating =
+        Opacity(opacity: 0.5, child: Image.asset("assets/sunglasses.png"));
+
+  var chat =
+        EbbotChatBuilder().rating(rating).ratingSelected(ratingSelected).build();
+
   var configuration = EbbotConfigurationBuilder()
       .apiController(apiController)
       .environment(Environment.ovhEUProduction)
@@ -256,6 +275,7 @@ var userAttributes = {
       .theme(const DarkChatTheme())
       .callback(callback)
       .logConfiguration(logConfiguration)
+      .chat(chat)
       .build();
 
 
