@@ -1,7 +1,5 @@
 import 'package:ebbot_dart_client/entity/message/message.dart';
 import 'package:ebbot_flutter_ui/v1/configuration/ebbot_configuration.dart';
-import 'package:ebbot_flutter_ui/v1/src/initializer/service_locator.dart';
-import 'package:ebbot_flutter_ui/v1/src/service/log_service.dart';
 import 'package:flutter/material.dart';
 
 class RatingWidget extends StatefulWidget {
@@ -9,11 +7,8 @@ class RatingWidget extends StatefulWidget {
   final EbbotConfiguration configuration;
   final int initialRating;
   final void Function(int) onRatingChanged;
-  final _serviceLocator = ServiceLocator();
 
-  get _logger => _serviceLocator.getService<LogService>().logger;
-
-  RatingWidget(
+  const RatingWidget(
       {super.key,
       this.initialRating = 0,
       required this.onRatingChanged,
@@ -68,8 +63,6 @@ class _RatingWidgetState extends State<RatingWidget> {
     final text = Text(question,
         textAlign: TextAlign.center, style: theme.receivedMessageBodyTextStyle);
 
-    widget._logger.i("Building rating widget with rating: $_rating");
-
     return Padding(
         padding: const EdgeInsets.all(12.0),
         child: Column(children: [
@@ -87,7 +80,6 @@ class _RatingWidgetState extends State<RatingWidget> {
                       return;
                     }
                     _rating = index + 1;
-                    widget._logger.i("Rating changed to $_rating");
                     _hasRated = true;
                     widget.onRatingChanged(_rating);
                   });
