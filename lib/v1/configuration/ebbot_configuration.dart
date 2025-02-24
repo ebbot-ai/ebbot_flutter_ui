@@ -3,6 +3,7 @@ import 'package:ebbot_flutter_ui/v1/configuration/ebbot_behaviour.dart';
 import 'package:ebbot_flutter_ui/v1/configuration/ebbot_callback.dart';
 import 'package:ebbot_flutter_ui/v1/configuration/ebbot_chat.dart';
 import 'package:ebbot_flutter_ui/v1/configuration/ebbot_log_configuration.dart';
+import 'package:ebbot_flutter_ui/v1/configuration/ebbot_session.dart';
 import 'package:ebbot_flutter_ui/v1/configuration/ebbot_user_configuration.dart';
 import 'package:ebbot_flutter_ui/v1/controller/ebbot_api_controller.dart';
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
@@ -17,6 +18,7 @@ class EbbotConfiguration {
   final EbbotApiController apiController;
   final EbbotLogConfiguration logConfiguration;
   final EbbotChat chat;
+  final EbbotSession session;
 
   EbbotConfiguration._builder(EbbotConfigurationBuilder builder)
       : theme = builder._theme,
@@ -26,7 +28,8 @@ class EbbotConfiguration {
         callback = builder._callback,
         apiController = builder._apiController,
         logConfiguration = builder._logConfiguration,
-        chat = builder._chat;
+        chat = builder._chat,
+        session = builder._session;
 
   factory EbbotConfiguration(EbbotConfigurationBuilder builder) {
     return EbbotConfiguration._builder(builder);
@@ -44,6 +47,7 @@ class EbbotConfigurationBuilder {
   EbbotLogConfiguration _logConfiguration =
       EbbotLogConfigurationBuilder().build();
   EbbotChat _chat = EbbotChatBuilder().build();
+  EbbotSession _session = EbbotSessionBuilder().build();
 
   EbbotConfigurationBuilder theme(ChatTheme theme) {
     _theme = theme;
@@ -84,6 +88,11 @@ class EbbotConfigurationBuilder {
 
   EbbotConfigurationBuilder chat(EbbotChat chat) {
     _chat = chat;
+    return this;
+  }
+
+  EbbotConfigurationBuilder session(EbbotSession session) {
+    _session = session;
     return this;
   }
 

@@ -9,7 +9,6 @@ class EbbotNotificationService {
 
   List<Notification> getNotifications() {
     final client = _serviceLocator.getService<EbbotDartClientService>().client;
-    _logger?.d('Getting notifications');
     return client.notifications;
   }
 }

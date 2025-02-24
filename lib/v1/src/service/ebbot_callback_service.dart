@@ -35,4 +35,8 @@ class EbbotCallbackService {
   void dispatchOnStartConversation(String message) {
     _callback.dispatchOnStartConversation(message);
   }
+
+  void dispatchOnSessionData(String chatId) {
+    _callback.dispatchOnSessionData(chatId);
+  }
 }

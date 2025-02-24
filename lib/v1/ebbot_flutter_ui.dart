@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:ebbot_dart_client/configuration/configuration.dart';
 import 'package:ebbot_dart_client/configuration/log_configuration.dart';
+import 'package:ebbot_dart_client/configuration/session_configuration.dart';
 import 'package:ebbot_dart_client/ebbot_dart_client.dart';
 import 'package:ebbot_flutter_ui/v1/configuration/ebbot_configuration.dart';
 import 'package:ebbot_flutter_ui/v1/configuration/ebbot_log_configuration.dart';
@@ -84,8 +85,15 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
   bool get wantKeepAlive => true;
 
   void _initialize() async {
+    final sessionConfiguration = SessionConfigurationBuilder();
+
+    if (widget._configuration.session.chatId != null) {
+      sessionConfiguration.chatId(widget._configuration.session.chatId!);
+    }
+
     var configuration = ConfigurationBuilder()
         .environment(widget._configuration.environment)
+        .sessionConfiguration(sessionConfiguration.build())
         .logConfiguration(LogConfigurationBuilder()
             .enabled(widget._configuration.logConfiguration.enabled)
             .logLevel(widget._configuration.logConfiguration.logLevel.level)
@@ -315,6 +323,14 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
     if (hasPreUploadedImage && isFromChatUser) {
       _logger?.d(
           "This image has already been added to the message list as it is a uploaded image, skipping");
+      return;
+    }
+
+    // Go through messages, if the message already exists, dont add it again
+    bool hasMessage = _messages.any((element) => element.id == message.id);
+    if (hasMessage) {
+      _logger?.w(
+          "The message of id ${message.id} has already been added to the message list, skipping");
       return;
     }
 

@@ -27,44 +27,44 @@ class ChatTranscriptService {
     String? parsedMessage;
     switch (messageType) {
       case 'gpt':
-        _logger?.i("Parsing GPT message");
+        _logger?.d("Parsing GPT message");
         parsedMessage = _composeMessage(message, _parseGpt);
         break;
       case 'image':
-        _logger?.i("Parsing image message");
+        _logger?.d("Parsing image message");
         parsedMessage = _composeMessage(message, _parseImage);
         break;
       case 'text':
-        _logger?.i("Parsing text message");
+        _logger?.d("Parsing text message");
         parsedMessage = _composeMessage(message, _parseText);
         break;
       case 'file':
-        _logger?.i("Parsing file message");
+        _logger?.d("Parsing file message");
         parsedMessage = _composeMessage(message, _parseFile);
         break;
       case 'text_info':
-        _logger?.i("Parsing text info message");
+        _logger?.d("Parsing text info message");
         parsedMessage = _composeMessage(message, _parseTextInfo);
         break;
       case 'url':
-        _logger?.i("Parsing URL message");
+        _logger?.d("Parsing URL message");
         parsedMessage = _composeMessage(message, _parseUrl);
         break;
       case 'rating_request':
-        _logger?.i("Parsing rating request message");
+        _logger?.d("Parsing rating request message");
         parsedMessage = _composeMessage(message, _parseRatingRequest);
         break;
       case 'carousel':
-        _logger?.i("Parsing carousel message");
+        _logger?.d("Parsing carousel message");
         parsedMessage = _composeMessage(message, _parseCarousel);
         break;
       // Feedback types
       case 'button_click':
-        _logger?.i("Parsing button click message");
+        _logger?.d("Parsing button click message");
         parsedMessage = _composeMessage(message, _parseButtonClick);
         break;
       case 'rating':
-        _logger?.i("Parsing rating message");
+        _logger?.d("Parsing rating message");
         parsedMessage = _composeMessage(message, _getRating);
         break;
       default:
@@ -86,9 +86,8 @@ class ChatTranscriptService {
   }
 
   String? _parseImage(MessageContent content) {
-
     if (content.value is! Map<String, dynamic>) {
-      _logger?.i(
+      _logger?.w(
           "message is NOT a map, I don't know how to process this, so skipping.. type is ${content.value.runtimeType}");
       return null;
     }
@@ -105,7 +104,6 @@ class ChatTranscriptService {
   }
 
   String _parseFile(MessageContent content) {
-
     if (content.value is! Map<String, dynamic>) {
       _logger?.w('value is not a map');
       return '';
@@ -121,7 +119,6 @@ class ChatTranscriptService {
   }
 
   String _parseUrl(MessageContent content) {
-
     if (content.value['urls'] is! List) {
       _logger?.w('URLs is not a list');
       return '';
@@ -144,7 +141,6 @@ class ChatTranscriptService {
   }
 
   String _parseCarousel(MessageContent content) {
-
     if (content.value['slides'] is! List) {
       _logger?.w('Carousel slides is not a list');
       return '';
@@ -174,17 +170,11 @@ class ChatTranscriptService {
   }
 
   String _getRating(MessageContent content) {
-
-    _logger?.d(content.value);
-
     final rating = content.value['rating'];
     return rating.toString();
   }
 
   String _parseButtonClick(MessageContent content) {
-
-    _logger?.d(content.toJson());
-
     return content.value;
   }
 
@@ -201,7 +191,6 @@ class ChatTranscriptService {
   }
 
   String _getSubHeader(Message message) {
-
     try {
       final int timestamp =
           parseTimestampToMillis(message.data.message.timestamp);
