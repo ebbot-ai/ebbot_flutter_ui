@@ -10,6 +10,7 @@ import 'package:ebbot_flutter_ui/v1/src/service/log_service.dart';
 
 class EbbotServiceInitializer {
   final String _botId;
+
   final EbbotConfiguration _ebbotConfiguration;
   final Configuration _dartClientConfiguration;
   final ServiceLocator _serviceLocator = ServiceLocator();

@@ -8,6 +8,7 @@ class EbbotCallback extends AbstractEbbotCallback {
   final void Function(String message) onBotMessage;
   final void Function(String message) onUserMessage;
   final void Function(String message) onStartConversation;
+  final void Function(String chatId) onSessionData;
 
   EbbotCallback({
     required this.onLoadError,
@@ -18,6 +19,7 @@ class EbbotCallback extends AbstractEbbotCallback {
     required this.onBotMessage,
     required this.onUserMessage,
     required this.onStartConversation,
+    required this.onSessionData,
   });
 
   @override
@@ -59,6 +61,11 @@ class EbbotCallback extends AbstractEbbotCallback {
   void dispatchOnStartConversation(String message) async {
     onStartConversation(message);
   }
+
+  @override
+  void dispatchOnSessionData(String chatId) async {
+    onSessionData(chatId);
+  }
 }
 
 abstract class AbstractEbbotCallback {
@@ -70,6 +77,7 @@ abstract class AbstractEbbotCallback {
   void dispatchOnBotMessage(String message);
   void dispatchOnUserMessage(String message);
   void dispatchOnStartConversation(String message);
+  void dispatchOnSessionData(String chatId);
 }
 
 class EbbotCallbackBuilder {
@@ -81,6 +89,7 @@ class EbbotCallbackBuilder {
   void Function(String message) _onBotMessage = (message) {};
   void Function(String message) _onUserMessage = (message) {};
   void Function(String message) _onStartConversation = (message) {};
+  void Function(String chatId) _onSessionData = (chatId) {};
 
   EbbotCallbackBuilder onLoadError(
       void Function(EbbotLoadError error) onLoadError) {
@@ -127,6 +136,12 @@ class EbbotCallbackBuilder {
     return this;
   }
 
+  EbbotCallbackBuilder onSessionData(
+      void Function(String chatId) onSessionData) {
+    _onSessionData = onSessionData;
+    return this;
+  }
+
   EbbotCallback build() {
     return EbbotCallback(
       onLoadError: _onLoadError,
@@ -137,6 +152,7 @@ class EbbotCallbackBuilder {
       onBotMessage: _onBotMessage,
       onUserMessage: _onUserMessage,
       onStartConversation: _onStartConversation,
+      onSessionData: _onSessionData,
     );
   }
 }

@@ -17,7 +17,7 @@ class ChatInputController {
     required this.enterPressedBehaviour,
     required this.onTextChanged,
   }) {
-    _logger?.i("ChatInputController initialized with enabled: $enabled, "
+    _logger?.i("Initialized with enabled: $enabled, "
         "enterPressedBehaviour: $enterPressedBehaviour");
 
     _initializeController();
@@ -43,22 +43,17 @@ class ChatInputController {
 
   void _handleOnTextChanged(String text) {
     if (text.isEmpty) {
-      _logger?.i("text is empty, so skipping..");
       return;
     }
 
     if (enterPressedBehaviour != EbbotBehaviourInputEnterPressed.sendMessage) {
-      _logger
-          ?.i("enterPressedBehaviour is $enterPressedBehaviour, so skipping..");
       return;
     }
 
     if (!text.endsWith('\n')) {
-      _logger?.i("text does not end with newline, so skipping..");
       return;
     }
 
-    _logger?.i("text does end with newline, so sending..");
     text = text.substring(0, text.length - 1);
 
     onTextChanged(text);

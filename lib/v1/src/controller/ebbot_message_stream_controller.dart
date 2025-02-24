@@ -32,8 +32,17 @@ class EbbotMessageStreamController extends ResettableController {
 
   StreamSubscription<Message>? _messageStreamSubscription;
 
+  String getMessageId(MessageContent content) {
+    if (content.id != null) {
+      _logger.d(
+          "Using existing message id: ${content.id} for type: ${content.type}");
+      return content.id!;
+    }
+    _logger.d("Generating new message id for type: ${content.type}");
+    return StringUtil.randomString();
+  }
+
   void _handle(Message message) {
-    _logger?.i("handling message");
     // Handle the message
     var messageType = message.data.message.type;
 
@@ -60,8 +69,13 @@ class EbbotMessageStreamController extends ResettableController {
       _handleAddMessage(systemMessage);
     }
 
-    var chatMessage =
-        _ebbotMessageParser.parse(message, author, StringUtil.randomString());
+    var messageId = StringUtil.randomString();
+
+    if (message.data.message.id != null) {
+      messageId = message.data.message.id!;
+    }
+
+    var chatMessage = _ebbotMessageParser.parse(message, author, messageId);
     _handleAddMessage(chatMessage);
   }
 

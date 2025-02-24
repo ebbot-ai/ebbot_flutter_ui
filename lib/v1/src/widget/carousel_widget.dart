@@ -5,7 +5,6 @@ import 'package:ebbot_flutter_ui/v1/src/initializer/service_locator.dart';
 import 'package:ebbot_flutter_ui/v1/src/service/log_service.dart';
 import 'package:ebbot_flutter_ui/v1/src/widget/url_button_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:get_it/get_it.dart';
 
 class CarouselWidget extends StatefulWidget {
   final MessageContent content;
@@ -36,7 +35,6 @@ class _CarouselWidgetState extends State<CarouselWidget> {
   get _logger => _serviceLocator.getService<LogService>().logger;
   @override
   Widget build(BuildContext context) {
-    _logger?.i("Building carousel, page: $_currentPage");
     final content = widget.content;
 
     if (content.value['slides'] is! List) {
@@ -51,7 +49,6 @@ class _CarouselWidgetState extends State<CarouselWidget> {
           itemCount: slides.length,
           controller: _controller,
           onPageChanged: (int page) {
-            _logger?.i("Page changed to $page, current page: $_currentPage");
             setState(() {
               _currentPage = page;
             });
