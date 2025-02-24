@@ -141,16 +141,17 @@ Future<void> onStartConversation(String message) async {
 ### Callback function descriptions
 
 
-| Method                  | Description                                                      | Parameters                                                              |
-| ----------------------- | ---------------------------------------------------------------- | ----------------------------------------------------------------------- |
-| `onLoadError`           | Called when there is an error during the widget loading process. | `error`: An `EbbotLoadError` object containing details about the error. |
-| `onLoad`                | Called when the widget has successfully loaded.                  | No parameters.                                                          |
-| `onRestartConversation` | Called when the conversation is restarted.                       | No parameters.                                                          |
-| `onEndConversation`     | Called when a conversation ends.                                 | No parameters.                                                          |
-| `onMessage`             | Called when a general message is received.                       | `message`: A string containing the message received.                    |
-| `onBotMessage`          | Called when a message from the bot is received.                  | `message`: A string containing the bot's message.                       |
-| `onUserMessage`         | Called when a message from the user is received.                 | `message`: A string containing the user's message.                      |
-| `onStartConversation`   | Called when a new conversation starts.                           | No parameters.                                                          |
+| Method                  | Description                                                      | Parameters                                                                                                         |
+| ----------------------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `onLoadError`           | Called when there is an error during the widget loading process. | `error`: An `EbbotLoadError` object containing details about the error.                                            |
+| `onLoad`                | Called when the widget has successfully loaded.                  | No parameters.                                                                                                     |
+| `onRestartConversation` | Called when the conversation is restarted.                       | No parameters.                                                                                                     |
+| `onEndConversation`     | Called when a conversation ends.                                 | No parameters.                                                                                                     |
+| `onMessage`             | Called when a general message is received.                       | `message`: A string containing the message received.                                                               |
+| `onBotMessage`          | Called when a message from the bot is received.                  | `message`: A string containing the bot's message.                                                                  |
+| `onUserMessage`         | Called when a message from the user is received.                 | `message`: A string containing the user's message.                                                                 |
+| `onStartConversation`   | Called when a new conversation starts.                           | No parameters.                                                                                                     |
+| `onSessionData`         | Called when the session data is available.                       | `chatId`: The chat ID of the session, which can be provided when initing a chat widget, to restore a chat session. |
 
 
 ## API Controller
@@ -230,6 +231,10 @@ Future<void> onStartConversation(String message) async {
   print("CALLBACK: onStartConversation");
 }
 
+Future<void> onSessionData(String chatId) async {
+  print("CALLBACK: onSessionData, chatId: $chatId");
+}
+
 var userAttributes = {
     'name': 'John Doe',
     'email': 'john@doe.com',
@@ -242,6 +247,8 @@ var userAttributes = {
   var userConfiguration =
       EbbotUserConfigurationBuilder().userAttributes(userAttributes).build();
 
+  var session
+
   var callback = EbbotCallbackBuilder()
       .onLoadError(onLoadError)
       .onLoad(onLoad)
@@ -251,6 +258,7 @@ var userAttributes = {
       .onBotMessage(onBotMessage)
       .onUserMessage(onUserMessage)
       .onStartConversation(onStartConversation)
+      .onSessionData(onSessionData)
       .build();
 
   var ebbotBehaviourInput = EbbotBehaviourInputBuilder()
@@ -266,6 +274,8 @@ var userAttributes = {
 
   var chat =
         EbbotChatBuilder().rating(rating).ratingSelected(ratingSelected).build();
+  var someChatId = ""; // Provide your chatId here, it can be obtained from the onSessionData callback
+  var session = EbbotSessionBuilder().chatId(someChatId).build();
 
   var configuration = EbbotConfigurationBuilder()
       .apiController(apiController)
