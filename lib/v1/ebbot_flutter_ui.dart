@@ -59,12 +59,7 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
   late EbbotServiceInitializer _ebbotServiceInitializer;
   late EbbotControllerInitializer _ebbotControllerInitializer;
 
-  late Visibility _customBottomWidgetVisibility = Visibility(
-    visible: false,
-    child: Container(),
-  );
   late bool _customBottomWidgetVisibilityVisible = false;
-  late Input _customBottomWidget;
 
   Logger? _logger;
 
@@ -141,8 +136,8 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
         _ebbotControllerInitializer.chatInputController?.inputOptions ??
             const InputOptions();
 
-    _logger?.d(
-        "custom bottom widget visibility: $_customBottomWidgetVisibilityVisible");
+    _logger
+        ?.d("bottom widget visibility: $_customBottomWidgetVisibilityVisible");
 
     return Scaffold(
       body: Stack(
@@ -236,29 +231,34 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
 
   @override
   void handleInputMode(String? inputMode) {
-    _logger?.d("handling input mode: $inputMode");
-
     late bool newCustomBottomWidgetVisibilityVisible;
 
     switch (inputMode) {
       case 'hidden':
-        _logger?.i("setting input mode to hidden");
+        _logger?.i(
+            "handling input mode: $inputMode, setting input mode to hidden");
 
         newCustomBottomWidgetVisibilityVisible = false;
         break;
       case 'visible':
-        _logger?.i("setting input mode to visible");
+        _logger?.i(
+            "handling input mode: $inputMode, setting input mode to visible");
 
         newCustomBottomWidgetVisibilityVisible = true;
         break;
       case 'disabled':
-        _logger?.i("setting input mode to disabled");
+        _logger?.i(
+            "handling input mode: $inputMode, setting input mode to disabled");
 
         newCustomBottomWidgetVisibilityVisible = false;
         break;
       default:
-        _logger?.i("got unknown input mode: $inputMode");
-        return;
+        _logger?.i(
+            "handling unknown input mode: $inputMode, setting input mode to visible");
+        // TODO: When replaying messages, they are sometimes not providing a input_field boolean
+        // TODO: So we need to set the input mode to visible as a fallback
+        // TOOD: This might be a bug in the backend, so we should fix this eventually
+        newCustomBottomWidgetVisibilityVisible = true;
     }
 
     setState(() {
