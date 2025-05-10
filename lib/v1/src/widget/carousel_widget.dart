@@ -10,7 +10,8 @@ class CarouselWidget extends StatefulWidget {
   final MessageContent content;
   final EbbotConfiguration configuration;
   final void Function(String, {ButtonData? buttonData}) onURlPressed;
-  final void Function(String, {ButtonData? buttonData}) onScenarioPressed;
+  final void Function(String, {String? state, ButtonData? buttonData})
+      onScenarioPressed;
   final void Function(String, String, {ButtonData? buttonData})
       onVariablePressed;
 
@@ -69,9 +70,9 @@ class _CarouselWidgetState extends State<CarouselWidget> {
                         widget.onURlPressed(url, buttonData: buttonData);
                       },
                       onScenarioPressed: (String scenario,
-                          {ButtonData? buttonData}) {
+                          {String? state, ButtonData? buttonData}) {
                         widget.onScenarioPressed(scenario,
-                            buttonData: buttonData);
+                            state: state, buttonData: buttonData);
                       },
                       onVariablePressed: (String name, String value,
                           {ButtonData? buttonData}) {

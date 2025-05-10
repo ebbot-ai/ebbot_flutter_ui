@@ -6,7 +6,7 @@ class UrlButtonWidget extends StatefulWidget {
   final EbbotConfiguration configuration;
   final dynamic url;
   final void Function(String, {ButtonData? buttonData}) onURlPressed;
-  final void Function(String, {ButtonData? buttonData}) onScenarioPressed;
+  final void Function(String, {String? state, ButtonData? buttonData}) onScenarioPressed;
   final void Function(String, String, {ButtonData? buttonData})
       onVariablePressed;
   //final void Function(String, String, {ButtonData? buttonData})
@@ -40,7 +40,7 @@ class _UrlButtonWidgetState extends State<UrlButtonWidget> {
           MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
         if (states.contains(MaterialState.disabled)) {
           return Colors.grey; // Disabled color
-        }
+        } 
         return widget.configuration.theme.primaryColor; // Enabled color
       }),
     );
@@ -72,7 +72,11 @@ class _UrlButtonWidgetState extends State<UrlButtonWidget> {
                 });
                 final buttonData =
                     ButtonData(buttonId: url['buttonId'], label: url['label']);
-                widget.onScenarioPressed(url['next']['scenario'],
+                    String scenario = url['next']['scenario'];
+                    String? state = url['next'].containsKey('state')
+                        ? url['next']['state']
+                        : null;
+                widget.onScenarioPressed(scenario, state: state,
                     buttonData: buttonData);
               },
         child: Text(url['label']),

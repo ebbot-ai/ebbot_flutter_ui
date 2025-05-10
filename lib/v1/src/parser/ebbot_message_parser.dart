@@ -45,8 +45,13 @@ class EbbotMessageParser {
       case 'button_click':
         _logger?.d("parsing button click message");
         return _parseButtonClick(message.data.message, user, id);
+      case 'list':
+        _logger?.d("parsing list message");
+        return _parseCustom(message.data.message, user, id);
       default:
-        _logger?.w("Unsupported message type: $messageType");
+        _logger?.w(
+            "Unsupported message type: $messageType data: ${message.data.message.toJson().toString()}");
+
         return null;
     }
   }

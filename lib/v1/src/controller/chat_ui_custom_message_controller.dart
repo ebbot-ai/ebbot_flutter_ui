@@ -4,6 +4,7 @@ import 'package:ebbot_flutter_ui/v1/configuration/ebbot_configuration.dart';
 import 'package:ebbot_flutter_ui/v1/src/initializer/service_locator.dart';
 import 'package:ebbot_flutter_ui/v1/src/service/ebbot_dart_client_service.dart';
 import 'package:ebbot_flutter_ui/v1/src/widget/carousel_widget.dart';
+import 'package:ebbot_flutter_ui/v1/src/widget/list_widget.dart';
 import 'package:ebbot_flutter_ui/v1/src/widget/rating_widget.dart';
 import 'package:ebbot_flutter_ui/v1/src/widget/url_box_widget.dart';
 import 'package:flutter/material.dart';
@@ -34,9 +35,15 @@ class ChatUiCustomMessageController {
         return _processRatingRequest(content);
       case 'carousel':
         return _processCarousel(content);
+      case 'list':
+        return _processList(content);
       default:
         return Container();
     }
+  }
+
+  Widget _processList(MessageContent content) {
+    return ListWidget(content: content, configuration: configuration);
   }
 
   Widget _processCarousel(MessageContent content) {
@@ -47,8 +54,10 @@ class ChatUiCustomMessageController {
       onURlPressed: (String url, {ButtonData? buttonData}) async {
         _processUrlClick(url, buttonData: buttonData);
       },
-      onScenarioPressed: (String scenario, {ButtonData? buttonData}) {
-        client.sendScenarioMessage(scenario, buttonData: buttonData);
+      onScenarioPressed: (String scenario,
+          {String? state, ButtonData? buttonData}) {
+        client.sendScenarioMessage(scenario,
+            state: state, buttonData: buttonData);
       },
       onVariablePressed: (String name, String value, {ButtonData? buttonData}) {
         client.sendVariableMessage(name, value, buttonData: buttonData);
@@ -75,8 +84,9 @@ class ChatUiCustomMessageController {
         onURlPressed: (url, {ButtonData? buttonData}) async {
           _processUrlClick(url, buttonData: buttonData);
         },
-        onScenarioPressed: (scenario, {ButtonData? buttonData}) {
-          client.sendScenarioMessage(scenario, buttonData: buttonData);
+        onScenarioPressed: (scenario, {String? state, ButtonData? buttonData}) {
+          client.sendScenarioMessage(scenario,
+              state: state, buttonData: buttonData);
         },
         onVariablePressed: (name, value, {ButtonData? buttonData}) {
           client.sendVariableMessage(name, value, buttonData: buttonData);

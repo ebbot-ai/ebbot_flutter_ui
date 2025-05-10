@@ -47,6 +47,9 @@ class EbbotChatParser {
       case 'button_click':
         _logger?.d("parsing button click message");
         return _parseButtonClick(message, user, id);
+      case 'list':
+        _logger?.d("parsing list message");
+        return _parseCustom(message, user, id);
       default:
         _logger?.w("Unsupported message type: $messageType");
         inspect(message);
