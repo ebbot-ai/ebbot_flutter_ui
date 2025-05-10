@@ -8,7 +8,8 @@ class UrlBoxWidget extends StatefulWidget {
   final MessageContent content;
   final EbbotConfiguration configuration;
   final void Function(String, {ButtonData? buttonData}) onURlPressed;
-  final void Function(String, {ButtonData? buttonData}) onScenarioPressed;
+  final void Function(String, {String? state, ButtonData? buttonData})
+      onScenarioPressed;
   final void Function(String, String, {ButtonData? buttonData})
       onVariablePressed;
   //final void Function(String, String,{ButtonData? buttonData}) onButtonClickPressed;
@@ -37,23 +38,20 @@ class _UrlBoxWidgetState extends State<UrlBoxWidget> {
       return Container();
     }
 
-    var description = content.value['description'];
+    final description = content.value['description'];
 
-    List<Widget> children = [
-      Container(
-        margin: const EdgeInsets.only(bottom: 10.0),
-        child: Text(description,
-            textAlign: TextAlign.center,
-            style: theme.receivedMessageBodyTextStyle),
-      ),
-      ...(content.value['urls'] as List).map((url) => UrlButtonWidget(
+    final buttonList = content.value['urls'] as List;
+    final buttonWidgets = buttonList.map((url) {
+      return UrlButtonWidget(
           url: url,
           configuration: widget.configuration,
           onURlPressed: (String url, {ButtonData? buttonData}) {
             widget.onURlPressed(url, buttonData: buttonData);
           },
-          onScenarioPressed: (String scenario, {ButtonData? buttonData}) {
-            widget.onScenarioPressed(scenario, buttonData: buttonData);
+          onScenarioPressed: (String scenario,
+              {String? state, ButtonData? buttonData}) {
+            widget.onScenarioPressed(scenario,
+                state: state, buttonData: buttonData);
           },
           onVariablePressed: (String name, String value,
               {ButtonData? buttonData}) {
@@ -62,8 +60,22 @@ class _UrlBoxWidgetState extends State<UrlBoxWidget> {
             onButtonClickPressed: (String buttonId, String label) {
               widget.onButtonClickPressed(buttonId, label);
             },*/
-          )),
-    ];
+          );
+    }).toList();
+
+    List<Widget> children = [];
+    if (description != null && description.isNotEmpty) {
+      final descriptionWidget = Container(
+        margin: const EdgeInsets.only(bottom: 10.0),
+        child: Text(description,
+            textAlign: TextAlign.center,
+            style: theme.receivedMessageBodyTextStyle),
+      );
+      children.add(descriptionWidget);
+    }
+    if (buttonWidgets.isNotEmpty) {
+      children.addAll(buttonWidgets);
+    }
 
     return Padding(
       padding: const EdgeInsets.all(20.0),

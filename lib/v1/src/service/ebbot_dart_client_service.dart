@@ -29,7 +29,7 @@ class EbbotDartClientService {
   }
 
   Future<void> restartAsync() async {
-    await _client.closeAsync(closeSocket: true);
+    await _client.closeAsync(endSession: true);
     //await _client.disposeAsync();
 
     // Remove the chatId from the configuration object as we want to start a new session
