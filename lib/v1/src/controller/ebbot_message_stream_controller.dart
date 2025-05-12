@@ -15,7 +15,7 @@ class EbbotMessageStreamController extends ResettableController {
   get _logger => _serviceLocator.getService<LogService>().logger;
   final Function _handleTypingUsers;
   final Function _handleClearTypingUsers;
-  final Function(types.Message?) _handleAddMessage;
+  final Function(types.Message) _handleAddMessage;
   final Function(String?) _handleInputMode;
   bool hasReceivedGPTMessageBefore = false;
 
@@ -76,6 +76,10 @@ class EbbotMessageStreamController extends ResettableController {
     }
 
     var chatMessage = _ebbotMessageParser.parse(message, author, messageId);
+    if (chatMessage == null) {
+      _logger?.d("message is null");
+      return;
+    }
     _handleAddMessage(chatMessage);
   }
 

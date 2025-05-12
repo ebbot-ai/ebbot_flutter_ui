@@ -281,12 +281,7 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
   }
 
   @override
-  void handleAddMessage(types.Message? message) {
-    if (message == null) {
-      _logger?.w("message is null, so skipping..");
-      return;
-    }
-
+  void handleAddMessage(types.Message message) {
     final ebbotCallbackService =
         _serviceLocator.getService<EbbotCallbackService>();
 

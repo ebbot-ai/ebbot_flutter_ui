@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:ebbot_dart_client/entity/chat/chat.dart';
 import 'package:ebbot_flutter_ui/v1/src/initializer/service_locator.dart';
 import 'package:ebbot_flutter_ui/v1/src/service/log_service.dart';
@@ -12,10 +10,13 @@ class EbbotChatParser {
   types.Message? parse(ChatMessage message, types.User user, String id) {
     final messageType = message.type;
 
+    final expectedVisibility = ['chat', 'user'];
     // Lets assume that message.visibility = 'user' means we should show it
-    if (message.visibility != 'chat') {
+    if (expectedVisibility.contains(message.visibility)) {
+      _logger?.d("message visibility is ${message.visibility}");
+    } else {
       _logger?.d(
-          "message visibility is ${message.visibility}, expecting 'chat', so skipping..");
+          "message visibility is ${message.visibility}, expecting ${expectedVisibility.join(", ")}, so skipping..");
       return null;
     }
 
@@ -52,7 +53,6 @@ class EbbotChatParser {
         return _parseCustom(message, user, id);
       default:
         _logger?.w("Unsupported message type: $messageType");
-        inspect(message);
         return null;
     }
   }
@@ -120,8 +120,6 @@ class EbbotChatParser {
 
   types.Message? _parseText(ChatMessage message, types.User user, String id) {
     var text = message.value is String ? message.value : message.value['text'];
-
-    _logger?.d("message is correct type, so adding it: $text");
 
     return types.TextMessage(
       author: user,

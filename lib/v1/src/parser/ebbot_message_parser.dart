@@ -129,8 +129,6 @@ class EbbotMessageParser {
 
     var text = message.value is String ? message.value : message.value['text'];
 
-    _logger?.d("message is correct type, so adding it: $text");
-
     return types.TextMessage(
       author: user,
       createdAt: DateTime.now().millisecondsSinceEpoch,

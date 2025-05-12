@@ -13,7 +13,7 @@ class EbbotChatStreamController extends ResettableController {
   final _serviceLocator = ServiceLocator();
   final Function _handleTypingMessage;
   final Function _handleClearTypingUsers;
-  final Function(types.Message?) _handleAddMessage;
+  final Function(types.Message) _handleAddMessage;
   final Function(String) _handleCanType;
   bool hasReceivedGPTMessageBefore = false;
 
@@ -35,12 +35,7 @@ class EbbotChatStreamController extends ResettableController {
   void handle(Chat chat) {
     var chatMessages = chat.data?.chat?.chatMessages ?? [];
 
-    if (chatMessages.isEmpty) {
-      _logger?.d("chat messages are empty");
-      return;
-    }
-
-    _logger?.d("we have ${chatMessages.length} messages");
+    _logger?.d("we have ${chatMessages.length} chat messages to process");
 
     for (var message in chatMessages) {
       _handleClearTypingUsers();
@@ -49,6 +44,10 @@ class EbbotChatStreamController extends ResettableController {
       final messageId = message.id!;
 
       var chatMessage = _ebbotChatParser.parse(message, author, messageId);
+      if (chatMessage == null) {
+        _logger?.d("message is null");
+        continue;
+      }
       _handleAddMessage(chatMessage);
     }
   }

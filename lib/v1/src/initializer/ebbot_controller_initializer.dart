@@ -72,7 +72,7 @@ abstract class AbstractControllerDelegate {
   void handleNotification(String title, String text);
   void handleTypingUsers();
   void handleClearTypingUsers();
-  void handleAddMessage(types.Message? message);
+  void handleAddMessage(types.Message message);
   void handleInputMode(String? mode);
   void handleRestartConversation();
   void handleSendPressed(types.PartialText message);
