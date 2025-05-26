@@ -17,9 +17,10 @@ dependencies:
     sdk: flutter
 
   ebbot_dart_client:
-    git:
-      url: https://github.com/ebbot-ai/ebbot-dart-client
-      ref: v0.1.9
+    path: ../ebbot_dart_client
+    #git:
+    #  url: https://github.com/ebbot-ai/ebbot-dart-client
+    #  ref: v0.1.9
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.

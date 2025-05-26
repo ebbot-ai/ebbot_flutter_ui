@@ -12,6 +12,7 @@ import 'package:ebbot_flutter_ui/v1/src/initializer/service_locator.dart';
 import 'package:ebbot_flutter_ui/v1/src/service/chat_transcript_service.dart';
 import 'package:ebbot_flutter_ui/v1/src/service/ebbot_callback_service.dart';
 import 'package:ebbot_flutter_ui/v1/src/service/ebbot_dart_client_service.dart';
+import 'package:ebbot_flutter_ui/v1/src/service/ebbot_support_service.dart';
 import 'package:ebbot_flutter_ui/v1/src/service/log_service.dart';
 import 'package:ebbot_flutter_ui/v1/src/util/ebbot_gpt_user.dart';
 import 'package:ebbot_flutter_ui/v1/src/util/string_util.dart';
@@ -102,6 +103,9 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
         EbbotControllerInitializer(this, widget._configuration);
 
     await _ebbotServiceInitializer.registerServices();
+    final ebbotClientService =
+        _serviceLocator.getService<EbbotDartClientService>();
+    await ebbotClientService.client.initializeWebsocketConnection();
     _ebbotControllerInitializer.intializeControllers();
 
     widget._configuration.apiController.attach(this);
@@ -111,16 +115,23 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
     _setup();
   }
 
-  void _setup() {
+  void _setup() async {
     final ebbotClientService =
         _serviceLocator.getService<EbbotDartClientService>();
-    //_user = types.User(id: ebbotClientService.client.chatId);
+    final ebbotCallbackService =
+        _serviceLocator.getService<EbbotCallbackService>();
+    final userAttributes =
+        widget._configuration.userConfiguration.userAttributes;
+
+    final config = ebbotClientService.client.chatStyleConfig;
 
     ebbotClientService.client.startReceive();
     handleInputMode("visible");
 
-    final ebbotCallbackService =
-        _serviceLocator.getService<EbbotCallbackService>();
+    if (userAttributes.isNotEmpty) {
+      ebbotClientService.client
+          .sendUpdateConversationInfoMessage(userAttributes);
+    }
 
     ebbotCallbackService.dispatchOnLoad();
     setState(() {
@@ -194,9 +205,12 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
 
   @override
   void handleTypingUsers() {
+    final ebbotSupportService =
+        _serviceLocator.getService<EbbotSupportService>();
     setState(() {
       _typingUsers.clear();
-      _typingUsers.add(ebbotGPTUser);
+
+      _typingUsers.add(ebbotSupportService.getEbbotGPTUser());
     });
   }
 
@@ -285,6 +299,9 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
     final ebbotCallbackService =
         _serviceLocator.getService<EbbotCallbackService>();
 
+    final ebbotSupportService =
+        _serviceLocator.getService<EbbotSupportService>();
+
     if (message is types.TextMessage) {
       if (_messages.isEmpty) {
         ebbotCallbackService.dispatchOnStartConversation(message.text);
@@ -292,7 +309,7 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
 
       ebbotCallbackService.dispatchOnMessage(message.text);
 
-      if (message.author == ebbotGPTUser) {
+      if (message.author == ebbotSupportService.getEbbotGPTUser()) {
         ebbotCallbackService.dispatchOnBotMessage(message.text);
       }
 

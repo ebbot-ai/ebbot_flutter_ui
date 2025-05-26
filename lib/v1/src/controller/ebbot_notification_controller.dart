@@ -1,16 +1,15 @@
 import 'package:ebbot_flutter_ui/v1/src/initializer/service_locator.dart';
-import 'package:ebbot_flutter_ui/v1/src/service/ebbot_notification_service.dart';
+import 'package:ebbot_flutter_ui/v1/src/service/ebbot_support_service.dart';
 import 'package:ebbot_flutter_ui/v1/src/service/log_service.dart';
 
 class EbbotNotificationController {
   final _serviceLocator = ServiceLocator();
   get _logger => _serviceLocator.getService<LogService>().logger;
 
-  late EbbotNotificationService _notificationService;
+  late EbbotSupportService _notificationService;
   final Function(String title, String text) _handleNotification;
   EbbotNotificationController(this._handleNotification) {
-    _notificationService =
-        _serviceLocator.getService<EbbotNotificationService>();
+    _notificationService = _serviceLocator.getService<EbbotSupportService>();
     _processNotifications();
   }
 
