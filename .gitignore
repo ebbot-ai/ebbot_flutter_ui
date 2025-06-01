@@ -47,3 +47,4 @@ app.*.map.json
 /android/app/release
 # Misc
 /lib/main.dart
+/devtools_options.yaml
