@@ -5,7 +5,7 @@ import 'package:ebbot_flutter_ui/v1/src/service/chat_transcript_service.dart';
 import 'package:ebbot_flutter_ui/v1/src/service/ebbot_callback_service.dart';
 import 'package:ebbot_flutter_ui/v1/src/service/ebbot_chat_listener_service.dart';
 import 'package:ebbot_flutter_ui/v1/src/service/ebbot_dart_client_service.dart';
-import 'package:ebbot_flutter_ui/v1/src/service/ebbot_notification_service.dart';
+import 'package:ebbot_flutter_ui/v1/src/service/ebbot_support_service.dart';
 import 'package:ebbot_flutter_ui/v1/src/service/log_service.dart';
 
 class EbbotServiceInitializer {
@@ -38,8 +38,7 @@ class EbbotServiceInitializer {
   }
 
   Future<void> _registerEbbotNotificationService() async {
-    _serviceLocator
-        .registerService<EbbotNotificationService>(EbbotNotificationService());
+    _serviceLocator.registerService<EbbotSupportService>(EbbotSupportService());
   }
 
   Future<void> _registerEbbotChatListenerService() async {

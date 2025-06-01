@@ -81,4 +81,5 @@ abstract class AbstractControllerDelegate {
   void handleDownloadTranscript();
   void handleOnPopupMenuSelected(PopupMenuOptions option);
   void handleOnAttachmentPressed();
+  void handleAddMessageFromString(String message);
 }

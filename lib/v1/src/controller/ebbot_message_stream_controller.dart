@@ -5,6 +5,7 @@ import 'package:ebbot_flutter_ui/v1/src/controller/resettable_controller.dart';
 import 'package:ebbot_flutter_ui/v1/src/initializer/service_locator.dart';
 import 'package:ebbot_flutter_ui/v1/src/parser/ebbot_message_parser.dart';
 import 'package:ebbot_flutter_ui/v1/src/service/ebbot_chat_listener_service.dart';
+import 'package:ebbot_flutter_ui/v1/src/service/ebbot_support_service.dart';
 import 'package:ebbot_flutter_ui/v1/src/service/log_service.dart';
 import 'package:ebbot_flutter_ui/v1/src/util/ebbot_gpt_user.dart';
 import 'package:ebbot_flutter_ui/v1/src/util/string_util.dart';
@@ -43,6 +44,9 @@ class EbbotMessageStreamController extends ResettableController {
   }
 
   void _handle(Message message) {
+    final ebbotSupportService =
+        _serviceLocator.getService<EbbotSupportService>();
+    final ebbotGPTUser = ebbotSupportService.getEbbotGPTUser();
     // Handle the message
     var messageType = message.data.message.type;
 

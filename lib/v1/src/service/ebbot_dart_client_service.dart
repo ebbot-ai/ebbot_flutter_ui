@@ -55,11 +55,6 @@ class EbbotDartClientService {
     final httpSession = _client.session;
     callbackService.dispatchOnSessionData(httpSession.data.session.chatId);
 
-    // Send user attributes to the server on initialization
-    if (_userAttributes.isNotEmpty) {
-      _client.sendUpdateConversationInfoMessage(_userAttributes);
-    }
-
     _isInitialized = true;
   }
 }

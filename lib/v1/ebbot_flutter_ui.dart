@@ -12,10 +12,13 @@ import 'package:ebbot_flutter_ui/v1/src/initializer/service_locator.dart';
 import 'package:ebbot_flutter_ui/v1/src/service/chat_transcript_service.dart';
 import 'package:ebbot_flutter_ui/v1/src/service/ebbot_callback_service.dart';
 import 'package:ebbot_flutter_ui/v1/src/service/ebbot_dart_client_service.dart';
+import 'package:ebbot_flutter_ui/v1/src/service/ebbot_support_service.dart';
 import 'package:ebbot_flutter_ui/v1/src/service/log_service.dart';
 import 'package:ebbot_flutter_ui/v1/src/util/ebbot_gpt_user.dart';
+import 'package:ebbot_flutter_ui/v1/src/util/extension.dart';
 import 'package:ebbot_flutter_ui/v1/src/util/string_util.dart';
 import 'package:ebbot_flutter_ui/v1/src/widget/popup_menu_widget.dart';
+import 'package:ebbot_flutter_ui/v1/src/widget/start_page_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_chat_types/flutter_chat_types.dart';
@@ -25,6 +28,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:logger/logger.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class EbbotFlutterUi extends StatefulWidget {
   final String _botId;
@@ -61,6 +65,10 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
 
   late bool _customBottomWidgetVisibilityVisible = false;
 
+  // Start page states
+  bool _startPageDismissed = false;
+  bool _infoDialogInChatShown = false;
+
   Logger? _logger;
 
   @override
@@ -78,6 +86,8 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
 
   @override
   bool get wantKeepAlive => true;
+
+  // Initialization methods
 
   void _initialize() async {
     final sessionConfiguration = SessionConfigurationBuilder();
@@ -102,101 +112,89 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
         EbbotControllerInitializer(this, widget._configuration);
 
     await _ebbotServiceInitializer.registerServices();
+    final ebbotClientService =
+        _serviceLocator.getService<EbbotDartClientService>();
+    await ebbotClientService.client.initializeWebsocketConnection();
     _ebbotControllerInitializer.intializeControllers();
 
     widget._configuration.apiController.attach(this);
 
     _logger = _serviceLocator.getService<LogService>().logger;
 
-    _setup();
+    await _postInitSetup();
   }
 
-  void _setup() {
+  Future<void> _postInitSetup() async {
     final ebbotClientService =
         _serviceLocator.getService<EbbotDartClientService>();
-    //_user = types.User(id: ebbotClientService.client.chatId);
+    final ebbotCallbackService =
+        _serviceLocator.getService<EbbotCallbackService>();
+    final userAttributes =
+        widget._configuration.userConfiguration.userAttributes;
+
+    final config = ebbotClientService.client.chatStyleConfig;
 
     ebbotClientService.client.startReceive();
     handleInputMode("visible");
 
-    final ebbotCallbackService =
-        _serviceLocator.getService<EbbotCallbackService>();
+    if (userAttributes.isNotEmpty) {
+      ebbotClientService.client
+          .sendUpdateConversationInfoMessage(userAttributes);
+    }
 
     ebbotCallbackService.dispatchOnLoad();
+
     setState(() {
       _isInitialized = true;
     });
   }
 
+  // Overrides
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
 
-    final inputOptions =
-        _ebbotControllerInitializer.chatInputController?.inputOptions ??
-            const InputOptions();
+    if (!_isInitialized) {
+      return Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(
+            color: widget._configuration.theme.primaryColor,
+          ),
+        ),
+      );
+    }
 
+    final ebbotClientService =
+        _serviceLocator.getService<EbbotDartClientService>();
+
+    final config = ebbotClientService.client.chatStyleConfig;
     _logger
         ?.d("bottom widget visibility: $_customBottomWidgetVisibilityVisible");
+    _logger?.d("Chat started: $_isChatStarted");
+
+    final startPageEnabled = config?.start_page_enabled ?? false;
+    final shouldShowStartPage = !_startPageDismissed && startPageEnabled;
 
     return Scaffold(
       body: Stack(
         children: [
-          Chat(
-            inputOptions: inputOptions,
-            theme: widget._configuration.theme,
-            messages: _messages,
-            onSendPressed: handleSendPressed,
-            onMessageTap: handleMessageTap,
-            onAttachmentPressed: handleOnAttachmentPressed,
-            emptyState: Container(alignment: Alignment.center),
-            user: chatUser,
-            customBottomWidget: Visibility(
-              visible: _customBottomWidgetVisibilityVisible,
-              child: Input(
-                onSendPressed: handleSendPressed,
-                onAttachmentPressed: handleOnAttachmentPressed,
-                options: inputOptions,
-              ),
-            ),
-            customMessageBuilder: _ebbotControllerInitializer
-                .chatUiCustomMessageController?.processMessage,
-            typingIndicatorOptions: TypingIndicatorOptions(
-              typingMode: TypingIndicatorMode.avatar,
-              typingUsers: _typingUsers,
-            ),
-          ),
-          if (!isInitialized)
-            Container(
-              color: const Color.fromARGB(85, 255, 255, 255),
-              child: circularProgressIndicator(),
-            ),
-          if (isInitialized)
-            Positioned(
-              top: 10,
-              right: 10,
-              child: AnimatedOpacity(
-                opacity: _isChatStarted ? 1.0 : 0.0,
-                duration: const Duration(milliseconds: 300),
-                child: PopupMenuWidget(onSelected: handleOnPopupMenuSelected),
-              ),
-            ),
+          _buildChat(),
+          _buildPopupMenu(),
+          if (shouldShowStartPage) _buildStartPageWidget()
         ],
       ),
     );
   }
 
-  Widget circularProgressIndicator() {
-    return Center(
-        child: CircularProgressIndicator(
-            color: widget._configuration.theme.primaryColor));
-  }
-
   @override
   void handleTypingUsers() {
+    final ebbotSupportService =
+        _serviceLocator.getService<EbbotSupportService>();
     setState(() {
       _typingUsers.clear();
-      _typingUsers.add(ebbotGPTUser);
+
+      _typingUsers.add(ebbotSupportService.getEbbotGPTUser());
     });
   }
 
@@ -267,23 +265,13 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
     });
   }
 
-  void handleAddMessageFromString(String message) {
-    final textMessage = types.TextMessage(
-      author: chatUser,
-      createdAt: DateTime.now().millisecondsSinceEpoch,
-      id: StringUtil.randomString(),
-      text: message,
-    );
-    handleAddMessage(textMessage);
-    EbbotDartClient ebbotClient =
-        _serviceLocator.getService<EbbotDartClientService>().client;
-    ebbotClient.sendTextMessage(textMessage.text);
-  }
-
   @override
   void handleAddMessage(types.Message message) {
     final ebbotCallbackService =
         _serviceLocator.getService<EbbotCallbackService>();
+
+    final ebbotSupportService =
+        _serviceLocator.getService<EbbotSupportService>();
 
     if (message is types.TextMessage) {
       if (_messages.isEmpty) {
@@ -292,7 +280,7 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
 
       ebbotCallbackService.dispatchOnMessage(message.text);
 
-      if (message.author == ebbotGPTUser) {
+      if (message.author == ebbotSupportService.getEbbotGPTUser()) {
         ebbotCallbackService.dispatchOnBotMessage(message.text);
       }
 
@@ -408,10 +396,12 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
   @override
   void handleRestartConversation() async {
     setState(() {
+      _startPageDismissed = false;
       _customBottomWidgetVisibilityVisible = false;
       _isInitialized = false;
-      _messages.clear();
       _isChatStarted = false;
+      _infoDialogInChatShown = false;
+      _messages.clear();
     });
 
     final ebbotClientService =
@@ -420,7 +410,7 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
 
     _ebbotControllerInitializer.resetControllers();
 
-    _setup();
+    _postInitSetup();
 
     setState(() {
       _isInitialized = true;
@@ -501,5 +491,163 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
 
       await client.uploadImage(bytes, result.path);
     }
+  }
+
+  @override
+  void handleAddMessageFromString(String message) {
+    final textMessage = types.TextMessage(
+      author: chatUser,
+      createdAt: DateTime.now().millisecondsSinceEpoch,
+      id: StringUtil.randomString(),
+      text: message,
+    );
+    handleAddMessage(textMessage);
+    EbbotDartClient ebbotClient =
+        _serviceLocator.getService<EbbotDartClientService>().client;
+    ebbotClient.sendTextMessage(textMessage.text);
+  }
+
+  // Widgets and UI methods
+
+  void _maybeShowInfoTextDialogInChat() async {
+    if (_infoDialogInChatShown) return;
+
+    final ebbotClientService =
+        _serviceLocator.getService<EbbotDartClientService>();
+
+    final config = ebbotClientService.client.chatStyleConfig;
+    if (config == null) {
+      _logger
+          ?.w("Chat style configuration is null, cannot show info text dialog");
+      return;
+    }
+
+    if (!_startPageDismissed) {
+      _logger?.w("Info text dialog not shown, start page showing");
+      return;
+    }
+
+    if (!config.alert_time_window.shouldShow) {
+      _logger?.w(
+          "Info text dialog not shown, outside of time window: ${config.alert_time_window}");
+      return;
+    }
+
+    if (!_startPageDismissed) {
+      _logger?.w("Info text dialog not shown, start page not dismissed");
+      return;
+    }
+
+    if (!config.info_section_in_conversation) {
+      _logger?.w(
+          "Info text dialog not shown, info section not enabled in conversation");
+      return;
+    }
+
+    final text = config.info_section_text;
+    final title = config.info_section_title;
+
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(text),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+
+    setState(() {
+      _infoDialogInChatShown = true;
+    });
+  }
+
+  Widget _buildChat() {
+    final inputOptions =
+        _ebbotControllerInitializer.chatInputController?.inputOptions ??
+            const InputOptions();
+    return Chat(
+      inputOptions: inputOptions,
+      theme: widget._configuration.theme,
+      messages: _messages,
+      onSendPressed: handleSendPressed,
+      onMessageTap: handleMessageTap,
+      onAttachmentPressed: handleOnAttachmentPressed,
+      emptyState: Container(alignment: Alignment.center),
+      user: chatUser,
+      customBottomWidget: Visibility(
+        visible: _customBottomWidgetVisibilityVisible,
+        child: Input(
+          onSendPressed: handleSendPressed,
+          onAttachmentPressed: handleOnAttachmentPressed,
+          options: inputOptions,
+        ),
+      ),
+      customMessageBuilder: _ebbotControllerInitializer
+          .chatUiCustomMessageController?.processMessage,
+      typingIndicatorOptions: TypingIndicatorOptions(
+        typingMode: TypingIndicatorMode.avatar,
+        typingUsers: _typingUsers,
+      ),
+    );
+  }
+
+  Widget _buildPopupMenu() {
+    return Positioned(
+      top: 50,
+      right: 10,
+      child: AnimatedOpacity(
+        opacity: _isChatStarted ? 1.0 : 0,
+        duration: const Duration(milliseconds: 300),
+        child: PopupMenuWidget(onSelected: handleOnPopupMenuSelected),
+      ),
+    );
+  }
+
+  Widget _buildStartPageWidget() {
+    return StartPageWidget(
+      onCardButtonPressed: ({scenario, url}) async {
+        final client = _serviceLocator.getService<EbbotDartClientService>();
+        if (scenario != null) {
+          client.client.sendScenarioMessage(scenario);
+
+          setState(() {
+            _startPageDismissed = true;
+          });
+
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            _maybeShowInfoTextDialogInChat();
+          });
+        }
+        if (url != null) {
+          // Open the URL in the browser
+          _logger?.d("Opening URL: $url");
+          final uri = Uri.parse(url);
+          if (await canLaunchUrl(uri)) {
+            launchUrl(uri);
+          } else {
+            _logger?.e("Could not launch URL: $url");
+          }
+        }
+      },
+      onStartConversation: () {
+        _logger?.d("Start page dismissed, starting conversation");
+        setState(() {
+          _startPageDismissed = true;
+          _isChatStarted = true;
+        });
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _maybeShowInfoTextDialogInChat();
+        });
+      },
+    );
   }
 }
