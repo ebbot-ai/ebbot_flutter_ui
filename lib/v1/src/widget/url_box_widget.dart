@@ -1,6 +1,8 @@
 import 'package:ebbot_dart_client/entity/button_data/button_data.dart';
 import 'package:ebbot_dart_client/entity/message/message.dart';
 import 'package:ebbot_flutter_ui/v1/configuration/ebbot_configuration.dart';
+import 'package:ebbot_flutter_ui/v1/src/initializer/service_locator.dart';
+import 'package:ebbot_flutter_ui/v1/src/service/ebbot_support_service.dart';
 import 'package:ebbot_flutter_ui/v1/src/widget/url_button_widget.dart';
 import 'package:flutter/material.dart';
 
@@ -29,10 +31,14 @@ class UrlBoxWidget extends StatefulWidget {
 }
 
 class _UrlBoxWidgetState extends State<UrlBoxWidget> {
+  final _serviceLocator = ServiceLocator();
   @override
   Widget build(BuildContext context) {
     final content = widget.content;
-    final theme = widget.configuration.theme;
+    final ebbotSupportService =
+        _serviceLocator.getService<EbbotSupportService>();
+    final receivedMessageBodyTextStyle =
+        ebbotSupportService.chatTheme().receivedMessageBodyTextStyle;
 
     if (content.value['urls'] is! List) {
       return Container();
@@ -68,8 +74,7 @@ class _UrlBoxWidgetState extends State<UrlBoxWidget> {
       final descriptionWidget = Container(
         margin: const EdgeInsets.only(bottom: 10.0),
         child: Text(description,
-            textAlign: TextAlign.center,
-            style: theme.receivedMessageBodyTextStyle),
+            textAlign: TextAlign.center, style: receivedMessageBodyTextStyle),
       );
       children.add(descriptionWidget);
     }

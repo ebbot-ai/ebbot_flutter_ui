@@ -129,6 +129,8 @@ class EbbotMessageParser {
 
     var text = message.value is String ? message.value : message.value['text'];
 
+    
+
     return types.TextMessage(
       author: user,
       createdAt: DateTime.now().millisecondsSinceEpoch,
