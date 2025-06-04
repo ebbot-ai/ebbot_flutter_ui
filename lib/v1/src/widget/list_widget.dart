@@ -1,5 +1,7 @@
 import 'package:ebbot_dart_client/entity/message/message.dart';
 import 'package:ebbot_flutter_ui/v1/configuration/ebbot_configuration.dart';
+import 'package:ebbot_flutter_ui/v1/src/initializer/service_locator.dart';
+import 'package:ebbot_flutter_ui/v1/src/service/ebbot_support_service.dart';
 import 'package:flutter/material.dart';
 
 class ListWidget extends StatefulWidget {
@@ -17,10 +19,16 @@ class ListWidget extends StatefulWidget {
 }
 
 class _ListWidget extends State<ListWidget> {
+  final ServiceLocator _serviceLocator = ServiceLocator();
   @override
   Widget build(BuildContext context) {
+    final ebbotSupportService =
+        _serviceLocator.getService<EbbotSupportService>();
+
+    final receivedMessageBodyTextStyle =
+        ebbotSupportService.chatTheme().receivedMessageBodyTextStyle;
+
     final content = widget.content;
-    final theme = widget.configuration.theme;
 
     final items = content.value['items'] as List;
     final text = content.value['text'] as String;
@@ -31,11 +39,11 @@ class _ListWidget extends State<ListWidget> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('• ', style: theme.receivedMessageBodyTextStyle),
+            Text('• ', style: receivedMessageBodyTextStyle),
             Expanded(
               child: Text(
                 item['text'],
-                style: theme.receivedMessageBodyTextStyle,
+                style: receivedMessageBodyTextStyle,
               ),
             ),
           ],
@@ -48,8 +56,8 @@ class _ListWidget extends State<ListWidget> {
         margin: const EdgeInsets.only(bottom: 10.0),
         child: Text(text,
             textAlign: TextAlign.center,
-            style: theme.receivedMessageBodyTextStyle
-                .copyWith(fontWeight: FontWeight.bold, fontSize: 16)),
+            style: receivedMessageBodyTextStyle.copyWith(
+                fontWeight: FontWeight.bold, fontSize: 16)),
       ),
       ...bulletItems,
     ];

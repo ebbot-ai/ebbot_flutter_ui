@@ -1,5 +1,9 @@
 import 'package:ebbot_dart_client/entity/message/message.dart';
 import 'package:ebbot_flutter_ui/v1/configuration/ebbot_configuration.dart';
+import 'package:ebbot_flutter_ui/v1/src/initializer/service_locator.dart';
+import 'package:ebbot_flutter_ui/v1/src/service/ebbot_dart_client_service.dart';
+import 'package:ebbot_flutter_ui/v1/src/service/ebbot_support_service.dart';
+import 'package:ebbot_flutter_ui/v1/src/util/extension.dart';
 import 'package:flutter/material.dart';
 
 class RatingWidget extends StatefulWidget {
@@ -20,6 +24,7 @@ class RatingWidget extends StatefulWidget {
 }
 
 class _RatingWidgetState extends State<RatingWidget> {
+  final ServiceLocator _serviceLocator = ServiceLocator();
   late int _rating;
   bool _hasRated = false;
 
@@ -33,15 +38,33 @@ class _RatingWidgetState extends State<RatingWidget> {
   Widget build(BuildContext context) {
     final chatBehaviour = widget.configuration.chat;
 
+    final ebbotClientService =
+        _serviceLocator.getService<EbbotDartClientService>();
+
+    final ebbotSupportService =
+        _serviceLocator.getService<EbbotSupportService>();
+
+    final receivedMessageBodyTextStyle =
+        ebbotSupportService.chatTheme().receivedMessageBodyTextStyle;
+
+    final chatStyleConfig = ebbotClientService.client.chatStyleConfig;
+    if (chatStyleConfig == null) {
+      throw Exception(
+          'Chat style configuration is not available. Please ensure it is set up correctly.');
+    }
+
+    final primaryColor =
+        HexColor.fromHex(chatStyleConfig.regular_btn_background_color);
+
     Widget rating = Icon(
       Icons.star_border,
-      color: widget.configuration.theme.primaryColor,
+      color: primaryColor,
       size: 30,
     );
 
     Widget ratingSelected = Icon(
       Icons.star,
-      color: widget.configuration.theme.primaryColor,
+      color: primaryColor,
       size: 30,
     );
 
@@ -58,10 +81,9 @@ class _RatingWidgetState extends State<RatingWidget> {
       );
     }
 
-    final theme = widget.configuration.theme;
     final question = widget.content.value['question'];
     final text = Text(question,
-        textAlign: TextAlign.center, style: theme.receivedMessageBodyTextStyle);
+        textAlign: TextAlign.center, style: receivedMessageBodyTextStyle);
 
     return Padding(
         padding: const EdgeInsets.all(12.0),

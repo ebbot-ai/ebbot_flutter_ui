@@ -6,10 +6,8 @@ import 'package:ebbot_flutter_ui/v1/configuration/ebbot_log_configuration.dart';
 import 'package:ebbot_flutter_ui/v1/configuration/ebbot_session.dart';
 import 'package:ebbot_flutter_ui/v1/configuration/ebbot_user_configuration.dart';
 import 'package:ebbot_flutter_ui/v1/controller/ebbot_api_controller.dart';
-import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 
 class EbbotConfiguration {
-  final ChatTheme theme;
   final Environment
       environment; // This lives in the ebbot_dart_client package for now
   final EbbotUserConfiguration userConfiguration;
@@ -21,8 +19,7 @@ class EbbotConfiguration {
   final EbbotSession session;
 
   EbbotConfiguration._builder(EbbotConfigurationBuilder builder)
-      : theme = builder._theme,
-        environment = builder._environment,
+      : environment = builder._environment,
         userConfiguration = builder._userConfiguration,
         behaviour = builder._behaviour,
         callback = builder._callback,
@@ -37,7 +34,6 @@ class EbbotConfiguration {
 }
 
 class EbbotConfigurationBuilder {
-  ChatTheme _theme = const DefaultChatTheme();
   Environment _environment = Environment.staging; // Default to staging
   EbbotUserConfiguration _userConfiguration =
       EbbotUserConfigurationBuilder().build();
@@ -48,11 +44,6 @@ class EbbotConfigurationBuilder {
       EbbotLogConfigurationBuilder().build();
   EbbotChat _chat = EbbotChatBuilder().build();
   EbbotSession _session = EbbotSessionBuilder().build();
-
-  EbbotConfigurationBuilder theme(ChatTheme theme) {
-    _theme = theme;
-    return this;
-  }
 
   EbbotConfigurationBuilder environment(Environment env) {
     _environment = env;

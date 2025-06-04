@@ -18,6 +18,7 @@ class StartPageWidget extends StatefulWidget {
 
 class _StartPageWidgetState extends State<StartPageWidget> {
   final ServiceLocator _serviceLocator = ServiceLocator();
+  final ScrollController _scrollController = ScrollController();
   @override
   Widget build(BuildContext context) {
     final ebbotClientService =
@@ -55,7 +56,7 @@ class _StartPageWidgetState extends State<StartPageWidget> {
     final logoImageUrl = styleConfig.logo.src;
     final logoImageContainer = logoImageUrl != null
         ? Container(
-            padding: const EdgeInsets.only(bottom: 20, left: 20, top: 10),
+            padding: const EdgeInsets.only(bottom: 20, left: 20, top: 0),
             child: ConstrainedBox(
               constraints: const BoxConstraints(
                 maxHeight: 100,
@@ -66,9 +67,7 @@ class _StartPageWidgetState extends State<StartPageWidget> {
               ),
             ),
           )
-        : Container(
-            padding: const EdgeInsets.only(top: 60, bottom: 20),
-          );
+        : Container();
 
     final headerBackgroundColor = HexColor.fromHex(styleConfig.header_color);
 
@@ -92,66 +91,70 @@ class _StartPageWidgetState extends State<StartPageWidget> {
       width: double.infinity,
       child: Column(
         children: [
-          Column(
-            children: [
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.only(bottom: 40),
-                decoration: BoxDecoration(
-                  color: headerBackgroundColor,
-                  borderRadius: BorderRadius.vertical(
-                    bottom: Radius.elliptical(100, 40),
-                  ),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.only(bottom: 40),
+            decoration: BoxDecoration(
+              color: headerBackgroundColor,
+              borderRadius: BorderRadius.vertical(
+                bottom: Radius.elliptical(100, 40),
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: logoImageContainer,
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: logoImageContainer,
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        avatarImage,
-                        Text(
-                          headerTitle,
-                          style: TextStyle(
-                            fontSize: 24,
-                            color: Colors.white,
+                Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      avatarImage,
+                      Text(
+                        headerTitle,
+                        style: TextStyle(
+                          fontSize: 24,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(height: 10),
+                      Text(
+                        headerText,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                            height: 1,
+                            fontSize: 16,
                             fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        SizedBox(height: 10),
-                        Text(
-                          headerText,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                              height: 1,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white),
-                        ),
-                      ],
-                    ),
-                  ],
+                            color: Colors.white),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              Transform.translate(
-                offset: Offset(0, -20),
-                child: Container(
-                  padding: const EdgeInsets.only(left: 20, right: 20),
-                  child: Container(
-                    padding: const EdgeInsets.only(left: 20, right: 20),
-                    child: Column(
-                      children: cardChildren,
-                    ),
+              ],
+            ),
+          ),
+          // This is the scrollable area for cards
+          Expanded(
+            child: Transform.translate(
+              offset: Offset(0, -20),
+              child: Container(
+                padding: const EdgeInsets.only(left: 20, right: 20),
+                child: Scrollbar(
+                  controller: _scrollController,
+                  thumbVisibility: true,
+                  child: ListView(
+                    controller: _scrollController,
+                    padding: EdgeInsets.zero,
+                    children: cardChildren,
                   ),
                 ),
               ),
-            ],
+            ),
           ),
-          Spacer(),
           Padding(
             padding: const EdgeInsets.only(bottom: 50, left: 20, right: 20),
             child: ElevatedButton(
@@ -190,6 +193,7 @@ class _StartPageWidgetState extends State<StartPageWidget> {
       final icon = iconMappings[card.icon] ?? Icons.help_outline;
       final scenario = card.scenario == '' ? null : card.scenario;
       final url = card.url == '' ? null : card.url;
+      final cardText = card.text == '' ? null : card.text;
       return _buildCardButton(
         icon,
         card.title,
@@ -197,6 +201,7 @@ class _StartPageWidgetState extends State<StartPageWidget> {
         cardIconColor,
         scenario: scenario,
         url: url,
+        text: cardText,
       );
     }).toList();
 
@@ -229,7 +234,7 @@ class _StartPageWidgetState extends State<StartPageWidget> {
           BoxShadow(
             color: const Color(0x21535353),
             offset: const Offset(0, 3),
-            blurRadius: 35,
+            blurRadius: 8,
           ),
         ],
       ),
@@ -253,6 +258,7 @@ class _StartPageWidgetState extends State<StartPageWidget> {
     Color cardIconColor, {
     String? scenario,
     String? url,
+    String? text,
   }) {
     return Container(
       margin: const EdgeInsets.only(bottom: 20),
@@ -263,7 +269,7 @@ class _StartPageWidgetState extends State<StartPageWidget> {
           BoxShadow(
             color: const Color(0x21535353),
             offset: const Offset(0, 3),
-            blurRadius: 35,
+            blurRadius: 8,
           ),
         ],
       ),
@@ -275,10 +281,17 @@ class _StartPageWidgetState extends State<StartPageWidget> {
           child: Icon(icon, color: cardIconColor),
         ),
         title: Text(title),
+        subtitle: text != null ? Text(text) : null,
         onTap: () {
           widget.onCardButtonPressed?.call(scenario: scenario, url: url);
         },
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 }

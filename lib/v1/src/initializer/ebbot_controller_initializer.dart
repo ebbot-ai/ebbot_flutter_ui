@@ -4,7 +4,6 @@ import 'package:ebbot_flutter_ui/v1/src/controller/chat_transcript_controller.da
 import 'package:ebbot_flutter_ui/v1/src/controller/chat_ui_custom_message_controller.dart';
 import 'package:ebbot_flutter_ui/v1/src/controller/ebbot_chat_stream_controller.dart';
 import 'package:ebbot_flutter_ui/v1/src/controller/ebbot_message_stream_controller.dart';
-import 'package:ebbot_flutter_ui/v1/src/controller/ebbot_notification_controller.dart';
 import 'package:ebbot_flutter_ui/v1/src/widget/popup_menu_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
@@ -15,7 +14,6 @@ class EbbotControllerInitializer {
   final AbstractControllerDelegate controllerDelegates;
 
   ChatInputController? chatInputController;
-  EbbotNotificationController? notificationController;
   ChatUiCustomMessageController? chatUiCustomMessageController;
   EbbotMessageStreamController? ebbotMessageStreamController;
   EbbotChatStreamController? ebbotChatStreamController;
@@ -32,9 +30,6 @@ class EbbotControllerInitializer {
       enterPressedBehaviour: configuration.behaviour.input.enterPressed,
       onTextChanged: controllerDelegates.handleOnTextChanged,
     );
-
-    notificationController =
-        EbbotNotificationController(controllerDelegates.handleNotification);
 
     chatUiCustomMessageController = ChatUiCustomMessageController(
         configuration: configuration,

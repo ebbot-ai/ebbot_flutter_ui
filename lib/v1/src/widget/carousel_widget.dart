@@ -2,7 +2,9 @@ import 'package:ebbot_dart_client/entity/button_data/button_data.dart';
 import 'package:ebbot_dart_client/entity/message/message.dart';
 import 'package:ebbot_flutter_ui/v1/configuration/ebbot_configuration.dart';
 import 'package:ebbot_flutter_ui/v1/src/initializer/service_locator.dart';
+import 'package:ebbot_flutter_ui/v1/src/service/ebbot_dart_client_service.dart';
 import 'package:ebbot_flutter_ui/v1/src/service/log_service.dart';
+import 'package:ebbot_flutter_ui/v1/src/util/extension.dart';
 import 'package:ebbot_flutter_ui/v1/src/widget/url_button_widget.dart';
 import 'package:flutter/material.dart';
 
@@ -34,6 +36,7 @@ class _CarouselWidgetState extends State<CarouselWidget> {
 
   final _serviceLocator = ServiceLocator();
   get _logger => _serviceLocator.getService<LogService>().logger;
+
   @override
   Widget build(BuildContext context) {
     final content = widget.content;
@@ -149,7 +152,17 @@ class _CarouselWidgetState extends State<CarouselWidget> {
   }
 
   List<Widget> _buildDots(List slides) {
-    final theme = widget.configuration.theme;
+    final ebbotClientService =
+        _serviceLocator.getService<EbbotDartClientService>();
+
+    final chatStyleConfig = ebbotClientService.client.chatStyleConfig;
+    if (chatStyleConfig == null) {
+      throw Exception(
+          'Chat style configuration is not available. Please ensure it is set up correctly.');
+    }
+
+    final primaryColor =
+        HexColor.fromHex(chatStyleConfig.regular_btn_background_color);
 
     List<Widget> dots = [];
     for (int i = 0; i < slides.length; i++) {
@@ -160,7 +173,10 @@ class _CarouselWidgetState extends State<CarouselWidget> {
           height: 10,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: _currentPage == i ? theme.primaryColor : Colors.grey,
+            color: _currentPage == i
+                ? primaryColor
+                : Colors
+                    .grey, // TODO: Maybe use fallback color for not active dots
           ),
         ),
       );

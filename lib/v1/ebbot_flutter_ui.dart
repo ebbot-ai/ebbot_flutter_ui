@@ -132,8 +132,6 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
     final userAttributes =
         widget._configuration.userConfiguration.userAttributes;
 
-    final config = ebbotClientService.client.chatStyleConfig;
-
     ebbotClientService.client.startReceive();
     handleInputMode("visible");
 
@@ -156,10 +154,10 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
     super.build(context);
 
     if (!_isInitialized) {
-      return Scaffold(
+      return const Scaffold(
         body: Center(
           child: CircularProgressIndicator(
-            color: widget._configuration.theme.primaryColor,
+            color: Colors.grey,
           ),
         ),
       );
@@ -167,6 +165,10 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
 
     final ebbotClientService =
         _serviceLocator.getService<EbbotDartClientService>();
+
+    final ebbotSupportService =
+        _serviceLocator.getService<EbbotSupportService>();
+    final chatTheme = ebbotSupportService.chatTheme();
 
     final config = ebbotClientService.client.chatStyleConfig;
     _logger
@@ -179,7 +181,7 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
     return Scaffold(
       body: Stack(
         children: [
-          _buildChat(),
+          _buildChat(chatTheme: chatTheme),
           _buildPopupMenu(),
           if (shouldShowStartPage) _buildStartPageWidget()
         ],
@@ -206,26 +208,8 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
   }
 
   @override
-  void handleNotification(String title, String text) async {
-    _logger?.d("handling notification: $title, $text");
-    await showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(title),
-          content: Text(text),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('OK'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
+  @deprecated
+  void handleNotification(String title, String text) async {}
 
   @override
   void handleInputMode(String? inputMode) {
@@ -570,13 +554,13 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
     });
   }
 
-  Widget _buildChat() {
+  Widget _buildChat({required ChatTheme chatTheme}) {
     final inputOptions =
         _ebbotControllerInitializer.chatInputController?.inputOptions ??
             const InputOptions();
     return Chat(
       inputOptions: inputOptions,
-      theme: widget._configuration.theme,
+      theme: chatTheme,
       messages: _messages,
       onSendPressed: handleSendPressed,
       onMessageTap: handleMessageTap,
