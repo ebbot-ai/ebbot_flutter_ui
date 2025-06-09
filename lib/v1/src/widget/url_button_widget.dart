@@ -53,10 +53,8 @@ class _UrlButtonWidgetState extends State<UrlButtonWidget> {
     final backgroundColor =
         HexColor.fromHex(chatStyleConfig.regular_btn_background_color);
     final textColor = HexColor.fromHex(chatStyleConfig.regular_btn_text_color);
-    final disabledBackgroundColor =
-        HexColor.fromHex(chatStyleConfig.btn_clicked_background_color);
-    final disabledTextColor =
-        HexColor.fromHex(chatStyleConfig.btn_clicked_text_color);
+    final disabledBackgroundColor = Color.fromARGB(255, 214, 214, 214);
+    final disabledTextColor = Color.fromARGB(255, 128, 128, 128);
 
     final style = ButtonStyle(
       backgroundColor: WidgetStateProperty.resolveWith<Color>((states) {
@@ -72,7 +70,7 @@ class _UrlButtonWidgetState extends State<UrlButtonWidget> {
         if (states.contains(WidgetState.disabled)) {
           return RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10.0),
-            side: BorderSide(color: Colors.grey),
+            side: BorderSide(color: disabledBackgroundColor),
           );
         }
         return RoundedRectangleBorder(

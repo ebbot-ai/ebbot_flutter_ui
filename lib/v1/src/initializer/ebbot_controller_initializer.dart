@@ -64,7 +64,6 @@ class EbbotControllerInitializer {
 
 abstract class AbstractControllerDelegate {
   void handleOnTextChanged(String text);
-  void handleNotification(String title, String text);
   void handleTypingUsers();
   void handleClearTypingUsers();
   void handleAddMessage(types.Message message);

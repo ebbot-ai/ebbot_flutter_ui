@@ -208,12 +208,8 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
   }
 
   @override
-  @deprecated
-  void handleNotification(String title, String text) async {}
-
-  @override
   void handleInputMode(String? inputMode) {
-    late bool newCustomBottomWidgetVisibilityVisible;
+    bool? newCustomBottomWidgetVisibilityVisible;
 
     switch (inputMode) {
       case 'hidden':
@@ -235,18 +231,19 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
         newCustomBottomWidgetVisibilityVisible = false;
         break;
       default:
-        _logger?.i(
-            "handling unknown input mode: $inputMode, setting input mode to visible");
-        // TODO: When replaying messages, they are sometimes not providing a input_field boolean
-        // TODO: So we need to set the input mode to visible as a fallback
-        // TOOD: This might be a bug in the backend, so we should fix this eventually
-        newCustomBottomWidgetVisibilityVisible = true;
+        _logger?.i("handling input mode: $inputMode, skip setting input mode");
+      // TODO: When replaying messages, they are sometimes not providing a input_field boolean
+      // TODO: So we need to set the input mode to visible as a fallback
+      // TOOD: This might be a bug in the backend, so we should fix this eventually
+      //newCustomBottomWidgetVisibilityVisible = true;
     }
 
-    setState(() {
-      _customBottomWidgetVisibilityVisible =
-          newCustomBottomWidgetVisibilityVisible;
-    });
+    if (newCustomBottomWidgetVisibilityVisible != null) {
+      setState(() {
+        _customBottomWidgetVisibilityVisible =
+            newCustomBottomWidgetVisibilityVisible!;
+      });
+    }
   }
 
   @override
@@ -586,7 +583,7 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
 
   Widget _buildPopupMenu() {
     return Positioned(
-      top: 50,
+      top: 0,
       right: 10,
       child: AnimatedOpacity(
         opacity: _isChatStarted ? 1.0 : 0,
