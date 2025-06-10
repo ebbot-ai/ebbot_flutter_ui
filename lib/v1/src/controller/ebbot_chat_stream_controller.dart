@@ -34,7 +34,7 @@ class EbbotChatStreamController extends ResettableController {
   }
 
   void handle(Chat chat) {
-    var chatMessages = chat.data?.chat?.chatMessages ?? [];
+    var chatMessages = chat.data?.chat?.chat_messages ?? [];
     final ebbotSupportService =
         _serviceLocator.getService<EbbotSupportService>();
 
@@ -43,7 +43,9 @@ class EbbotChatStreamController extends ResettableController {
     for (var message in chatMessages) {
       _handleClearTypingUsers();
       _logger?.d("Message sender: ${message.sender}");
-      final author = message.sender == 'user' ? chatUser : ebbotSupportService.getEbbotGPTUser();
+      final author = message.sender == 'user'
+          ? chatUser
+          : ebbotSupportService.getEbbotGPTUser();
       final messageId = message.id!;
 
       var chatMessage = _ebbotChatParser.parse(message, author, messageId);

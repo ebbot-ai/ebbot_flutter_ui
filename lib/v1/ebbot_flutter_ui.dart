@@ -54,8 +54,6 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
 
   bool _isInitialized = false;
   bool get isInitialized => _isInitialized;
-  bool _isChatStarted =
-      false; // This is toggled when the user sends their first chat message
 
   final _typingUsers = <types.User>[];
   bool hasReceivedGPTMessageBefore = false;
@@ -63,11 +61,14 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
   late EbbotServiceInitializer _ebbotServiceInitializer;
   late EbbotControllerInitializer _ebbotControllerInitializer;
 
-  late bool _customBottomWidgetVisibilityVisible = false;
-
   // Start page states
+  bool _isChatStarted =
+      false; // This is toggled when the user sends their first chat message
   bool _startPageDismissed = false;
   bool _infoDialogInChatShown = false;
+  bool _shouldUsePassedChatId = true;
+  bool _isChatRestarted = false;
+  bool _inputBoxVisible = true;
 
   Logger? _logger;
 
@@ -92,7 +93,8 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
   void _initialize() async {
     final sessionConfiguration = SessionConfigurationBuilder();
 
-    if (widget._configuration.session.chatId != null) {
+    if (widget._configuration.session.chatId != null &&
+        _shouldUsePassedChatId) {
       sessionConfiguration.chatId(widget._configuration.session.chatId!);
     }
 
@@ -144,6 +146,11 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
 
     setState(() {
       _isInitialized = true;
+      if (widget._configuration.session.chatId != null && !_isChatRestarted) {
+        _shouldUsePassedChatId = true;
+        _logger?.i(
+            "Initialized with chatId: ${widget._configuration.session.chatId}");
+      }
     });
   }
 
@@ -172,11 +179,12 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
 
     final config = ebbotClientService.client.chatStyleConfig;
     _logger
-        ?.d("bottom widget visibility: $_customBottomWidgetVisibilityVisible");
+        ?.d("bottom widget visibility: $_inputBoxVisible");
     _logger?.d("Chat started: $_isChatStarted");
 
     final startPageEnabled = config?.start_page_enabled ?? false;
-    final shouldShowStartPage = !_startPageDismissed && startPageEnabled;
+    final shouldShowStartPage =
+        !_startPageDismissed && startPageEnabled && !_shouldUsePassedChatId;
 
     return Scaffold(
       body: Stack(
@@ -240,7 +248,7 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
 
     if (newCustomBottomWidgetVisibilityVisible != null) {
       setState(() {
-        _customBottomWidgetVisibilityVisible =
+        _inputBoxVisible =
             newCustomBottomWidgetVisibilityVisible!;
       });
     }
@@ -248,6 +256,7 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
 
   @override
   void handleAddMessage(types.Message message) {
+    _logger?.d("Handling add message: ${message.id} of type ${message.type}");
     final ebbotCallbackService =
         _serviceLocator.getService<EbbotCallbackService>();
 
@@ -255,9 +264,12 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
         _serviceLocator.getService<EbbotSupportService>();
 
     if (message is types.TextMessage) {
+      _logger?.d("Handling text message: ${message.text}");
       if (_messages.isEmpty) {
         ebbotCallbackService.dispatchOnStartConversation(message.text);
       }
+
+      _logger?.d("Adding message with ID: ${message.id}");
 
       ebbotCallbackService.dispatchOnMessage(message.text);
 
@@ -378,10 +390,13 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
   void handleRestartConversation() async {
     setState(() {
       _startPageDismissed = false;
-      _customBottomWidgetVisibilityVisible = false;
+      _inputBoxVisible = false;
       _isInitialized = false;
       _isChatStarted = false;
+      _isChatRestarted = true;
       _infoDialogInChatShown = false;
+      _shouldUsePassedChatId =
+          false; // After restart, we don't use the passed chatId
       _messages.clear();
     });
 
@@ -565,7 +580,7 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
       emptyState: Container(alignment: Alignment.center),
       user: chatUser,
       customBottomWidget: Visibility(
-        visible: _customBottomWidgetVisibilityVisible,
+        visible: _inputBoxVisible,
         child: Input(
           onSendPressed: handleSendPressed,
           onAttachmentPressed: handleOnAttachmentPressed,
