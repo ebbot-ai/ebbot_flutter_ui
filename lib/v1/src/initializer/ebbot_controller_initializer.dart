@@ -48,6 +48,8 @@ class EbbotControllerInitializer {
       controllerDelegates.handleClearTypingUsers,
       controllerDelegates.handleAddMessage,
       controllerDelegates.handleInputMode,
+      controllerDelegates.handleAgentHandover,
+      controllerDelegates.handleChatClosed,
     );
 
     chatTranscriptController = ChatTranscriptController();
@@ -64,7 +66,6 @@ class EbbotControllerInitializer {
 
 abstract class AbstractControllerDelegate {
   void handleOnTextChanged(String text);
-  void handleNotification(String title, String text);
   void handleTypingUsers();
   void handleClearTypingUsers();
   void handleAddMessage(types.Message message);
@@ -77,4 +78,6 @@ abstract class AbstractControllerDelegate {
   void handleOnPopupMenuSelected(PopupMenuOptions option);
   void handleOnAttachmentPressed();
   void handleAddMessageFromString(String message);
+  void handleAgentHandover();
+  void handleChatClosed();
 }

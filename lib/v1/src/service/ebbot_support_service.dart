@@ -10,24 +10,33 @@ import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 class EbbotSupportService {
   final _serviceLocator = ServiceLocator();
 
-  types.User? _cachedEbbotGPTUser;
+  types.User? _cachedEbbotUser;
 
-  types.User getEbbotGPTUser() {
-    if (_cachedEbbotGPTUser != null) return _cachedEbbotGPTUser!;
+  types.User getEbbotUser() {
+    if (_cachedEbbotUser != null) return _cachedEbbotUser!;
 
     final client = _serviceLocator.getService<EbbotDartClientService>().client;
     final config = client.chatStyleConfig;
-    _cachedEbbotGPTUser = _generateEbbotGPTUser(imageUrl: config?.avatar.src);
-    return _cachedEbbotGPTUser!;
+    // This will default to use the GPT avatar, it will be overridden once an agent handover happens
+    _cachedEbbotUser = _generateEbbotUser(imageUrl: config?.avatar.src);
+    return _cachedEbbotUser!;
   }
 
-  types.User _generateEbbotGPTUser({String? imageUrl}) {
+  types.User _generateEbbotUser({String? imageUrl}) {
     return types.User(
       id: 'bot',
       firstName: 'Bot',
       lastName: 'Bot',
       imageUrl: imageUrl,
     );
+  }
+
+  void setEbbotAgentUser(String? imageUrl) {
+    _cachedEbbotUser = _generateEbbotUser(imageUrl: imageUrl);
+  }
+
+  void resetEbbotUser() {
+    _cachedEbbotUser = null;
   }
 
   ChatTheme chatTheme() {
