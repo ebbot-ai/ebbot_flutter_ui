@@ -251,10 +251,6 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
         break;
       default:
         _logger?.i("handling input mode: $inputMode, skip setting input mode");
-      // TODO: When replaying messages, they are sometimes not providing a input_field boolean
-      // TODO: So we need to set the input mode to visible as a fallback
-      // TOOD: This might be a bug in the backend, so we should fix this eventually
-      //newCustomBottomWidgetVisibilityVisible = true;
     }
 
     if (newCustomBottomWidgetVisibilityVisible != null) {
