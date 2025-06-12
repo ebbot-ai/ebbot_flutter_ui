@@ -209,6 +209,15 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
   }
 
   @override
+  void handleChatClosed() {
+    _logger?.d("Chat is closed, hiding input box");
+    setState(() {
+      _inputBoxVisible = false;
+      _hasAgentHandover = false;
+    });
+  }
+
+  @override
   void handleTypingUsers() {
     final ebbotSupportService =
         _serviceLocator.getService<EbbotSupportService>();

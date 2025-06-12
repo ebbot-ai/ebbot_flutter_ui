@@ -17,6 +17,7 @@ class EbbotChatStreamController extends ResettableController {
   final Function(types.Message) _handleAddMessage;
   final Function(String) _handleCanType;
   final Function() _handleAgentHandover;
+  final Function() _handleChatClosed;
   bool hasReceivedGPTMessageBefore = false;
   bool hasHadAgentHandover = false;
 
@@ -32,6 +33,7 @@ class EbbotChatStreamController extends ResettableController {
     this._handleAddMessage,
     this._handleCanType,
     this._handleAgentHandover,
+    this._handleChatClosed,
   ) {
     startListening();
   }
@@ -51,6 +53,12 @@ class EbbotChatStreamController extends ResettableController {
       _logger?.d("Agent handover detected");
       _handleAgentHandover();
       ebbotSupportService.setEbbotAgentUser(agentImage);
+    }
+
+    // Check if the chat has been "closed"
+    if (chat.data?.chat?.status == 'closed' &&
+        chat.data?.chat?.type == 'close_chat') {
+      _handleChatClosed();
     }
 
     for (var message in chatMessages) {

@@ -49,6 +49,7 @@ class EbbotControllerInitializer {
       controllerDelegates.handleAddMessage,
       controllerDelegates.handleInputMode,
       controllerDelegates.handleAgentHandover,
+      controllerDelegates.handleChatClosed,
     );
 
     chatTranscriptController = ChatTranscriptController();
@@ -78,4 +79,5 @@ abstract class AbstractControllerDelegate {
   void handleOnAttachmentPressed();
   void handleAddMessageFromString(String message);
   void handleAgentHandover();
+  void handleChatClosed();
 }
