@@ -228,34 +228,19 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
 
   @override
   void handleInputMode(String? inputMode) {
-    bool? newCustomBottomWidgetVisibilityVisible;
+    final visibility = switch (inputMode) {
+      'hidden' => false,
+      'visible' => true,
+      'disabled' => false,
+      _ => null, // Default case, do nothing
+    };
 
-    switch (inputMode) {
-      case 'hidden':
-        _logger?.i(
-            "handling input mode: $inputMode, setting input mode to hidden");
+    _logger?.i(
+        "handling input mode: $inputMode, setting input mode to $visibility");
 
-        newCustomBottomWidgetVisibilityVisible = false;
-        break;
-      case 'visible':
-        _logger?.i(
-            "handling input mode: $inputMode, setting input mode to visible");
-
-        newCustomBottomWidgetVisibilityVisible = true;
-        break;
-      case 'disabled':
-        _logger?.i(
-            "handling input mode: $inputMode, setting input mode to disabled");
-
-        newCustomBottomWidgetVisibilityVisible = false;
-        break;
-      default:
-        _logger?.i("handling input mode: $inputMode, skip setting input mode");
-    }
-
-    if (newCustomBottomWidgetVisibilityVisible != null) {
+    if (visibility != null) {
       setState(() {
-        _inputBoxVisible = newCustomBottomWidgetVisibilityVisible!;
+        _inputBoxVisible = visibility;
       });
     }
   }
