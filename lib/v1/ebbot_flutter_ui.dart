@@ -66,9 +66,11 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
       false; // This is toggled when the user sends their first chat message
   bool _startPageDismissed = false;
   bool _infoDialogInChatShown = false;
-  bool _shouldUsePassedChatId = true;
+  bool _shouldUsePassedChatId =
+      false; // If the chatId is passed in the configuration, we use it
   bool _isChatRestarted = false;
   bool _inputBoxVisible = true;
+  bool _hasAgentHandover = false;
 
   Logger? _logger;
 
@@ -81,6 +83,7 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
   @override
   void dispose() {
     super.dispose();
+    _logger?.i("Disposing EbbotFlutterUiState");
     _serviceLocator.getService<EbbotDartClientService>().client.closeAsync();
     _serviceLocator.reset();
   }
@@ -178,8 +181,7 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
     final chatTheme = ebbotSupportService.chatTheme();
 
     final config = ebbotClientService.client.chatStyleConfig;
-    _logger
-        ?.d("bottom widget visibility: $_inputBoxVisible");
+    _logger?.d("bottom widget visibility: $_inputBoxVisible");
     _logger?.d("Chat started: $_isChatStarted");
 
     final startPageEnabled = config?.start_page_enabled ?? false;
@@ -198,13 +200,22 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
   }
 
   @override
+  void handleAgentHandover() {
+    // Make sure we always show the input box from now on
+    setState(() {
+      _inputBoxVisible = true;
+      _hasAgentHandover = true;
+    });
+  }
+
+  @override
   void handleTypingUsers() {
     final ebbotSupportService =
         _serviceLocator.getService<EbbotSupportService>();
     setState(() {
       _typingUsers.clear();
 
-      _typingUsers.add(ebbotSupportService.getEbbotGPTUser());
+      _typingUsers.add(ebbotSupportService.getEbbotUser());
     });
   }
 
@@ -248,8 +259,7 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
 
     if (newCustomBottomWidgetVisibilityVisible != null) {
       setState(() {
-        _inputBoxVisible =
-            newCustomBottomWidgetVisibilityVisible!;
+        _inputBoxVisible = newCustomBottomWidgetVisibilityVisible!;
       });
     }
   }
@@ -273,7 +283,7 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
 
       ebbotCallbackService.dispatchOnMessage(message.text);
 
-      if (message.author == ebbotSupportService.getEbbotGPTUser()) {
+      if (message.author == ebbotSupportService.getEbbotUser()) {
         ebbotCallbackService.dispatchOnBotMessage(message.text);
       }
 
@@ -397,8 +407,18 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
       _infoDialogInChatShown = false;
       _shouldUsePassedChatId =
           false; // After restart, we don't use the passed chatId
+      _hasAgentHandover = false;
       _messages.clear();
     });
+
+    _logger
+        ?.i("Restarting conversation, clearing messages and resetting state");
+
+    final ebbotSupportService =
+        _serviceLocator.getService<EbbotSupportService>();
+
+    ebbotSupportService
+        .resetEbbotUser(); // This makes sure we reset the user to GPT if there has been an agent handover
 
     final ebbotClientService =
         _serviceLocator.getService<EbbotDartClientService>();
@@ -406,7 +426,7 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
 
     _ebbotControllerInitializer.resetControllers();
 
-    _postInitSetup();
+    await _postInitSetup();
 
     setState(() {
       _isInitialized = true;
@@ -579,6 +599,7 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
       onAttachmentPressed: handleOnAttachmentPressed,
       emptyState: Container(alignment: Alignment.center),
       user: chatUser,
+      showUserAvatars: true,
       customBottomWidget: Visibility(
         visible: _inputBoxVisible,
         child: Input(

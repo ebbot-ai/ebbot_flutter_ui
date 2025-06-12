@@ -16,7 +16,9 @@ class EbbotChatStreamController extends ResettableController {
   final Function _handleClearTypingUsers;
   final Function(types.Message) _handleAddMessage;
   final Function(String) _handleCanType;
+  final Function() _handleAgentHandover;
   bool hasReceivedGPTMessageBefore = false;
+  bool hasHadAgentHandover = false;
 
   final _ebbotChatParser = EbbotChatParser();
 
@@ -29,6 +31,7 @@ class EbbotChatStreamController extends ResettableController {
     this._handleClearTypingUsers,
     this._handleAddMessage,
     this._handleCanType,
+    this._handleAgentHandover,
   ) {
     startListening();
   }
@@ -40,12 +43,22 @@ class EbbotChatStreamController extends ResettableController {
 
     _logger?.d("we have ${chatMessages.length} chat messages to process");
 
+    // Check if there is an agent handover happening
+    if (chat.data?.chat?.handled_by == 'agent' && !hasHadAgentHandover) {
+      final ebbotSupportService =
+          _serviceLocator.getService<EbbotSupportService>();
+      final agentImage = chat.data?.chat?.user_profile_picture;
+      _logger?.d("Agent handover detected");
+      _handleAgentHandover();
+      ebbotSupportService.setEbbotAgentUser(agentImage);
+    }
+
     for (var message in chatMessages) {
       _handleClearTypingUsers();
       _logger?.d("Message sender: ${message.sender}");
       final author = message.sender == 'user'
           ? chatUser
-          : ebbotSupportService.getEbbotGPTUser();
+          : ebbotSupportService.getEbbotUser();
       final messageId = message.id!;
 
       var chatMessage = _ebbotChatParser.parse(message, author, messageId);
@@ -59,6 +72,7 @@ class EbbotChatStreamController extends ResettableController {
 
   @override
   void reset() {
+    hasHadAgentHandover = false;
     startListening();
   }
 

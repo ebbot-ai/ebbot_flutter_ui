@@ -9,6 +9,7 @@ import 'package:ebbot_flutter_ui/v1/src/widget/rating_widget.dart';
 import 'package:ebbot_flutter_ui/v1/src/widget/url_box_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
+import 'package:logger/logger.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 // A controller for handling custom flutter chat ui messages
@@ -16,6 +17,7 @@ class ChatUiCustomMessageController {
   final EbbotConfiguration configuration;
   final Function() handleRestartConversation;
   final _serviceLocator = ServiceLocator();
+  Logger? _logger;
 
   ChatUiCustomMessageController(
       {required this.configuration, required this.handleRestartConversation});
@@ -52,7 +54,7 @@ class ChatUiCustomMessageController {
       content: content,
       configuration: configuration,
       onURlPressed: (String url, {ButtonData? buttonData}) async {
-        _processUrlClick(url, buttonData: buttonData);
+        _processUrlPressed(url, buttonData: buttonData);
       },
       onScenarioPressed: (String scenario,
           {String? state, ButtonData? buttonData}) {
@@ -82,7 +84,7 @@ class ChatUiCustomMessageController {
         content: content,
         configuration: configuration,
         onURlPressed: (url, {ButtonData? buttonData}) async {
-          _processUrlClick(url, buttonData: buttonData);
+          _processUrlPressed(url, buttonData: buttonData);
         },
         onScenarioPressed: (scenario, {String? state, ButtonData? buttonData}) {
           client.sendScenarioMessage(scenario,
@@ -93,7 +95,7 @@ class ChatUiCustomMessageController {
         });
   }
 
-  void _processUrlClick(String url, {ButtonData? buttonData}) async {
+  void _processUrlPressed(String url, {ButtonData? buttonData}) async {
     final client = _serviceLocator.getService<EbbotDartClientService>().client;
     var uri = Uri.parse(url);
 
@@ -106,6 +108,8 @@ class ChatUiCustomMessageController {
 
     // If uri protocol is ebbot://reset, reset the conversation by letting the parent know
     if (uri.scheme == 'ebbot' && uri.host == 'reset') {
+      _logger?.i(
+          "Resetting conversation due to ebbot://reset protocol on url tapped");
       handleRestartConversation();
       return;
     }
