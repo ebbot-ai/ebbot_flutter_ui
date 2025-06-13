@@ -54,6 +54,12 @@ class EbbotApiController extends AbstractEbbotApiController {
     _client.sendScenarioMessage(scenarioId);
   }
 
+  @override
+  void showTranscript() {
+    _throwIfNotAttached();
+    _ebbotFlutterUiState?.handleDownloadTranscript();
+  }
+
   void _throwIfNotAttached() {
     throwIf(
         _ebbotFlutterUiState == null, _ebbotClientServiceNotInitializedMessage);
@@ -63,6 +69,7 @@ class EbbotApiController extends AbstractEbbotApiController {
 abstract class AbstractEbbotApiController {
   bool isInitialized();
   void restartConversation();
+  void showTranscript();
   void sendMessage(String message);
   void setUserAttributes(Map<String, dynamic> attributes);
   void triggerScenario(String scenarioId);

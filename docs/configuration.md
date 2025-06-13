@@ -171,6 +171,7 @@ var configuration = EbbotConfigurationBuilder()
 | `isInitialized`       | Checks if the widget is initialized.              | No parameters. Returns `bool`.                                                           |
 | `restartConversation` | Restarts the conversation.                        | No parameters.                                                                           |
 | `endConversation`     | Ends the current conversation.                    | No parameters.                                                                           |
+| `showTranscript`      | Presents the user with the chat transcript.       | No parameters.                                                                           |
 | `sendMessage`         | Sends a message to the conversation.              | `message`: A `String` containing the message to be sent.                                 |
 | `setUserAttributes`   | Sets attributes for the user in the conversation. | `attributes`: A `Map<String, dynamic>` containing the attributes to be set for the user. |
 | `triggerScenario`     | Triggers a specific scenario in the conversation. | `scenarioId`: A `String` identifying the scenario to be triggered.                       |
