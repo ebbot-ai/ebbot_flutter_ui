@@ -66,17 +66,20 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
       false; // This is toggled when the user sends their first chat message
   bool _startPageDismissed = false;
   bool _infoDialogInChatShown = false;
-  bool _shouldUsePassedChatId =
-      false; // If the chatId is passed in the configuration, we use it
   bool _isChatRestarted = false;
   bool _inputBoxVisible = true;
   bool _hasAgentHandover = false;
+
+  bool get _shouldUsePassedChatId =>
+      widget._configuration.session.chatId != null &&
+      !_isChatRestarted; // If chatId is passed and we are not restarting
 
   Logger? _logger;
 
   @override
   void initState() {
     super.initState();
+
     _initialize();
   }
 
@@ -96,8 +99,7 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
   void _initialize() async {
     final sessionConfiguration = SessionConfigurationBuilder();
 
-    if (widget._configuration.session.chatId != null &&
-        _shouldUsePassedChatId) {
+    if (_shouldUsePassedChatId) {
       sessionConfiguration.chatId(widget._configuration.session.chatId!);
     }
 
@@ -149,11 +151,6 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
 
     setState(() {
       _isInitialized = true;
-      if (widget._configuration.session.chatId != null && !_isChatRestarted) {
-        _shouldUsePassedChatId = true;
-        _logger?.i(
-            "Initialized with chatId: ${widget._configuration.session.chatId}");
-      }
     });
   }
 
@@ -395,8 +392,6 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
       _isChatStarted = false;
       _isChatRestarted = true;
       _infoDialogInChatShown = false;
-      _shouldUsePassedChatId =
-          false; // After restart, we don't use the passed chatId
       _hasAgentHandover = false;
       _messages.clear();
     });
