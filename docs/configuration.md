@@ -273,8 +273,10 @@ var userAttributes = {
   final rating =
         Opacity(opacity: 0.5, child: Image.asset("assets/sunglasses.png"));
 
-  var chat =
-        EbbotChatBuilder().rating(rating).ratingSelected(ratingSelected).build();
+  var chat = EbbotChatBuilder()
+        .showContextMenu(true) // Disable this if you want to use the apiController instead
+        .rating(rating)
+        .ratingSelected(ratingSelected).build();
   var someChatId = ""; // Provide your chatId here, it can be obtained from the onSessionData callback
   var session = EbbotSessionBuilder().chatId(someChatId).build();
 

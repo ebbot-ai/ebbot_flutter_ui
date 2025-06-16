@@ -4,7 +4,7 @@ import 'package:ebbot_flutter_ui/v1/src/controller/chat_transcript_controller.da
 import 'package:ebbot_flutter_ui/v1/src/controller/chat_ui_custom_message_controller.dart';
 import 'package:ebbot_flutter_ui/v1/src/controller/ebbot_chat_stream_controller.dart';
 import 'package:ebbot_flutter_ui/v1/src/controller/ebbot_message_stream_controller.dart';
-import 'package:ebbot_flutter_ui/v1/src/widget/popup_menu_widget.dart';
+import 'package:ebbot_flutter_ui/v1/src/widget/context_menu_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 
@@ -75,7 +75,7 @@ abstract class AbstractControllerDelegate {
   void handleMessageTap(BuildContext _, types.Message message);
   void handleEndConversation();
   void handleDownloadTranscript();
-  void handleOnPopupMenuSelected(PopupMenuOptions option);
+  void handleOnPopupMenuSelected(ContextMenuOptions option);
   void handleOnAttachmentPressed();
   void handleAddMessageFromString(String message);
   void handleAgentHandover();

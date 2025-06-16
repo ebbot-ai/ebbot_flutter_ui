@@ -17,7 +17,7 @@ import 'package:ebbot_flutter_ui/v1/src/service/log_service.dart';
 import 'package:ebbot_flutter_ui/v1/src/util/ebbot_gpt_user.dart';
 import 'package:ebbot_flutter_ui/v1/src/util/extension.dart';
 import 'package:ebbot_flutter_ui/v1/src/util/string_util.dart';
-import 'package:ebbot_flutter_ui/v1/src/widget/popup_menu_widget.dart';
+import 'package:ebbot_flutter_ui/v1/src/widget/context_menu_widget.dart';
 import 'package:ebbot_flutter_ui/v1/src/widget/start_page_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
@@ -185,11 +185,15 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
     final shouldShowStartPage =
         !_startPageDismissed && startPageEnabled && !_shouldUsePassedChatId;
 
+    final passedConfig = widget._configuration;
+
+    final shouldRenderContextMenu = passedConfig.chat.showContextMenu;
+
     return Scaffold(
       body: Stack(
         children: [
           _buildChat(chatTheme: chatTheme),
-          _buildPopupMenu(),
+          if (shouldRenderContextMenu) _buildContextMenu(),
           if (shouldShowStartPage) _buildStartPageWidget()
         ],
       ),
@@ -450,15 +454,15 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
   }
 
   @override
-  void handleOnPopupMenuSelected(PopupMenuOptions option) {
+  void handleOnPopupMenuSelected(ContextMenuOptions option) {
     switch (option) {
-      case PopupMenuOptions.restartChat:
+      case ContextMenuOptions.restartChat:
         handleRestartConversation();
         break;
-      case PopupMenuOptions.downloadTranscript:
+      case ContextMenuOptions.downloadTranscript:
         handleDownloadTranscript();
         break;
-      case PopupMenuOptions.endConversation:
+      case ContextMenuOptions.endConversation:
         handleEndConversation();
         break;
     }
@@ -602,14 +606,14 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
     );
   }
 
-  Widget _buildPopupMenu() {
+  Widget _buildContextMenu() {
     return Positioned(
       top: 0,
       right: 10,
       child: AnimatedOpacity(
         opacity: _isChatStarted ? 1.0 : 0,
         duration: const Duration(milliseconds: 300),
-        child: PopupMenuWidget(onSelected: handleOnPopupMenuSelected),
+        child: ContextMenuWidget(onSelected: handleOnPopupMenuSelected),
       ),
     );
   }

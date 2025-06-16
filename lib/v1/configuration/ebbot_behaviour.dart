@@ -13,6 +13,10 @@ class EbbotBehaviourBuilder {
     return this;
   }
 
+  EbbotBehaviourBuilder showContextMenu(bool show) {
+    return this;
+  }
+
   EbbotBehaviour build() {
     return EbbotBehaviour._builder(this);
   }
