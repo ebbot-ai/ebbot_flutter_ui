@@ -1,15 +1,23 @@
 class EbbotBehaviour {
   final EbbotBehaviourInput input;
+  final bool showContextMenu;
 
   EbbotBehaviour._builder(EbbotBehaviourBuilder builder)
-      : input = builder._input;
+      : input = builder._input,
+        showContextMenu = builder._showContextMenu;
 }
 
 class EbbotBehaviourBuilder {
   EbbotBehaviourInput _input = EbbotBehaviourInputBuilder().build();
+  bool _showContextMenu = true;
 
   EbbotBehaviourBuilder input(EbbotBehaviourInput input) {
     _input = input;
+    return this;
+  }
+
+  EbbotBehaviourBuilder showContextMenu(bool show) {
+    _showContextMenu = show;
     return this;
   }
 

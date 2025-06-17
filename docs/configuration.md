@@ -171,6 +171,7 @@ var configuration = EbbotConfigurationBuilder()
 | `isInitialized`       | Checks if the widget is initialized.              | No parameters. Returns `bool`.                                                           |
 | `restartConversation` | Restarts the conversation.                        | No parameters.                                                                           |
 | `endConversation`     | Ends the current conversation.                    | No parameters.                                                                           |
+| `showTranscript`      | Presents the user with the chat transcript.       | No parameters.                                                                           |
 | `sendMessage`         | Sends a message to the conversation.              | `message`: A `String` containing the message to be sent.                                 |
 | `setUserAttributes`   | Sets attributes for the user in the conversation. | `attributes`: A `Map<String, dynamic>` containing the attributes to be set for the user. |
 | `triggerScenario`     | Triggers a specific scenario in the conversation. | `scenarioId`: A `String` identifying the scenario to be triggered.                       |
@@ -264,7 +265,9 @@ var userAttributes = {
   var ebbotBehaviourInput = EbbotBehaviourInputBuilder()
       .enterPressed(EbbotBehaviourInputEnterPressed.sendMessage)
       .build();
-  var behaviour = EbbotBehaviourBuilder().input(ebbotBehaviourInput).build();
+  var behaviour = EbbotBehaviourBuilder()
+      .showContextMenu(true) // Disable this if you want to use the apiController instead
+      .input(ebbotBehaviourInput).build();
 
   var logConfiguration = EbbotLogConfigurationBuilder().logLevel(EbbotLogLevel.info).enabled(true).build();
 
@@ -272,8 +275,9 @@ var userAttributes = {
   final rating =
         Opacity(opacity: 0.5, child: Image.asset("assets/sunglasses.png"));
 
-  var chat =
-        EbbotChatBuilder().rating(rating).ratingSelected(ratingSelected).build();
+  var chat = EbbotChatBuilder()
+        .rating(rating)
+        .ratingSelected(ratingSelected).build();
   var someChatId = ""; // Provide your chatId here, it can be obtained from the onSessionData callback
   var session = EbbotSessionBuilder().chatId(someChatId).build();
 

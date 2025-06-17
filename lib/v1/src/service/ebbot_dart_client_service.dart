@@ -37,6 +37,7 @@ class EbbotDartClientService {
     _configuration.sessionConfiguration.chatId = null;
     _client = EbbotDartClient(_botId, _configuration);
     await initialize();
+    await _client.initializeWebsocketConnection();
   }
 
   Future<void> initialize() async {

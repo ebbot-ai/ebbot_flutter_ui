@@ -46,14 +46,13 @@ class EbbotMessageStreamController extends ResettableController {
   void _handle(Message message) {
     final ebbotSupportService =
         _serviceLocator.getService<EbbotSupportService>();
-    final ebbotGPTUser = ebbotSupportService.getEbbotGPTUser();
+    final ebbotUser = ebbotSupportService.getEbbotUser();
     // Handle the message
     var messageType = message.data.message.type;
 
     _handleInputMode(message.data.message.input_field);
 
-    final author =
-        message.data.message.sender == 'user' ? chatUser : ebbotGPTUser;
+    final author = message.data.message.sender == 'user' ? chatUser : ebbotUser;
 
     if (messageType == 'typing') {
       _handleTypingUsers();
@@ -68,7 +67,7 @@ class EbbotMessageStreamController extends ResettableController {
 
       var systemMessage = types.SystemMessage(
           id: StringUtil.randomString(),
-          author: ebbotGPTUser,
+          author: ebbotUser,
           text: "AI generated message");
       _handleAddMessage(systemMessage);
     }
