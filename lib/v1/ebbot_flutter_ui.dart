@@ -187,7 +187,7 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
 
     final passedConfig = widget._configuration;
 
-    final shouldRenderContextMenu = passedConfig.chat.showContextMenu;
+    final shouldRenderContextMenu = passedConfig.behaviour.showContextMenu;
 
     return Scaffold(
       body: Stack(
