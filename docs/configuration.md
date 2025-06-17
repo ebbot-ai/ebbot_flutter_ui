@@ -265,7 +265,9 @@ var userAttributes = {
   var ebbotBehaviourInput = EbbotBehaviourInputBuilder()
       .enterPressed(EbbotBehaviourInputEnterPressed.sendMessage)
       .build();
-  var behaviour = EbbotBehaviourBuilder().input(ebbotBehaviourInput).build();
+  var behaviour = EbbotBehaviourBuilder()
+      .showContextMenu(true) // Disable this if you want to use the apiController instead
+      .input(ebbotBehaviourInput).build();
 
   var logConfiguration = EbbotLogConfigurationBuilder().logLevel(EbbotLogLevel.info).enabled(true).build();
 
@@ -274,7 +276,6 @@ var userAttributes = {
         Opacity(opacity: 0.5, child: Image.asset("assets/sunglasses.png"));
 
   var chat = EbbotChatBuilder()
-        .showContextMenu(true) // Disable this if you want to use the apiController instead
         .rating(rating)
         .ratingSelected(ratingSelected).build();
   var someChatId = ""; // Provide your chatId here, it can be obtained from the onSessionData callback
