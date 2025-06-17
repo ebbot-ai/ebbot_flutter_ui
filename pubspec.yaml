@@ -1,7 +1,7 @@
 name: ebbot_flutter_ui
 description: "The Ebbot flutter ui project."
 publish_to: "none" # Remove this line if you wish to publish to pub.dev¨
-version: 0.2.4
+version: 0.2.5
 
 environment:
   sdk: ">=3.2.6 <4.0.0"
