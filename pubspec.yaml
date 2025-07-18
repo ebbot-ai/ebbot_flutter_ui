@@ -1,7 +1,29 @@
 name: ebbot_flutter_ui
-description: "The Ebbot flutter ui project."
-publish_to: "none" # Remove this line if you wish to publish to pub.dev¨
+description: A Flutter UI library for integrating Ebbot chat functionality into Flutter applications. Provides a complete chat interface with real-time messaging, image uploads, session management, and customizable themes.
+publish_to: "none" # This is a private library not published to pub.dev
 version: 0.2.6+1
+
+# Repository information
+repository: https://github.com/ebbot-ai/ebbot-flutter-ui
+issue_tracker: https://github.com/ebbot-ai/ebbot-flutter-ui/issues
+documentation: https://docs.ebbot.ai/
+
+# Package metadata
+topics:
+  - chat
+  - ui
+  - messaging
+  - customer-support
+  - flutter-widget
+
+# Platform support
+platforms:
+  android:
+  ios:
+  web:
+  macos:
+  windows:
+  linux:
 
 environment:
   sdk: ">=3.2.6 <4.0.0"
