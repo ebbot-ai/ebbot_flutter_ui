@@ -30,10 +30,76 @@ import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+/// The main Ebbot Flutter UI widget.
+///
+/// This widget provides a complete chat interface that connects to Ebbot's
+/// backend services. It includes features like:
+/// - Real-time messaging with WebSocket support
+/// - Image upload capabilities
+/// - Session management and recovery
+/// - Customizable themes and behaviors
+/// - Agent handover support
+/// - Conversation transcripts
+/// - Context menu with actions
+///
+/// ## Basic Usage
+///
+/// ```dart
+/// EbbotFlutterUi(
+///   botId: 'your-bot-id',
+///   configuration: EbbotConfigurationBuilder()
+///     .environment(Environment.production)
+///     .build(),
+/// )
+/// ```
+///
+/// ## Advanced Usage
+///
+/// ```dart
+/// EbbotFlutterUi(
+///   botId: 'your-bot-id',
+///   configuration: EbbotConfigurationBuilder()
+///     .environment(Environment.production)
+///     .userConfiguration(
+///       EbbotUserConfigurationBuilder()
+///         .userAttributes({'userId': '123', 'name': 'John'})
+///         .build()
+///     )
+///     .behaviour(
+///       EbbotBehaviourBuilder()
+///         .showContextMenu(true)
+///         .build()
+///     )
+///     .callback(
+///       EbbotCallbackBuilder()
+///         .onMessage((message) => print('Message: $message'))
+///         .onLoad(() => print('Chat loaded'))
+///         .build()
+///     )
+///     .build(),
+/// )
+/// ```
 class EbbotFlutterUi extends StatefulWidget {
   final String _botId;
   final EbbotConfiguration _configuration;
 
+  /// Creates an Ebbot Flutter UI widget.
+  ///
+  /// Parameters:
+  /// - [botId]: The unique identifier for your Ebbot bot (required)
+  /// - [configuration]: Optional configuration for customizing the chat behavior.
+  ///   If not provided, default configuration will be used.
+  /// - [key]: Optional key for the widget
+  ///
+  /// Example:
+  /// ```dart
+  /// EbbotFlutterUi(
+  ///   botId: 'your-bot-id',
+  ///   configuration: EbbotConfigurationBuilder()
+  ///     .environment(Environment.production)
+  ///     .build(),
+  /// )
+  /// ```
   EbbotFlutterUi({
     Key? key,
     required String botId,
