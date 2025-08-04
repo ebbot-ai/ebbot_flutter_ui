@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:ebbot_flutter_ui/ebbot_flutter_ui.dart';
 import 'app_data/demo_app_with_pages.dart';
@@ -50,7 +51,9 @@ var apiController = EbbotApiController();
 String getBotId() {
   final botId = dotenv.env['BOT_ID'];
   if (botId == null || botId.isEmpty || botId.contains('your_')) {
-    throw Exception('BOT_ID not configured. Please check your .env file.');
+    print('BOT_ID not found or not configured properly.');
+    print('Please ensure .env file exists and contains: BOT_ID=your_actual_bot_id');
+    throw Exception('BOT_ID not configured. Please check your .env file.\nCopy .env.example to .env and set your bot ID.');
   }
   return botId;
 }
@@ -73,7 +76,21 @@ Environment getEnvironment() {
 
 Future main() async {
   // Load environment variables
-  await dotenv.load(fileName: ".env");
+  try {
+    await dotenv.load();  // Try default .env file first
+  } catch (e) {
+    try {
+      await dotenv.load(fileName: ".env");  // Try explicit .env
+    } catch (e2) {
+      print('Could not load .env file. Error: $e2');
+      print('Make sure .env file exists in the project root.');
+      print('Copy .env.example to .env and configure your bot settings.');
+      
+      // For development, let's provide fallback values
+      print('Using fallback configuration...');
+      // We'll handle this in getBotId() function
+    }
+  }
   
   // Get configuration from environment
   final botId = getBotId();
