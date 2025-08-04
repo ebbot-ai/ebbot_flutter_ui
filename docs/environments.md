@@ -54,20 +54,7 @@ final configuration = EbbotConfigurationBuilder()
 ```
 
 ### Production Deployment
-
-Choose based on your primary user location:
-
-#### For North American Users
-```dart
-.environment(Environment.googleCanadaProduction)
-```
-
-#### For European Users
-```dart
-.environment(Environment.googleEUProduction)
-// or
-.environment(Environment.ovhEUProduction)
-```
+Use the environment where your bot is configured. Your specific environment will be determined by your bot setup.
 
 ## Environment-Specific Configuration
 
@@ -266,11 +253,7 @@ class _DebugEnvironmentSelectorState
 
 ## Environment Selection
 
-The environment is determined by where your Ebbot bot is configured, not a choice you make based on user location. Your bot will be set up in a specific environment by your Ebbot account manager:
-
-- Contact your Ebbot representative to confirm which environment your bot uses
-- Use the environment specified in your bot configuration
-- All users will connect to the same environment regardless of their location
+Use the environment where your bot is configured. This is determined by your bot setup and technical requirements.
 
 ## Security Notes
 
@@ -316,9 +299,6 @@ final configuration = EbbotConfigurationBuilder()
 
 ## Support
 
-If you're unsure which environment to use:
-1. Contact your Ebbot account manager
-2. Check your bot configuration dashboard
-3. Start with staging for initial testing
+Start with staging for initial testing, then use the production environment specified for your bot.
 
 For more help, see the [Troubleshooting Guide](./troubleshooting.md).

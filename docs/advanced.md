@@ -199,10 +199,7 @@ class AdvancedChatConfig {
   }
   
   static void _handleBotMessage(String message) {
-    // Handle specific bot responses
-    if (message.contains('AGENT_TRANSFER')) {
-      _notifyAgentTransfer();
-    }
+    debugPrint('Bot message received: ${message.length} characters');
   }
   
   static void _handleUserMessage(String message) {
@@ -329,56 +326,29 @@ class ConditionalFeatures {
 }
 ```
 
-## Error Recovery Strategies
+## Error Handling
 
-Implement robust error handling:
+Handle loading errors in your configuration:
 
 ```dart
-class ErrorRecoveryConfig {
-  static EbbotConfiguration buildResilientConfig(String botId) {
+class ErrorHandlingConfig {
+  static EbbotConfiguration buildWithErrorHandling(String botId) {
     return EbbotConfigurationBuilder()
       .environment(Environment.production)
       .callback(
         EbbotCallbackBuilder()
-          .onLoadError((error) async {
-            await _handleLoadError(error, botId);
+          .onLoadError((error) {
+            debugPrint('Load error: ${error.type} - ${error.cause}');
           })
           .build()
       )
       .logConfiguration(
         EbbotLogConfigurationBuilder()
           .enabled(true)
-          .logLevel(EbbotLogLevel.warning)
+          .logLevel(EbbotLogLevel.error)
           .build()
       )
       .build();
-  }
-  
-  static Future<void> _handleLoadError(
-    EbbotLoadError error, 
-    String botId,
-  ) async {
-    // Log the error
-    debugPrint('Load error: ${error.type} - ${error.cause}');
-    
-    // Try fallback strategies
-    switch (error.type) {
-      case EbbotInitializationErrorType.network:
-        await _retryWithDelay(botId);
-        break;
-      case EbbotInitializationErrorType.initialization:
-        await _fallbackToOfflineMode();
-        break;
-    }
-  }
-  
-  static Future<void> _retryWithDelay(String botId) async {
-    await Future.delayed(Duration(seconds: 5));
-    // Implement retry logic
-  }
-  
-  static Future<void> _fallbackToOfflineMode() async {
-    // Show offline support options
   }
 }
 ```
@@ -516,4 +486,3 @@ class ChatNavigationManager {
 For complex configuration needs:
 1. Review the example implementations above
 2. Check the troubleshooting guide
-3. Contact Ebbot support for custom requirements
