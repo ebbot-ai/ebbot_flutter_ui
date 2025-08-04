@@ -1,5 +1,6 @@
 import 'package:ebbot_flutter_ui/v1/src/initializer/service_locator.dart';
 import 'package:ebbot_flutter_ui/v1/src/service/ebbot_dart_client_service.dart';
+import 'package:ebbot_flutter_ui/v1/src/theme/ebbot_text_styles.dart';
 import 'package:ebbot_flutter_ui/v1/src/util/extension.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
@@ -58,9 +59,7 @@ class EbbotSupportService {
       bubbleColor: neutral7,
       countAvatarColor: primaryColor,
       countTextColor: primaryColor,
-      multipleUserTextStyle: const TextStyle(
-        fontSize: 12,
-        fontWeight: FontWeight.w500,
+      multipleUserTextStyle: EbbotTextStyles.typingIndicator.copyWith(
         color: neutral2,
       ),
     );
@@ -70,17 +69,7 @@ class EbbotSupportService {
         userAvatarImageBackgroundColor: primaryColor,
         userAvatarNameColors: [primaryColor],
         typingIndicatorTheme: typingIndicatorTheme,
-        receivedMessageBodyTextStyle: const TextStyle(
-          color: neutral0,
-          fontSize: 14,
-          fontWeight: FontWeight.w500,
-          height: 1.5,
-        ),
-        sentMessageBodyTextStyle: const TextStyle(
-          color: neutral7,
-          fontSize: 14,
-          fontWeight: FontWeight.w500,
-          height: 1.5,
-        ));
+        receivedMessageBodyTextStyle: EbbotTextStyles.receivedMessageBody(neutral0),
+        sentMessageBodyTextStyle: EbbotTextStyles.sentMessageBody(neutral7));
   }
 }

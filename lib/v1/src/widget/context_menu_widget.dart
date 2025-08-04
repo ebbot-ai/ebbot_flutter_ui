@@ -1,3 +1,4 @@
+import 'package:ebbot_flutter_ui/v1/src/theme/ebbot_text_styles.dart';
 import 'package:flutter/material.dart';
 
 enum ContextMenuOptions { restartChat, downloadTranscript, endConversation }
@@ -17,21 +18,21 @@ class ContextMenuWidget extends StatelessWidget {
           value: ContextMenuOptions.endConversation,
           child: ListTile(
             leading: Icon(Icons.exit_to_app),
-            title: Text('End conversation', style: TextStyle(fontSize: 14)),
+            title: Text('End conversation', style: EbbotTextStyles.menuItem),
           ),
         ),
         const PopupMenuItem(
           value: ContextMenuOptions.restartChat,
           child: ListTile(
             leading: Icon(Icons.refresh),
-            title: Text('Restart chat', style: TextStyle(fontSize: 14)),
+            title: Text('Restart chat', style: EbbotTextStyles.menuItem),
           ),
         ),
         const PopupMenuItem(
           value: ContextMenuOptions.downloadTranscript,
           child: ListTile(
             leading: Icon(Icons.download),
-            title: Text('Download transcript', style: TextStyle(fontSize: 14)),
+            title: Text('Download transcript', style: EbbotTextStyles.menuItem),
           ),
         ),
       ],
