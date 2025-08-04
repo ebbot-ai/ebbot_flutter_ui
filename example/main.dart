@@ -4,6 +4,7 @@ import 'package:ebbot_flutter_ui/ebbot_flutter_ui.dart';
 import 'app_data/demo_app_with_pages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 Future<void> onLoadError(EbbotLoadError error) async {
   //print("CALLBACK: onLoadError: $error");
@@ -45,32 +46,38 @@ Future<void> onSessionData(String chatId) async {
 
 var apiController = EbbotApiController();
 
-var botsAndEnvs = Map<Clients, Client>.from({
-  Clients.husqvarna: const Client(
-      "ebqqtpv3h1qzwflhfroyzc7jzdxqqx", Environment.googleEUProduction),
-  Clients.forest: const Client(
-      "ebypvbmu3ryfsei5gjzyfsrthz48fq", Environment.ovhEUProduction),
-  Clients.ebbotTest: const Client(
-      "eb28zly33rwflwrb3bcerqr3oe9gd0", Environment.ovhEUProduction),
-});
-
-class Client {
-  final String botId;
-  final Environment environment;
-  const Client(this.botId, this.environment);
+/// Get bot ID from environment variables
+String getBotId() {
+  final botId = dotenv.env['BOT_ID'];
+  if (botId == null || botId.isEmpty || botId.contains('your_')) {
+    throw Exception('BOT_ID not configured. Please check your .env file.');
+  }
+  return botId;
 }
 
-enum Clients { husqvarna, forest, ebbotTest }
+/// Get environment from environment variables
+Environment getEnvironment() {
+  final envName = dotenv.env['EBBOT_ENVIRONMENT'] ?? 'ovhEUProduction';
+  
+  switch (envName.toLowerCase()) {
+    case 'googleeuproduction':
+      return Environment.googleEUProduction;
+    case 'ovheuproduction':
+      return Environment.ovhEUProduction;
+    case 'staging':
+      return Environment.staging;
+    default:
+      throw Exception('Unknown environment: $envName. Supported: googleEUProduction, ovhEUProduction, staging');
+  }
+}
 
 Future main() async {
-  //var botId = "ebypvbmu3ryfsei5gjzyfsrthz48fq";
-
-  var client = botsAndEnvs[Clients.forest];
-  if (client == null) {
-    throw Exception("Client not found");
-  }
-
-  var (botId, environment) = (client.botId, client.environment);
+  // Load environment variables
+  await dotenv.load(fileName: ".env");
+  
+  // Get configuration from environment
+  final botId = getBotId();
+  final environment = getEnvironment();
 
   var userAttributes = {
     'name': 'John Doe',

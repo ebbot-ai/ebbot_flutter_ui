@@ -2,6 +2,20 @@
 
 This directory contains example applications demonstrating how to use the `ebbot_flutter_ui` library.
 
+## Setup
+
+1. **Environment Configuration**: Copy the environment template and configure your bot:
+   ```bash
+   cp .env.example .env
+   ```
+   
+2. **Edit `.env` file**: Replace the placeholder values with your actual bot configuration:
+   ```bash
+   # Example .env content
+   BOT_ID=your_bot_id_here
+   EBBOT_ENVIRONMENT=ovhEUProduction
+   ```
+
 ## Running the Example
 
 1. Make sure you have Flutter installed and set up
@@ -9,11 +23,12 @@ This directory contains example applications demonstrating how to use the `ebbot
    ```bash
    cd example
    ```
-3. Get dependencies:
+3. Complete the setup steps above (create .env file)
+4. Get dependencies:
    ```bash
    flutter pub get
    ```
-4. Run the app:
+5. Run the app:
    ```bash
    flutter run
    ```
@@ -65,9 +80,19 @@ var configuration = EbbotConfigurationBuilder()
 
 ## Bot Configuration
 
-The example includes configurations for different clients:
-- Husqvarna
-- Forest
-- Ebbot Test
+The example uses environment variables for configuration, making it easy to use with any bot:
 
-Each configuration specifies the bot ID and environment to use.
+### Environment Variables
+
+| Variable | Description | Required | Default |
+|----------|-------------|----------|---------|
+| `BOT_ID` | Your Ebbot bot ID | Yes | - |
+| `EBBOT_ENVIRONMENT` | Environment to connect to | No | `ovhEUProduction` |
+
+### Supported Environments
+
+- `googleEUProduction` - Google EU production environment
+- `ovhEUProduction` - OVH EU production environment  
+- `staging` - Staging environment for testing
+
+**Security Note**: The `.env` file contains sensitive bot IDs and is excluded from version control. Never commit actual bot IDs to the repository.
