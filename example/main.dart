@@ -4,7 +4,6 @@ import 'package:ebbot_flutter_ui/ebbot_flutter_ui.dart';
 import 'app_data/demo_app_with_pages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 Future<void> onLoadError(EbbotLoadError error) async {
   //print("CALLBACK: onLoadError: $error");
@@ -46,19 +45,14 @@ Future<void> onSessionData(String chatId) async {
 
 var apiController = EbbotApiController();
 
-Map<Clients, Client> getBotsAndEnvs() {
-  return {
-    Clients.husqvarna: Client(
-        dotenv.env['HUSQVARNA_BOT_ID'] ?? 'missing-husqvarna-bot-id', 
-        Environment.googleEUProduction),
-    Clients.forest: Client(
-        dotenv.env['FOREST_BOT_ID'] ?? 'missing-forest-bot-id', 
-        Environment.ovhEUProduction),
-    Clients.ebbotTest: Client(
-        dotenv.env['EBBOT_TEST_BOT_ID'] ?? 'missing-test-bot-id', 
-        Environment.ovhEUProduction),
-  };
-}
+var botsAndEnvs = Map<Clients, Client>.from({
+  Clients.husqvarna: const Client(
+      "ebqqtpv3h1qzwflhfroyzc7jzdxqqx", Environment.googleEUProduction),
+  Clients.forest: const Client(
+      "ebypvbmu3ryfsei5gjzyfsrthz48fq", Environment.ovhEUProduction),
+  Clients.ebbotTest: const Client(
+      "eb28zly33rwflwrb3bcerqr3oe9gd0", Environment.ovhEUProduction),
+});
 
 class Client {
   final String botId;
@@ -66,38 +60,14 @@ class Client {
   const Client(this.botId, this.environment);
 }
 
-Clients getDefaultClient() {
-  final defaultClientName = dotenv.env['DEFAULT_CLIENT'] ?? 'forest';
-  switch (defaultClientName.toLowerCase()) {
-    case 'husqvarna':
-      return Clients.husqvarna;
-    case 'forest':
-      return Clients.forest;
-    case 'ebbottest':
-      return Clients.ebbotTest;
-    default:
-      return Clients.forest;
-  }
-}
-
 enum Clients { husqvarna, forest, ebbotTest }
 
 Future main() async {
-  // Load environment variables
-  await dotenv.load(fileName: ".env");
-  
-  // Get bot configuration from environment
-  final botsAndEnvs = getBotsAndEnvs();
-  final defaultClient = getDefaultClient();
-  
-  var client = botsAndEnvs[defaultClient];
+  //var botId = "ebypvbmu3ryfsei5gjzyfsrthz48fq";
+
+  var client = botsAndEnvs[Clients.forest];
   if (client == null) {
-    throw Exception("Client $defaultClient not found");
-  }
-  
-  // Validate that bot ID is not a placeholder
-  if (client.botId.startsWith('missing-') || client.botId.contains('your_')) {
-    throw Exception("Bot ID not configured. Please check your .env file.");
+    throw Exception("Client not found");
   }
 
   var (botId, environment) = (client.botId, client.environment);
