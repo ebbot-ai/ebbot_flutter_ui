@@ -1,6 +1,7 @@
 import 'package:ebbot_dart_client/entity/chat_config/chat_style_v2_config.dart';
 import 'package:ebbot_flutter_ui/v1/src/initializer/service_locator.dart';
 import 'package:ebbot_flutter_ui/v1/src/service/ebbot_dart_client_service.dart';
+import 'package:ebbot_flutter_ui/v1/src/theme/ebbot_text_styles.dart';
 import 'package:ebbot_flutter_ui/v1/src/util/extension.dart';
 import 'package:flutter/material.dart';
 
@@ -115,21 +116,17 @@ class _StartPageWidgetState extends State<StartPageWidget> {
                       avatarImage,
                       Text(
                         headerTitle,
-                        style: TextStyle(
-                          fontSize: 24,
+                        style: EbbotTextStyles.pageTitle.copyWith(
                           color: Colors.white,
-                          fontWeight: FontWeight.bold,
                         ),
                       ),
                       SizedBox(height: 10),
                       Text(
                         headerText,
                         textAlign: TextAlign.center,
-                        style: TextStyle(
-                            height: 1,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white),
+                        style: EbbotTextStyles.subtitle.copyWith(
+                          color: Colors.white,
+                        ),
                       ),
                     ],
                   ),
@@ -170,10 +167,7 @@ class _StartPageWidgetState extends State<StartPageWidget> {
                 widget.onStartConversation?.call();
               },
               child: Text("Start conversation",
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  )),
+                  style: EbbotTextStyles.sectionTitle),
             ),
           ),
         ],

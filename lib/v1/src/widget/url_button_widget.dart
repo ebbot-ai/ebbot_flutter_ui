@@ -2,6 +2,7 @@ import 'package:ebbot_dart_client/entity/button_data/button_data.dart';
 import 'package:ebbot_flutter_ui/v1/configuration/ebbot_configuration.dart';
 import 'package:ebbot_flutter_ui/v1/src/initializer/service_locator.dart';
 import 'package:ebbot_flutter_ui/v1/src/service/ebbot_dart_client_service.dart';
+import 'package:ebbot_flutter_ui/v1/src/theme/ebbot_text_styles.dart';
 import 'package:ebbot_flutter_ui/v1/src/util/extension.dart';
 import 'package:flutter/material.dart';
 
@@ -86,15 +87,9 @@ class _UrlButtonWidgetState extends State<UrlButtonWidget> {
       }),
       textStyle: WidgetStateProperty.resolveWith<TextStyle>((states) {
         if (states.contains(WidgetState.disabled)) {
-          return const TextStyle(
-            fontWeight: FontWeight.normal,
-            fontSize: 16,
-          );
+          return EbbotTextStyles.buttonDisabled;
         }
-        return const TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.bold,
-        );
+        return EbbotTextStyles.button;
       }),
     );
 

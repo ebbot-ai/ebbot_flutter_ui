@@ -4,6 +4,7 @@ import 'package:ebbot_flutter_ui/v1/configuration/ebbot_configuration.dart';
 import 'package:ebbot_flutter_ui/v1/src/initializer/service_locator.dart';
 import 'package:ebbot_flutter_ui/v1/src/service/ebbot_dart_client_service.dart';
 import 'package:ebbot_flutter_ui/v1/src/service/log_service.dart';
+import 'package:ebbot_flutter_ui/v1/src/theme/ebbot_text_styles.dart';
 import 'package:ebbot_flutter_ui/v1/src/util/extension.dart';
 import 'package:ebbot_flutter_ui/v1/src/widget/url_button_widget.dart';
 import 'package:flutter/material.dart';
@@ -95,10 +96,7 @@ class _CarouselWidgetState extends State<CarouselWidget> {
                 padding: const EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
                 child: Text(
                   slides[index]["title"],
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
+                  style: EbbotTextStyles.sectionTitle,
                 ),
               ),
               // Description
@@ -107,6 +105,7 @@ class _CarouselWidgetState extends State<CarouselWidget> {
                 child: Text(
                   slides[index]["description"],
                   textAlign: TextAlign.center,
+                  style: EbbotTextStyles.description,
                 ),
               ),
               // Image

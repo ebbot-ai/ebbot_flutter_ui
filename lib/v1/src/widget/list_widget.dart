@@ -2,6 +2,7 @@ import 'package:ebbot_dart_client/entity/message/message.dart';
 import 'package:ebbot_flutter_ui/v1/configuration/ebbot_configuration.dart';
 import 'package:ebbot_flutter_ui/v1/src/initializer/service_locator.dart';
 import 'package:ebbot_flutter_ui/v1/src/service/ebbot_support_service.dart';
+import 'package:ebbot_flutter_ui/v1/src/theme/ebbot_text_styles.dart';
 import 'package:flutter/material.dart';
 
 class ListWidget extends StatefulWidget {
@@ -56,8 +57,7 @@ class _ListWidget extends State<ListWidget> {
         margin: const EdgeInsets.only(bottom: 10.0),
         child: Text(text,
             textAlign: TextAlign.center,
-            style: receivedMessageBodyTextStyle.copyWith(
-                fontWeight: FontWeight.bold, fontSize: 16)),
+            style: EbbotTextStyles.sectionTitle),
       ),
       ...bulletItems,
     ];
