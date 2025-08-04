@@ -49,3 +49,4 @@ app.*.map.json
 /lib/main.dart
 /devtools_options.yaml
 /lib/app_data
+.env
