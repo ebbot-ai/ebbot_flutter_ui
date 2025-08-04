@@ -129,8 +129,8 @@ _controller.setUserAttributes({
   'name': 'Jane Smith'
 });
 
-// Trigger a scenario
-_controller.triggerScenario('welcome-scenario');
+// Trigger a scenario (using MD5 hash of scenario ID)
+_controller.triggerScenario('5d41402abc4b2a76b9719d911017c592');
 
 // End the conversation
 _controller.endConversation();
