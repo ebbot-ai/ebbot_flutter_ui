@@ -2,6 +2,22 @@
 
 This directory contains example applications demonstrating how to use the `ebbot_flutter_ui` library.
 
+## Setup
+
+1. **Environment Configuration**: Copy the environment template and add your bot IDs:
+   ```bash
+   cp .env.example .env
+   ```
+   
+2. **Edit `.env` file**: Replace the placeholder values with your actual bot IDs:
+   ```bash
+   # Example .env content
+   HUSQVARNA_BOT_ID=your_husqvarna_bot_id_here
+   FOREST_BOT_ID=your_forest_bot_id_here
+   EBBOT_TEST_BOT_ID=your_test_bot_id_here
+   DEFAULT_CLIENT=forest
+   ```
+
 ## Running the Example
 
 1. Make sure you have Flutter installed and set up
@@ -9,11 +25,12 @@ This directory contains example applications demonstrating how to use the `ebbot
    ```bash
    cd example
    ```
-3. Get dependencies:
+3. Complete the setup steps above (create .env file)
+4. Get dependencies:
    ```bash
    flutter pub get
    ```
-4. Run the app:
+5. Run the app:
    ```bash
    flutter run
    ```
@@ -65,9 +82,19 @@ var configuration = EbbotConfigurationBuilder()
 
 ## Bot Configuration
 
-The example includes configurations for different clients:
-- Husqvarna
-- Forest
-- Ebbot Test
+The example supports multiple bot configurations through environment variables:
 
-Each configuration specifies the bot ID and environment to use.
+- **Husqvarna**: Production bot for Husqvarna client
+- **Forest**: Production bot for Forest client  
+- **Ebbot Test**: Test bot for development
+
+### Environment Variables
+
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `HUSQVARNA_BOT_ID` | Bot ID for Husqvarna client | No |
+| `FOREST_BOT_ID` | Bot ID for Forest client | No |
+| `EBBOT_TEST_BOT_ID` | Bot ID for testing | No |
+| `DEFAULT_CLIENT` | Which client to use by default (`husqvarna`, `forest`, `ebbottest`) | Yes |
+
+**Security Note**: The `.env` file contains sensitive bot IDs and is excluded from version control. Never commit actual bot IDs to the repository.
