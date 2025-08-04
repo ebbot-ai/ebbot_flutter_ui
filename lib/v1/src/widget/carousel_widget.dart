@@ -107,6 +107,9 @@ class _CarouselWidgetState extends State<CarouselWidget> {
                 child: Text(
                   slides[index]["description"],
                   textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 14,
+                  ),
                 ),
               ),
               // Image

@@ -17,21 +17,21 @@ class ContextMenuWidget extends StatelessWidget {
           value: ContextMenuOptions.endConversation,
           child: ListTile(
             leading: Icon(Icons.exit_to_app),
-            title: Text('End conversation'),
+            title: Text('End conversation', style: TextStyle(fontSize: 14)),
           ),
         ),
         const PopupMenuItem(
           value: ContextMenuOptions.restartChat,
           child: ListTile(
             leading: Icon(Icons.refresh),
-            title: Text('Restart chat'),
+            title: Text('Restart chat', style: TextStyle(fontSize: 14)),
           ),
         ),
         const PopupMenuItem(
           value: ContextMenuOptions.downloadTranscript,
           child: ListTile(
             leading: Icon(Icons.download),
-            title: Text('Download transcript'),
+            title: Text('Download transcript', style: TextStyle(fontSize: 14)),
           ),
         ),
       ],

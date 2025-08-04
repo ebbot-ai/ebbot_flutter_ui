@@ -171,7 +171,7 @@ class _StartPageWidgetState extends State<StartPageWidget> {
               },
               child: Text("Start conversation",
                   style: TextStyle(
-                    fontSize: 20,
+                    fontSize: 16,
                     fontWeight: FontWeight.bold,
                   )),
             ),
