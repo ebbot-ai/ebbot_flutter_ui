@@ -18,55 +18,6 @@ final configuration = EbbotConfigurationBuilder()
   .build();
 ```
 
-### Session Persistence Implementation
-
-Save and restore chat sessions:
-
-```dart
-class ChatSessionManager {
-  static const String _sessionKey = 'ebbot_chat_session';
-  
-  static Future<EbbotConfiguration> buildConfiguration({
-    required String botId,
-    required String userId,
-  }) async {
-    final savedSessionId = await getSavedSessionId(userId);
-    
-    return EbbotConfigurationBuilder()
-      .environment(Environment.production)
-      .session(
-        EbbotSessionBuilder()
-          .chatId(savedSessionId)  // null if no saved session
-          .build()
-      )
-      .userConfiguration(
-        EbbotUserConfigurationBuilder()
-          .userAttributes({'userId': userId})
-          .build()
-      )
-      .callback(
-        EbbotCallbackBuilder()
-          .onSessionData((chatId) => saveSessionId(userId, chatId))
-          .onEndConversation(() => clearSession(userId))
-          .build()
-      )
-      .build();
-  }
-  
-  static Future<String?> getSavedSessionId(String userId) async {
-    // Implement your preferred storage solution
-    return null;
-  }
-  
-  static Future<void> saveSessionId(String userId, String chatId) async {
-    // Implement your preferred storage solution
-  }
-  
-  static Future<void> clearSession(String userId) async {
-    // Implement your preferred storage solution
-  }
-}
-```
 
 ## Complete Configuration Example
 
@@ -157,11 +108,6 @@ class AdvancedChatConfig {
       'userId': user.id,
       'name': user.displayName,
       'email': user.email,
-      'tier': user.subscriptionTier,
-      'joinDate': user.createdAt.millisecondsSinceEpoch,
-      'language': user.preferredLanguage,
-      'timezone': user.timezone,
-      'appVersion': user.appVersion,
     };
   }
   
@@ -222,109 +168,8 @@ class AdvancedChatConfig {
 }
 ```
 
-## Multi-Bot Configuration
-
-Handle multiple bots in one application:
-
-```dart
-class MultiBotManager {
-  static final Map<String, EbbotApiController> _controllers = {};
-  
-  static EbbotConfiguration buildBotConfig({
-    required String botId,
-    required BotType type,
-    required User user,
-  }) {
-    final controller = EbbotApiController();
-    _controllers[botId] = controller;
-    
-    return EbbotConfigurationBuilder()
-      .environment(Environment.production)
-      .apiController(controller)
-      .userConfiguration(
-        EbbotUserConfigurationBuilder()
-          .userAttributes({
-            ...user.toMap(),
-            'botType': type.toString(),
-            'sessionId': '${user.id}_${botId}',
-          })
-          .build()
-      )
-      .behaviour(
-        EbbotBehaviourBuilder()
-          .showContextMenu(type == BotType.support)
-          .build()
-      )
-      .callback(
-        EbbotCallbackBuilder()
-          .onStartConversation((msg) {
-            debugPrint('${type.name} conversation started');
-          })
-          .build()
-      )
-      .build();
-  }
-  
-  static EbbotApiController? getController(String botId) {
-    return _controllers[botId];
-  }
-}
-
-enum BotType { support, sales, feedback }
-```
 
 
-## Conditional Features
-
-Enable features based on user properties:
-
-```dart
-class ConditionalFeatures {
-  static EbbotConfiguration buildForUser(User user, String botId) {
-    final builder = EbbotConfigurationBuilder()
-      .environment(Environment.production)
-      .userConfiguration(
-        EbbotUserConfigurationBuilder()
-          .userAttributes(user.toChatAttributes())
-          .build()
-      );
-    
-    // Premium users get enhanced features
-    if (user.isPremium) {
-      builder.behaviour(
-        EbbotBehaviourBuilder()
-          .showContextMenu(true)
-          .build()
-      );
-    }
-    
-    // Beta users get experimental features
-    if (user.isBetaTester) {
-      builder.logConfiguration(
-        EbbotLogConfigurationBuilder()
-          .enabled(true)
-          .logLevel(EbbotLogLevel.debug)
-          .build()
-      );
-    }
-    
-    // Support tier affects chat routing
-    if (user.supportTier == SupportTier.enterprise) {
-      builder.userConfiguration(
-        EbbotUserConfigurationBuilder()
-          .userAttributes({
-            ...user.toChatAttributes(),
-            'priority': 'high',
-            'supportTier': 'enterprise',
-          })
-          .build()
-      );
-    }
-    
-    return builder.build();
-  }
-}
-```
 
 ## Error Handling
 
@@ -353,127 +198,14 @@ class ErrorHandlingConfig {
 }
 ```
 
-## Performance Optimization
 
-Optimize for different performance requirements:
-
-```dart
-class PerformanceOptimizedConfig {
-  static EbbotConfiguration buildForPerformance({
-    required String botId,
-    required PerformanceMode mode,
-  }) {
-    final builder = EbbotConfigurationBuilder()
-      .environment(Environment.production);
-    
-    switch (mode) {
-      case PerformanceMode.minimal:
-        builder
-          .logConfiguration(
-            EbbotLogConfigurationBuilder()
-              .enabled(false)
-              .build()
-          )
-          .behaviour(
-            EbbotBehaviourBuilder()
-              .showContextMenu(false)
-              .build()
-          );
-        break;
-        
-      case PerformanceMode.balanced:
-        builder
-          .logConfiguration(
-            EbbotLogConfigurationBuilder()
-              .enabled(true)
-              .logLevel(EbbotLogLevel.error)
-              .build()
-          );
-        break;
-        
-      case PerformanceMode.full:
-        builder
-          .logConfiguration(
-            EbbotLogConfigurationBuilder()
-              .enabled(true)
-              .logLevel(EbbotLogLevel.debug)
-              .build()
-          )
-          .callback(
-            EbbotCallbackBuilder()
-              .onMessage((msg) => debugPrint('Message: $msg'))
-              .build()
-          );
-        break;
-    }
-    
-    return builder.build();
-  }
-}
-
-enum PerformanceMode { minimal, balanced, full }
-```
-
-## Integration Examples
-
-### With State Management (Bloc)
-
-```dart
-class ChatBloc extends Cubit<ChatState> {
-  final EbbotApiController _apiController = EbbotApiController();
-  
-  EbbotConfiguration get configuration => EbbotConfigurationBuilder()
-    .apiController(_apiController)
-    .callback(
-      EbbotCallbackBuilder()
-        .onLoad(() => emit(ChatState.loaded()))
-        .onStartConversation((msg) => emit(ChatState.active()))
-        .onEndConversation(() => emit(ChatState.ended()))
-        .build()
-    )
-    .build();
-    
-  void sendMessage(String message) {
-    _apiController.sendMessage(message);
-  }
-}
-```
-
-### With Navigation
-
-```dart
-class ChatNavigationManager {
-  static void showChatPage(BuildContext context, String botId) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ChatPage(
-          configuration: EbbotConfigurationBuilder()
-            .callback(
-              EbbotCallbackBuilder()
-                .onEndConversation(() {
-                  Navigator.pop(context);
-                })
-                .build()
-            )
-            .build(),
-          botId: botId,
-        ),
-      ),
-    );
-  }
-}
-```
 
 ## Best Practices
 
 1. **Centralize configuration** in dedicated classes
-2. **Use environment-specific configs** for different deployments
-3. **Implement proper error handling** and recovery strategies
-4. **Monitor performance** with appropriate logging levels
-5. **Test configurations** across different scenarios
-6. **Keep sensitive data secure** in user attributes
-7. **Use session management** for better user experience
+2. **Use environment-specific configs** for different deployments  
+3. **Handle errors appropriately** with callbacks
+4. **Keep sensitive data secure** in user attributes
 
 ## Next Steps
 
