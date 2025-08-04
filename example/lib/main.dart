@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:ebbot_flutter_ui/ebbot_flutter_ui.dart';
-import 'package:ebbot_flutter_ui_example/app_data/demo_app_with_pages.dart';
+import 'app_data/demo_app_with_pages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 
