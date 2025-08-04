@@ -88,11 +88,11 @@ class _UrlButtonWidgetState extends State<UrlButtonWidget> {
         if (states.contains(WidgetState.disabled)) {
           return const TextStyle(
             fontWeight: FontWeight.normal,
-            fontSize: 16,
+            fontSize: 14,
           );
         }
         return const TextStyle(
-          fontSize: 16,
+          fontSize: 14,
           fontWeight: FontWeight.bold,
         );
       }),
