@@ -1,11 +1,10 @@
 {
     "configurations": [
         {
-            "name": "Flutter (iPhone 13)",
-            "program": "lib/main.dart",
-            "deviceId": "00008110-000A15322E00401E",
+            "name": "Flutter",
+            "type": "dart",
             "request": "launch",
-            "type": "dart"
+            "program": "example/main.dart"
         }
     ]
 }
