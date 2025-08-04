@@ -69,6 +69,18 @@ class EbbotSupportService {
         primaryColor: primaryColor,
         userAvatarImageBackgroundColor: primaryColor,
         userAvatarNameColors: [primaryColor],
-        typingIndicatorTheme: typingIndicatorTheme);
+        typingIndicatorTheme: typingIndicatorTheme,
+        receivedMessageBodyTextStyle: const TextStyle(
+          color: neutral0,
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+          height: 1.5,
+        ),
+        sentMessageBodyTextStyle: const TextStyle(
+          color: neutral7,
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+          height: 1.5,
+        ));
   }
 }
