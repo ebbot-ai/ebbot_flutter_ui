@@ -50,7 +50,7 @@ class _ChatScreenState extends State<ChatScreen> {
 | `restartConversation()` | Restart the conversation | None | `void` |
 | `endConversation()` | End the current conversation | None | `void` |
 | `setUserAttributes(attrs)` | Update user attributes | `Map<String, dynamic>` | `void` |
-| `triggerScenario(id)` | Trigger a predefined scenario | `String scenarioMd5` | `void` |
+| `triggerScenario(id)` | Trigger a predefined scenario | `String scenarioUuid` | `void` |
 | `showTranscript()` | Show conversation transcript | None | `void` |
 
 ## Method Details
@@ -108,17 +108,15 @@ void updateUserPreferences(UserPreferences prefs) {
 
 ### Trigger Scenarios
 
-Launch predefined conversation flows using MD5 hash of scenario ID:
+Launch predefined conversation flows using scenario UUID:
 
 ```dart
 void showProductDemo() {
-  // Use MD5 hash of scenario ID
-  _apiController.triggerScenario('5d41402abc4b2a76b9719d911017c592');
+  _apiController.triggerScenario('550e8400-e29b-41d4-a716-446655440000');
 }
 
 void startSupportFlow() {
-  // Use MD5 hash of scenario ID  
-  _apiController.triggerScenario('098f6bcd4621d373cade4e832627b4f6');
+  _apiController.triggerScenario('6ba7b810-9dad-11d1-80b4-00c04fd430c8');
 }
 ```
 
@@ -207,7 +205,7 @@ class _ChatControllerExampleState extends State<ChatControllerExample> {
                     child: Text('Need Help'),
                   ),
                   ElevatedButton(
-                    onPressed: () => _triggerScenario('5d41402abc4b2a76b9719d911017c592'),
+                    onPressed: () => _triggerScenario('550e8400-e29b-41d4-a716-446655440000'),
                     child: Text('Product Demo'),
                   ),
                   ElevatedButton(
@@ -250,9 +248,9 @@ class _ChatControllerExampleState extends State<ChatControllerExample> {
     }
   }
   
-  void _triggerScenario(String scenarioMd5) {
+  void _triggerScenario(String scenarioUuid) {
     if (_isInitialized) {
-      _apiController.triggerScenario(scenarioMd5);
+      _apiController.triggerScenario(scenarioUuid);
     }
   }
   
@@ -352,7 +350,7 @@ class ChatBloc extends Cubit<ChatState> {
       'supportIssue': issue,
       'timestamp': DateTime.now().toIso8601String(),
     });
-    _apiController.triggerScenario('1b4f0e9851971998e732078544c96b36c3d01cedf7caa332359d6f1d83567014');
+    _apiController.triggerScenario('6ba7b810-9dad-11d1-80b4-00c04fd430c8');
   }
 }
 ```

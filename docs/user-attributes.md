@@ -70,56 +70,6 @@ final configuration = EbbotConfigurationBuilder()
   .build();
 ```
 
-## Common User Attributes
-
-### Customer Support Context
-
-```dart
-final supportAttributes = {
-  'userId': customer.id,
-  'name': customer.fullName,
-  'email': customer.email,
-  'phone': customer.phoneNumber,
-  'accountType': customer.subscription,
-  'supportTier': customer.supportLevel,
-  'lastPurchaseDate': customer.lastPurchase?.millisecondsSinceEpoch,
-  'totalSpent': customer.lifetimeValue,
-  'preferredLanguage': customer.language,
-};
-```
-
-### E-commerce Context
-
-```dart
-final ecommerceAttributes = {
-  'customerId': user.id,
-  'customerName': user.name,
-  'email': user.email,
-  'cartValue': cart.total,
-  'cartItemCount': cart.itemCount,
-  'isLoggedIn': user.isAuthenticated,
-  'membershipLevel': user.tier,
-  'hasAbandonedCart': cart.isAbandoned,
-  'lastOrderId': user.lastOrderId,
-  'preferredPaymentMethod': user.defaultPayment,
-};
-```
-
-### SaaS Application Context
-
-```dart
-final saasAttributes = {
-  'userId': account.userId,
-  'companyId': account.companyId,
-  'companyName': account.companyName,
-  'userRole': account.role,
-  'planType': account.subscription,
-  'trialEndsAt': account.trialEndDate?.millisecondsSinceEpoch,
-  'monthlyUsage': account.currentUsage,
-  'isAdmin': account.hasAdminPrivileges,
-  'teamSize': account.teamMemberCount,
-};
-```
 
 ## Dynamic Attribute Updates
 
