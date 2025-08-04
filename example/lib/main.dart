@@ -1,9 +1,11 @@
 import 'dart:async';
 
 import 'package:ebbot_flutter_ui/ebbot_flutter_ui.dart';
-import 'app_data/demo_app_with_pages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
+import 'app_data/demo_app_with_pages.dart';
 
 Future<void> onLoadError(EbbotLoadError error) async {
   //print("CALLBACK: onLoadError: $error");
@@ -45,32 +47,57 @@ Future<void> onSessionData(String chatId) async {
 
 var apiController = EbbotApiController();
 
-var botsAndEnvs = Map<Clients, Client>.from({
-  Clients.husqvarna: const Client(
-      "ebqqtpv3h1qzwflhfroyzc7jzdxqqx", Environment.googleEUProduction),
-  Clients.forest: const Client(
-      "ebypvbmu3ryfsei5gjzyfsrthz48fq", Environment.ovhEUProduction),
-  Clients.ebbotTest: const Client(
-      "eb28zly33rwflwrb3bcerqr3oe9gd0", Environment.ovhEUProduction),
-});
-
-class Client {
-  final String botId;
-  final Environment environment;
-  const Client(this.botId, this.environment);
+/// Get bot ID from environment variables
+String getBotId() {
+  final botId = dotenv.env['BOT_ID'];
+  if (botId == null || botId.isEmpty || botId.contains('your_')) {
+    print('BOT_ID not found or not configured properly.');
+    print(
+        'Please ensure .env file exists and contains: BOT_ID=your_actual_bot_id');
+    throw Exception(
+        'BOT_ID not configured. Please check your .env file.\nCopy .env.example to .env and set your bot ID.');
+  }
+  return botId;
 }
 
-enum Clients { husqvarna, forest, ebbotTest }
+/// Get environment from environment variables
+Environment getEnvironment() {
+  final envName = dotenv.env['EBBOT_ENVIRONMENT'] ?? 'ovhEUProduction';
+
+  switch (envName.toLowerCase()) {
+    case 'googleeuproduction':
+      return Environment.googleEUProduction;
+    case 'ovheuproduction':
+      return Environment.ovhEUProduction;
+    case 'staging':
+      return Environment.staging;
+    default:
+      throw Exception(
+          'Unknown environment: $envName. Supported: googleEUProduction, ovhEUProduction, staging');
+  }
+}
 
 Future main() async {
-  //var botId = "ebypvbmu3ryfsei5gjzyfsrthz48fq";
+  // Load environment variables
+  try {
+    await dotenv.load(); // Try default .env file first
+  } catch (e) {
+    try {
+      await dotenv.load(fileName: ".env"); // Try explicit .env
+    } catch (e2) {
+      print('Could not load .env file. Error: $e2');
+      print('Make sure .env file exists in the project root.');
+      print('Copy .env.example to .env and configure your bot settings.');
 
-  var client = botsAndEnvs[Clients.forest];
-  if (client == null) {
-    throw Exception("Client not found");
+      // For development, let's provide fallback values
+      print('Using fallback configuration...');
+      // We'll handle this in getBotId() function
+    }
   }
 
-  var (botId, environment) = (client.botId, client.environment);
+  // Get configuration from environment
+  final botId = getBotId();
+  final environment = getEnvironment();
 
   var userAttributes = {
     'name': 'John Doe',
@@ -109,16 +136,14 @@ Future main() async {
       .enabled(true)
       .build();
 
-  var session = EbbotSessionBuilder()
-      .chatId("1749557756986-fa8037bd-78ac-4bbc-bb50-f093aa1f4969")
-      .build();
+  var session = EbbotSessionBuilder().chatId("some-chat-id").build();
 
   //var chat = EbbotChatBuilder().
 
   var configuration = EbbotConfigurationBuilder()
       .apiController(apiController)
       .environment(environment)
-      //.userConfiguration(userConfiguration)
+      .userConfiguration(userConfiguration)
       .behaviour(behaviour)
       .callback(callback)
       .logConfiguration(logConfiguration)
