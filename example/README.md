@@ -15,7 +15,6 @@ This directory contains example applications demonstrating how to use the `ebbot
    BOT_ID=your_bot_id_here
    EBBOT_ENVIRONMENT=ovhEUProduction
    ```
-
 ## Running the Example
 
 1. Make sure you have Flutter installed and set up
@@ -23,12 +22,11 @@ This directory contains example applications demonstrating how to use the `ebbot
    ```bash
    cd example
    ```
-3. Complete the setup steps above (create .env file)
-4. Get dependencies:
+3. Get dependencies:
    ```bash
    flutter pub get
    ```
-5. Run the app:
+4. Run the app:
    ```bash
    flutter run
    ```

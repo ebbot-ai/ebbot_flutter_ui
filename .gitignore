@@ -41,11 +41,18 @@ app.*.symbols
 # Obfuscation related
 app.*.map.json
 
-# Android Studio will place build artifacts here
-/android/app/debug
-/android/app/profile
-/android/app/release
+# Root level platform folders should not exist for packages
+/android/
+/ios/
+
+# Example app specific
+example/.env
+example/build/
+example/android/app/debug
+example/android/app/profile
+example/android/app/release
+example/ios/Pods/
+example/.dart_tool/
+
 # Misc
-/lib/main.dart
 /devtools_options.yaml
-/lib/app_data
