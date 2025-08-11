@@ -1,4 +1,3 @@
-import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
+import 'package:flutter_chat_core/flutter_chat_core.dart';
 
-const chatUser =
-    types.User(id: 'chatuser', firstName: 'chat', lastName: 'user');
+const chatUser = User(id: 'chatuser', name: 'Chat User');

@@ -6,7 +6,7 @@ import 'package:ebbot_flutter_ui/v1/src/controller/ebbot_chat_stream_controller.
 import 'package:ebbot_flutter_ui/v1/src/controller/ebbot_message_stream_controller.dart';
 import 'package:ebbot_flutter_ui/v1/src/widget/context_menu_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
+import 'package:flutter_chat_core/flutter_chat_core.dart';
 
 class EbbotControllerInitializer {
   //final EbbotFlutterUiState ebbotFlutterUiState;
@@ -68,11 +68,11 @@ abstract class AbstractControllerDelegate {
   void handleOnTextChanged(String text);
   void handleTypingUsers();
   void handleClearTypingUsers();
-  void handleAddMessage(types.Message message);
+  void handleAddMessage(Message message);
   void handleInputMode(String? mode);
   void handleRestartConversation();
-  void handleSendPressed(types.PartialText message);
-  void handleMessageTap(BuildContext _, types.Message message);
+  void handleSendPressed(String text);
+  void handleMessageTap(BuildContext _, Message message);
   void handleEndConversation();
   void handleDownloadTranscript();
   void handleOnPopupMenuSelected(ContextMenuOptions option);

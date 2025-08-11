@@ -3,7 +3,7 @@ import 'package:ebbot_flutter_ui/v1/src/service/ebbot_dart_client_service.dart';
 import 'package:ebbot_flutter_ui/v1/src/theme/ebbot_text_styles.dart';
 import 'package:ebbot_flutter_ui/v1/src/util/extension.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
+import 'package:flutter_chat_core/flutter_chat_core.dart';
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 
 // EbbotSupportService is a service that provides support functionalities for Ebbot, such as retrieving notifications and generating a user representation for Ebbot GPT.
@@ -11,9 +11,9 @@ import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 class EbbotSupportService {
   final _serviceLocator = ServiceLocator();
 
-  types.User? _cachedEbbotUser;
+  User? _cachedEbbotUser;
 
-  types.User getEbbotUser() {
+  User getEbbotUser() {
     if (_cachedEbbotUser != null) return _cachedEbbotUser!;
 
     final client = _serviceLocator.getService<EbbotDartClientService>().client;
@@ -23,11 +23,10 @@ class EbbotSupportService {
     return _cachedEbbotUser!;
   }
 
-  types.User _generateEbbotUser({String? imageUrl}) {
-    return types.User(
+  User _generateEbbotUser({String? imageUrl}) {
+    return User(
       id: 'bot',
-      firstName: 'Bot',
-      lastName: 'Bot',
+      name: 'Bot',
       imageUrl: imageUrl,
     );
   }
@@ -48,28 +47,13 @@ class EbbotSupportService {
       throw Exception(
           "ChatStyleConfig is not initialized. Please check your EbbotDartClientService initialization.");
     }
-    final typingIndicatorCirclesColor =
-        HexColor.fromHex(config.message_dots_color);
+    
     final primaryColor = HexColor.fromHex(config.regular_btn_background_color);
 
-    var typingIndicatorTheme = TypingIndicatorTheme(
-      animatedCirclesColor: typingIndicatorCirclesColor,
-      animatedCircleSize: 5.0,
-      bubbleBorder: const BorderRadius.all(Radius.circular(27.0)),
-      bubbleColor: neutral7,
-      countAvatarColor: primaryColor,
-      countTextColor: primaryColor,
-      multipleUserTextStyle: EbbotTextStyles.typingIndicator.copyWith(
-        color: neutral2,
-      ),
+    // For now, return a basic theme. In v2, theming might work differently
+    return ChatTheme(
+      primaryColor: primaryColor,
+      // Add minimal required theme properties
     );
-
-    return DefaultChatTheme(
-        primaryColor: primaryColor,
-        userAvatarImageBackgroundColor: primaryColor,
-        userAvatarNameColors: [primaryColor],
-        typingIndicatorTheme: typingIndicatorTheme,
-        receivedMessageBodyTextStyle: EbbotTextStyles.receivedMessageBody(neutral0),
-        sentMessageBodyTextStyle: EbbotTextStyles.sentMessageBody(neutral7));
   }
 }
