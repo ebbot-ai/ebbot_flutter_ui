@@ -20,6 +20,7 @@ import 'package:ebbot_flutter_ui/v1/src/util/string_util.dart';
 import 'package:ebbot_flutter_ui/v1/src/widget/context_menu_widget.dart';
 import 'package:ebbot_flutter_ui/v1/src/widget/start_page_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_chat_core/flutter_chat_core.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_chat_types/flutter_chat_types.dart';
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
@@ -116,7 +117,7 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
     with AutomaticKeepAliveClientMixin
     implements AbstractControllerDelegate {
   final ServiceLocator _serviceLocator = ServiceLocator();
-  final List<types.Message> _messages = [];
+  late InMemoryChatController _chatController;
 
   bool _isInitialized = false;
   bool get isInitialized => _isInitialized;
@@ -146,6 +147,7 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
   void initState() {
     super.initState();
 
+    _chatController = InMemoryChatController();
     _initialize();
   }
 
@@ -332,7 +334,7 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
 
     if (message is types.TextMessage) {
       _logger?.d("Handling text message: ${message.text}");
-      if (_messages.isEmpty) {
+      if (_chatController.messages.isEmpty) {
         ebbotCallbackService.dispatchOnStartConversation(message.text);
       }
 
@@ -360,7 +362,7 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
 
     // If we have a image uploaded, we need to remove it first, to avoid duplicate messages.
     bool hasPreUploadedImage =
-        _messages.any((message) => message.id == 'pre-uploaded-image');
+        _chatController.messages.any((message) => message.id == 'pre-uploaded-image');
     bool isFromChatUser =
         message.type == MessageType.image && message.author == chatUser;
     if (hasPreUploadedImage && isFromChatUser) {
@@ -370,24 +372,22 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
     }
 
     // Go through messages, if the message already exists, dont add it again
-    bool hasMessage = _messages.any((element) => element.id == message.id);
+    bool hasMessage = _chatController.messages.any((element) => element.id == message.id);
     if (hasMessage) {
       _logger?.w(
           "The message of id ${message.id} has already been added to the message list, skipping");
       return;
     }
 
-    setState(() {
-      _logger?.d(
-          "adding message of type ${message.type} from user ${message.author.id}");
+    _logger?.d(
+        "adding message of type ${message.type} from user ${message.author.id}");
 
-      _messages.insert(0, message);
-    });
+    _chatController.insertMessage(message);
   }
 
   @override
   void handleOnTextChanged(String text) {
-    handleSendPressed(types.PartialText(text: text));
+    handleSendText(text);
   }
 
   @override
@@ -397,16 +397,12 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
 
       if (message.uri.startsWith('http')) {
         try {
-          final index =
-              _messages.indexWhere((element) => element.id == message.id);
           final updatedMessage =
-              (_messages[index] as types.FileMessage).copyWith(
+              (message as types.FileMessage).copyWith(
             isLoading: true,
           );
 
-          setState(() {
-            _messages[index] = updatedMessage;
-          });
+          _chatController.updateMessage(updatedMessage);
 
           final client = http.Client();
           final request = await client.get(Uri.parse(message.uri));
@@ -419,16 +415,12 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
             await file.writeAsBytes(bytes);
           }
         } finally {
-          final index =
-              _messages.indexWhere((element) => element.id == message.id);
           final updatedMessage =
-              (_messages[index] as types.FileMessage).copyWith(
+              (message as types.FileMessage).copyWith(
             isLoading: null,
           );
 
-          setState(() {
-            _messages[index] = updatedMessage;
-          });
+          _chatController.updateMessage(updatedMessage);
         }
       }
 
@@ -438,11 +430,15 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
 
   @override
   void handleSendPressed(types.PartialText message) {
+    handleSendText(message.text);
+  }
+
+  void handleSendText(String text) {
     final textMessage = types.TextMessage(
       author: chatUser,
       createdAt: DateTime.now().millisecondsSinceEpoch,
       id: StringUtil.randomString(),
-      text: message.text,
+      text: text,
     );
 
     handleAddMessage(textMessage);
@@ -463,7 +459,7 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
       _isChatRestarted = true;
       _infoDialogInChatShown = false;
       _hasAgentHandover = false;
-      _messages.clear();
+      _chatController.setMessages([]);
     });
 
     _logger
@@ -556,9 +552,7 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
         size: bytes.length, // Size in bytes, if known
       );
 
-      setState(() {
-        _messages.insert(0, localImageMessage);
-      });
+      _chatController.insertMessage(localImageMessage);
 
       await client.uploadImage(bytes, result.path);
     }
@@ -642,33 +636,22 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
   }
 
   Widget _buildChat({required ChatTheme chatTheme}) {
-    final inputOptions =
-        _ebbotControllerInitializer.chatInputController?.inputOptions ??
-            const InputOptions();
     return Chat(
-      inputOptions: inputOptions,
-      theme: chatTheme,
-      messages: _messages,
-      onSendPressed: handleSendPressed,
+      chatController: _chatController,
+      currentUserId: 'chatuser',
+      resolveUser: (UserID id) async {
+        if (id == 'chatuser') {
+          return chatUser;
+        } else {
+          // Return ebbot user
+          final ebbotSupportService = _serviceLocator.getService<EbbotSupportService>();
+          return ebbotSupportService.getEbbotUser();
+        }
+      },
+      onMessageSend: handleSendText,
       onMessageTap: handleMessageTap,
-      onAttachmentPressed: handleOnAttachmentPressed,
-      emptyState: Container(alignment: Alignment.center),
-      user: chatUser,
-      showUserAvatars: true,
-      customBottomWidget: Visibility(
-        visible: _inputBoxVisible,
-        child: Input(
-          onSendPressed: handleSendPressed,
-          onAttachmentPressed: handleOnAttachmentPressed,
-          options: inputOptions,
-        ),
-      ),
-      customMessageBuilder: _ebbotControllerInitializer
-          .chatUiCustomMessageController?.processMessage,
-      typingIndicatorOptions: TypingIndicatorOptions(
-        typingMode: TypingIndicatorMode.avatar,
-        typingUsers: _typingUsers,
-      ),
+      onAttachmentTap: handleOnAttachmentPressed,
+      theme: chatTheme,
     );
   }
 

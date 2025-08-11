@@ -13,9 +13,6 @@ dependencies:
   # Use the library from parent directory
   ebbot_flutter_ui:
     path: ../
-
-  # UI dependencies for chat
-  flutter_chat_ui: ^1.6.12
   
   # Environment variables
   flutter_dotenv: ^5.1.0
