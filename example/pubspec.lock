@@ -375,7 +375,7 @@ packages:
     source: hosted
     version: "3.6.2"
   flutter_chat_ui:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: flutter_chat_ui
       sha256: aafab2afe71c034ec6353a2b109cbaba73ce4be572692ebd29889e4d82227b49
