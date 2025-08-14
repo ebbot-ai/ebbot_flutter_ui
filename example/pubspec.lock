@@ -237,18 +237,18 @@ packages:
     dependency: transitive
     description:
       path: "."
-      ref: "v0.2.5+1"
-      resolved-ref: "8eed6c2212e2e7700749b3f8b77d82ac975f5dde"
+      ref: "v0.2.6"
+      resolved-ref: "5b50a03fbd5b9ccf2ead443391192699ce19074c"
       url: "https://github.com/ebbot-ai/ebbot-dart-client"
     source: git
-    version: "0.2.5+1"
+    version: "0.2.6"
   ebbot_flutter_ui:
     dependency: "direct main"
     description:
       path: ".."
       relative: true
     source: path
-    version: "0.2.6+1"
+    version: "0.2.7+1"
   equatable:
     dependency: transitive
     description:

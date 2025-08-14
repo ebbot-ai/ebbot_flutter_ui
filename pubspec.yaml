@@ -1,7 +1,7 @@
 name: ebbot_flutter_ui
 description: A Flutter UI library for integrating Ebbot chat functionality into Flutter applications. Provides a complete chat interface with real-time messaging, image uploads, session management, and customizable themes.
 publish_to: "none" # This is a private library not published to pub.dev
-version: 0.2.7
+version: 0.2.7+1
 
 # Repository information
 repository: https://github.com/ebbot-ai/ebbot-flutter-ui
@@ -41,7 +41,7 @@ dependencies:
   ebbot_dart_client:
     git:
       url: https://github.com/ebbot-ai/ebbot-dart-client
-      ref: v0.2.5+1
+      ref: v0.2.6
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.

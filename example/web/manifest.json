@@ -1,6 +1,6 @@
 {
-    "name": "ebbot_demo",
-    "short_name": "ebbot_demo",
+    "name": "ebbot_flutter_ui_example",
+    "short_name": "ebbot_flutter_ui_example",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

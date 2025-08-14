@@ -44,6 +44,10 @@ app.*.map.json
 # Root level platform folders should not exist for packages
 /android/
 /ios/
+/web/
+/macos/
+/windows/
+/linux/
 
 # Example app specific
 example/.env
@@ -56,3 +60,4 @@ example/.dart_tool/
 
 # Misc
 /devtools_options.yaml
+*.log
