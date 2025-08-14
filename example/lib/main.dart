@@ -126,9 +126,16 @@ Future main() async {
   var ebbotBehaviourInput = EbbotBehaviourInputBuilder()
       .enterPressed(EbbotBehaviourInputEnterPressed.sendMessage)
       .build();
+
+  var messageThrottling = EbbotBehaviourMessageThrottlingBuilder()
+      .enabled(true)
+      .delayBetweenMessages(const Duration(milliseconds: 600))
+      .build();
+
   var behaviour = EbbotBehaviourBuilder()
       .input(ebbotBehaviourInput)
       .showContextMenu(true)
+      .messageThrottling(messageThrottling)
       .build();
 
   var logConfiguration = EbbotLogConfigurationBuilder()

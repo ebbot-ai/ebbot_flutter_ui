@@ -9,6 +9,7 @@ The behavior configuration controls how users interact with the chat interface:
 - Context menu visibility
 - Input field behavior
 - UI interaction patterns
+- Message delivery throttling
 
 ## Basic Configuration
 
@@ -20,6 +21,12 @@ final configuration = EbbotConfigurationBuilder()
       .input(
         EbbotBehaviourInputBuilder()
           .enterPressed(EbbotBehaviourInputEnterPressed.sendMessage)
+          .build()
+      )
+      .messageThrottling(
+        EbbotBehaviourMessageThrottlingBuilder()
+          .enabled(true)
+          .delayBetweenMessages(const Duration(milliseconds: 300))
           .build()
       )
       .build()
@@ -89,6 +96,39 @@ Control what happens when the user presses Enter:
 - **Send button**: Sends the message
 - Best for: Long messages, detailed descriptions
 
+## Message Throttling
+
+Control how bot messages appear to prevent them from "exploding" onto the screen when multiple messages arrive simultaneously.
+
+### Enable Message Throttling
+```dart
+.messageThrottling(
+  EbbotBehaviourMessageThrottlingBuilder()
+    .enabled(true)  // Enable throttling (default: true)
+    .delayBetweenMessages(const Duration(milliseconds: 500))  // 500ms between messages
+    .build()
+)
+```
+
+### Disable Message Throttling
+```dart
+.messageThrottling(
+  EbbotBehaviourMessageThrottlingBuilder()
+    .enabled(false)  // All messages appear immediately
+    .build()
+)
+```
+
+### How It Works
+- **User messages**: Always appear immediately for responsive interactions
+- **Bot messages**: Queued and displayed with configurable delays
+- **Timer management**: Automatically starts/stops based on queue state
+- **Queue processing**: One message per interval until queue is empty
+
+### Configuration Options
+- `enabled`: Boolean to enable/disable throttling (default: `true`)
+- `delayBetweenMessages`: Duration between messages (default: `300ms`)
+
 ## Complete Behavior Example
 
 ```dart
@@ -101,68 +141,17 @@ final configuration = EbbotConfigurationBuilder()
           .enterPressed(EbbotBehaviourInputEnterPressed.sendMessage)
           .build()
       )
+      .messageThrottling(
+        EbbotBehaviourMessageThrottlingBuilder()
+          .enabled(true)
+          .delayBetweenMessages(const Duration(milliseconds: 300))
+          .build()
+      )
       .build()
   )
   .build();
 ```
 
-## Use Cases
-
-### Customer Support Chat
-Quick interactions, immediate responses:
-
-```dart
-final supportBehavior = EbbotBehaviourBuilder()
-  .showContextMenu(true)  // Allow users to restart or end chat
-  .input(
-    EbbotBehaviourInputBuilder()
-      .enterPressed(EbbotBehaviourInputEnterPressed.sendMessage)
-      .build()
-  )
-  .build();
-```
-
-### Feedback or Survey Chat
-Longer responses, thoughtful input:
-
-```dart
-final feedbackBehavior = EbbotBehaviourBuilder()
-  .showContextMenu(false)  // Simplified interface
-  .input(
-    EbbotBehaviourInputBuilder()
-      .enterPressed(EbbotBehaviourInputEnterPressed.newline)
-      .build()
-  )
-  .build();
-```
-
-### Mobile-Optimized Chat
-Touch-friendly interactions:
-
-```dart
-final mobileBehavior = EbbotBehaviourBuilder()
-  .showContextMenu(true)  // Easy access to actions
-  .input(
-    EbbotBehaviourInputBuilder()
-      .enterPressed(EbbotBehaviourInputEnterPressed.sendMessage)  // Quick sending
-      .build()
-  )
-  .build();
-```
-
-### Desktop Application Chat
-Keyboard-focused interactions:
-
-```dart
-final desktopBehavior = EbbotBehaviourBuilder()
-  .showContextMenu(false)  // Keyboard shortcuts preferred
-  .input(
-    EbbotBehaviourInputBuilder()
-      .enterPressed(EbbotBehaviourInputEnterPressed.newline)  // Multi-line support
-      .build()
-  )
-  .build();
-```
 
 ## Platform-Specific Behavior
 
