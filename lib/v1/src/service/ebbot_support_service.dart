@@ -1,6 +1,5 @@
 import 'package:ebbot_flutter_ui/v1/src/initializer/service_locator.dart';
 import 'package:ebbot_flutter_ui/v1/src/service/ebbot_dart_client_service.dart';
-import 'package:ebbot_flutter_ui/v1/src/theme/ebbot_text_styles.dart';
 import 'package:ebbot_flutter_ui/v1/src/util/extension.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_core/flutter_chat_core.dart';
@@ -27,7 +26,9 @@ class EbbotSupportService {
     return User(
       id: 'bot',
       name: 'Bot',
-      imageUrl: imageUrl,
+      imageSource: imageUrl,
+      // Note: avatarUrl parameter might not be supported in current flutter_chat_core version
+      // TODO: Re-add avatar support when compatible with v2
     );
   }
 
@@ -40,20 +41,26 @@ class EbbotSupportService {
   }
 
   ChatTheme chatTheme() {
-    final client = _serviceLocator.getService<EbbotDartClientService>().client;
-    final config = client.chatStyleConfig;
-
-    if (config == null) {
-      throw Exception(
-          "ChatStyleConfig is not initialized. Please check your EbbotDartClientService initialization.");
-    }
-    
-    final primaryColor = HexColor.fromHex(config.regular_btn_background_color);
-
-    // For now, return a basic theme. In v2, theming might work differently
+    // Create a minimal valid ChatTheme with proper shape parameter
     return ChatTheme(
-      primaryColor: primaryColor,
-      // Add minimal required theme properties
+      colors: ChatColors(
+        primary: Colors.blue.shade600,
+        onPrimary: Colors.white,
+        surface: Colors.white,
+        onSurface: Colors.black87,
+        surfaceContainer: Colors.grey.shade100,
+        surfaceContainerHigh: Colors.grey.shade200,
+        surfaceContainerLow: Colors.grey.shade50,
+      ),
+      shape: BorderRadius.circular(12.0), // BorderRadiusGeometry
+      typography: ChatTypography(
+        bodyLarge: const TextStyle(fontSize: 16, color: Colors.black87),
+        bodyMedium: const TextStyle(fontSize: 14, color: Colors.black87),
+        bodySmall: const TextStyle(fontSize: 12, color: Colors.black54),
+        labelLarge: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+        labelMedium: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+        labelSmall: const TextStyle(fontSize: 10, fontWeight: FontWeight.w500),
+      ),
     );
   }
 }

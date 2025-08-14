@@ -1,7 +1,7 @@
-import 'package:ebbot_dart_client/entity/message/message.dart';
+import 'package:ebbot_dart_client/entity/message/message.dart' as ebbot_message;
 import 'package:ebbot_flutter_ui/v1/src/initializer/service_locator.dart';
 import 'package:ebbot_flutter_ui/v1/src/service/log_service.dart';
-import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
+import 'package:flutter_chat_core/flutter_chat_core.dart';
 
 /// A parser for processing incoming ebbot chat messages and generating corresponding types of flutter chat ui messages.
 ///
@@ -14,7 +14,7 @@ class EbbotMessageParser {
   ///
   /// The method examines the type of the incoming message and delegates the processing to specific handlers.
   /// Returns `null` if the message type is unsupported.
-  types.Message? parse(Message message, types.User user, String id) {
+  Message? parse(ebbot_message.Message message, User user, String id) {
     final messageType = message.data.message.type;
 
     switch (messageType) {
@@ -56,53 +56,53 @@ class EbbotMessageParser {
     }
   }
 
-  types.Message? _parseButtonClick(
-      MessageContent message, types.User user, String id) {
+  Message? _parseButtonClick(
+      ebbot_message.MessageContent message, User user, String id) {
     var text = message.value is String ? message.value : message.value['text'];
-    return types.TextMessage(
+    return TextMessage(
       id: id,
-      author: user,
-      createdAt: DateTime.now().millisecondsSinceEpoch,
+      authorId: user.id,
+      createdAt: DateTime.now().toUtc(),
       text: text,
       metadata: message.toJson(),
     );
   }
 
-  types.Message? _parseCustom(
-      MessageContent message, types.User user, String id) {
-    return types.CustomMessage(
+  Message? _parseCustom(
+      ebbot_message.MessageContent message, User user, String id) {
+    return CustomMessage(
         id: id,
-        author: user,
-        createdAt: DateTime.now().millisecondsSinceEpoch,
+        authorId: user.id,
+        createdAt: DateTime.now().toUtc(),
         metadata: message.toJson());
   }
 
-  types.Message? _parseTextInfo(
-      MessageContent message, types.User user, String id) {
+  Message? _parseTextInfo(
+      ebbot_message.MessageContent message, User user, String id) {
     var text = message.value is String ? message.value : message.value['text'];
 
-    return types.SystemMessage(
+    return SystemMessage(
         id: id,
-        author: user,
-        createdAt: DateTime.now().millisecondsSinceEpoch,
+        authorId: user.id,
+        createdAt: DateTime.now().toUtc(),
         text: text,
         metadata: message.toJson());
   }
 
-  types.Message? _parseGpt(MessageContent message, types.User user, String id) {
+  Message? _parseGpt(ebbot_message.MessageContent message, User user, String id) {
     var text = message.value is String ? message.value : message.value['text'];
 
-    return types.TextMessage(
-      author: user,
-      createdAt: DateTime.now().millisecondsSinceEpoch,
+    return TextMessage(
+      authorId: user.id,
+      createdAt: DateTime.now().toUtc(),
       id: id,
       text: text,
       metadata: message.toJson(),
     );
   }
 
-  types.Message? _parseImage(
-      MessageContent message, types.User user, String id) {
+  Message? _parseImage(
+      ebbot_message.MessageContent message, User user, String id) {
     if (message.value is! Map<String, dynamic>) {
       _logger?.d(
           "message is NOT a map, I don't know how to process this, so skipping.. type is ${message.value.runtimeType}");
@@ -110,18 +110,18 @@ class EbbotMessageParser {
     }
 
     Map<String, dynamic> image = message.value;
-    return types.ImageMessage(
+    return ImageMessage(
       id: image['key'],
-      author: user,
-      name: image['filename'],
-      uri: image['url'],
+      authorId: user.id,
+      createdAt: DateTime.now().toUtc(),
+      source: image['url'],
       size: image['size'],
       metadata: message.toJson(),
     );
   }
 
-  types.Message? _parseText(
-      MessageContent message, types.User user, String id) {
+  Message? _parseText(
+      ebbot_message.MessageContent message, User user, String id) {
     if (message.sender == 'user') {
       _logger?.w("message is from user, so skipping..");
       return null;
@@ -129,19 +129,17 @@ class EbbotMessageParser {
 
     var text = message.value is String ? message.value : message.value['text'];
 
-    
-
-    return types.TextMessage(
-      author: user,
-      createdAt: DateTime.now().millisecondsSinceEpoch,
+    return TextMessage(
+      authorId: user.id,
+      createdAt: DateTime.now().toUtc(),
       id: id,
       text: text,
       metadata: message.toJson(),
     );
   }
 
-  types.Message? _parseFile(
-      MessageContent message, types.User user, String id) {
+  Message? _parseFile(
+      ebbot_message.MessageContent message, User user, String id) {
     if (message.value is! Map<String, dynamic>) {
       _logger?.w(
           "message is NOT a map, I don't know how to process this, so skipping.. type is ${message.value.runtimeType}");
@@ -150,13 +148,13 @@ class EbbotMessageParser {
 
     Map<String, dynamic> file = message.value;
 
-    return types.FileMessage(
+    return FileMessage(
       id: file['key'],
-      author: user,
+      authorId: user.id,
+      createdAt: DateTime.now().toUtc(),
       name: file['filename'],
       size: file['size'],
-      uri: file['url'],
-      type: types.MessageType.file,
+      source: file['url'],
       metadata: message.toJson(),
     );
   }

@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:ebbot_dart_client/entity/message/message.dart';
+import 'package:ebbot_dart_client/entity/message/message.dart' as ebbot_message;
 import 'package:ebbot_flutter_ui/v1/src/controller/resettable_controller.dart';
 import 'package:ebbot_flutter_ui/v1/src/initializer/service_locator.dart';
 import 'package:ebbot_flutter_ui/v1/src/parser/ebbot_message_parser.dart';
@@ -9,14 +9,14 @@ import 'package:ebbot_flutter_ui/v1/src/service/ebbot_support_service.dart';
 import 'package:ebbot_flutter_ui/v1/src/service/log_service.dart';
 import 'package:ebbot_flutter_ui/v1/src/util/ebbot_gpt_user.dart';
 import 'package:ebbot_flutter_ui/v1/src/util/string_util.dart';
-import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
+import 'package:flutter_chat_core/flutter_chat_core.dart';
 
 class EbbotMessageStreamController extends ResettableController {
   final _serviceLocator = ServiceLocator();
   get _logger => _serviceLocator.getService<LogService>().logger;
   final Function _handleTypingUsers;
   final Function _handleClearTypingUsers;
-  final Function(types.Message) _handleAddMessage;
+  final Function(Message) _handleAddMessage;
   final Function(String?) _handleInputMode;
   bool hasReceivedGPTMessageBefore = false;
 
@@ -31,9 +31,9 @@ class EbbotMessageStreamController extends ResettableController {
     startListening();
   }
 
-  StreamSubscription<Message>? _messageStreamSubscription;
+  StreamSubscription<ebbot_message.Message>? _messageStreamSubscription;
 
-  String getMessageId(MessageContent content) {
+  String getMessageId(ebbot_message.MessageContent content) {
     if (content.id != null) {
       _logger.d(
           "Using existing message id: ${content.id} for type: ${content.type}");
@@ -43,7 +43,7 @@ class EbbotMessageStreamController extends ResettableController {
     return StringUtil.randomString();
   }
 
-  void _handle(Message message) {
+  void _handle(ebbot_message.Message message) {
     final ebbotSupportService =
         _serviceLocator.getService<EbbotSupportService>();
     final ebbotUser = ebbotSupportService.getEbbotUser();
@@ -65,9 +65,10 @@ class EbbotMessageStreamController extends ResettableController {
     if (hasReceivedGPTMessageBefore == false && messageType == 'gpt') {
       hasReceivedGPTMessageBefore = true;
 
-      var systemMessage = types.SystemMessage(
+      var systemMessage = SystemMessage(
           id: StringUtil.randomString(),
-          author: ebbotUser,
+          authorId: ebbotUser.id,
+          createdAt: DateTime.now().toUtc(),
           text: "AI generated message");
       _handleAddMessage(systemMessage);
     }

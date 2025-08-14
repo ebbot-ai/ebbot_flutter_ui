@@ -26,8 +26,10 @@ class _ListWidget extends State<ListWidget> {
     final ebbotSupportService =
         _serviceLocator.getService<EbbotSupportService>();
 
-    final receivedMessageBodyTextStyle =
-        ebbotSupportService.chatTheme().receivedMessageBodyTextStyle;
+    final receivedMessageBodyTextStyle = const TextStyle(
+        fontSize: 14, 
+        color: Colors.black87
+      );
 
     final content = widget.content;
 

@@ -39,14 +39,14 @@ class EbbotControllerInitializer {
     ebbotMessageStreamController = EbbotMessageStreamController(
       controllerDelegates.handleTypingUsers,
       controllerDelegates.handleClearTypingUsers,
-      controllerDelegates.handleAddMessage,
+      (message) => controllerDelegates.handleAddMessage(message),
       controllerDelegates.handleInputMode,
     );
 
     ebbotChatStreamController = EbbotChatStreamController(
       controllerDelegates.handleTypingUsers,
       controllerDelegates.handleClearTypingUsers,
-      controllerDelegates.handleAddMessage,
+      (message) => controllerDelegates.handleAddMessage(message),
       controllerDelegates.handleInputMode,
       controllerDelegates.handleAgentHandover,
       controllerDelegates.handleChatClosed,

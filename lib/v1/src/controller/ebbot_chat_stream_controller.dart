@@ -8,13 +8,13 @@ import 'package:ebbot_flutter_ui/v1/src/service/ebbot_chat_listener_service.dart
 import 'package:ebbot_flutter_ui/v1/src/service/ebbot_support_service.dart';
 import 'package:ebbot_flutter_ui/v1/src/service/log_service.dart';
 import 'package:ebbot_flutter_ui/v1/src/util/ebbot_gpt_user.dart';
-import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
+import 'package:flutter_chat_core/flutter_chat_core.dart';
 
 class EbbotChatStreamController extends ResettableController {
   final _serviceLocator = ServiceLocator();
   final Function _handleTypingMessage;
   final Function _handleClearTypingUsers;
-  final Function(types.Message) _handleAddMessage;
+  final Function(Message) _handleAddMessage;
   final Function(String) _handleCanType;
   final Function() _handleAgentHandover;
   final Function() _handleChatClosed;

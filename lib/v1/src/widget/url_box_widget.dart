@@ -37,8 +37,10 @@ class _UrlBoxWidgetState extends State<UrlBoxWidget> {
     final content = widget.content;
     final ebbotSupportService =
         _serviceLocator.getService<EbbotSupportService>();
-    final receivedMessageBodyTextStyle =
-        ebbotSupportService.chatTheme().receivedMessageBodyTextStyle;
+    final receivedMessageBodyTextStyle = const TextStyle(
+        fontSize: 14, 
+        color: Colors.black87
+      );
 
     if (content.value['urls'] is! List) {
       return Container();

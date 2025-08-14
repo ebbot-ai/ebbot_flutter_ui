@@ -44,8 +44,10 @@ class _RatingWidgetState extends State<RatingWidget> {
     final ebbotSupportService =
         _serviceLocator.getService<EbbotSupportService>();
 
-    final receivedMessageBodyTextStyle =
-        ebbotSupportService.chatTheme().receivedMessageBodyTextStyle;
+    final receivedMessageBodyTextStyle = const TextStyle(
+        fontSize: 14, 
+        color: Colors.black87
+      );
 
     final chatStyleConfig = ebbotClientService.client.chatStyleConfig;
     if (chatStyleConfig == null) {

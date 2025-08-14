@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:ebbot_flutter_ui/ebbot_flutter_ui.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'app_data/demo_app_with_pages.dart';
@@ -154,22 +153,5 @@ Future main() async {
   runApp(EbbotDemoAppWithPages(botId: botId, configuration: configuration));
 }
 
-class ForestChatTheme extends DefaultChatTheme {
-  const ForestChatTheme(
-      {super.primaryColor = const Color(0xFF00A372),
-      super.userAvatarImageBackgroundColor = const Color(0xFF00A372),
-      super.userAvatarNameColors = const [Color(0xFF00A372)],
-      super.typingIndicatorTheme = const TypingIndicatorTheme(
-        animatedCirclesColor: neutral1,
-        animatedCircleSize: 5.0,
-        bubbleBorder: BorderRadius.all(Radius.circular(27.0)),
-        bubbleColor: neutral7,
-        countAvatarColor: Color(0xFF00A372),
-        countTextColor: Color(0xFF00A372),
-        multipleUserTextStyle: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
-          color: neutral2,
-        ),
-      )});
-}
+// Custom theme temporarily removed for v2 migration
+// TODO: Implement custom ForestChatTheme for flutter_chat_ui v2

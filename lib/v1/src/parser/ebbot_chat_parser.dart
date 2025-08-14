@@ -1,13 +1,13 @@
 import 'package:ebbot_dart_client/entity/chat/chat.dart';
 import 'package:ebbot_flutter_ui/v1/src/initializer/service_locator.dart';
 import 'package:ebbot_flutter_ui/v1/src/service/log_service.dart';
-import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
+import 'package:flutter_chat_core/flutter_chat_core.dart';
 
 class EbbotChatParser {
   final _serviceLocator = ServiceLocator();
   get _logger => _serviceLocator.getService<LogService>().logger;
 
-  types.Message? parse(ChatMessage message, types.User user, String id) {
+  Message? parse(ChatMessage message, User user, String id) {
     final messageType = message.type;
 
     final expectedVisibility = ['chat', 'user'];
@@ -57,50 +57,50 @@ class EbbotChatParser {
     }
   }
 
-  types.Message? _parseButtonClick(
-      ChatMessage message, types.User user, String id) {
+  Message? _parseButtonClick(
+      ChatMessage message, User user, String id) {
     var text = message.value is String ? message.value : message.value['text'];
-    return types.TextMessage(
+    return TextMessage(
       id: id,
-      author: user,
-      createdAt: DateTime.now().millisecondsSinceEpoch,
+      authorId: user.id,
+      createdAt: DateTime.now().toUtc(),
       text: text,
       metadata: message.toJson(),
     );
   }
 
-  types.Message? _parseCustom(ChatMessage message, types.User user, String id) {
-    return types.CustomMessage(
+  Message? _parseCustom(ChatMessage message, User user, String id) {
+    return CustomMessage(
         id: id,
-        author: user,
-        createdAt: DateTime.now().millisecondsSinceEpoch,
+        authorId: user.id,
+        createdAt: DateTime.now().toUtc(),
         metadata: message.toJson());
   }
 
-  types.Message? _parseTextInfo(
-      ChatMessage message, types.User user, String id) {
+  Message? _parseTextInfo(
+      ChatMessage message, User user, String id) {
     var text = message.value is String ? message.value : message.value['text'];
-    return types.TextMessage(
+    return TextMessage(
       id: id,
-      author: user,
-      createdAt: DateTime.now().millisecondsSinceEpoch,
+      authorId: user.id,
+      createdAt: DateTime.now().toUtc(),
       text: text,
       metadata: message.toJson(),
     );
   }
 
-  types.Message? _parseGpt(ChatMessage message, types.User user, String id) {
+  Message? _parseGpt(ChatMessage message, User user, String id) {
     var text = message.value is String ? message.value : message.value['text'];
-    return types.TextMessage(
+    return TextMessage(
       id: id,
-      author: user,
-      createdAt: DateTime.now().millisecondsSinceEpoch,
+      authorId: user.id,
+      createdAt: DateTime.now().toUtc(),
       text: text,
       metadata: message.toJson(),
     );
   }
 
-  types.Message? _parseImage(ChatMessage message, types.User user, String id) {
+  Message? _parseImage(ChatMessage message, User user, String id) {
     if (message.value is! Map<String, dynamic>) {
       _logger?.w(
           "message is NOT a map, I don't know how to process this, so skipping.. type is ${message.value.runtimeType}");
@@ -108,29 +108,29 @@ class EbbotChatParser {
     }
 
     Map<String, dynamic> image = message.value;
-    return types.ImageMessage(
+    return ImageMessage(
       id: image['key'],
-      author: user,
-      name: image['filename'],
-      uri: image['url'],
+      authorId: user.id,
+      createdAt: DateTime.now().toUtc(),
+      source: image['url'],
       size: image['size'],
       metadata: message.toJson(),
     );
   }
 
-  types.Message? _parseText(ChatMessage message, types.User user, String id) {
+  Message? _parseText(ChatMessage message, User user, String id) {
     var text = message.value is String ? message.value : message.value['text'];
 
-    return types.TextMessage(
-      author: user,
-      createdAt: DateTime.now().millisecondsSinceEpoch,
+    return TextMessage(
+      authorId: user.id,
+      createdAt: DateTime.now().toUtc(),
       id: id,
       text: text,
       metadata: message.toJson(),
     );
   }
 
-  types.Message? _parseFile(ChatMessage message, types.User user, String id) {
+  Message? _parseFile(ChatMessage message, User user, String id) {
     if (message.value is! Map<String, dynamic>) {
       _logger?.w(
           "message is NOT a map, I don't know how to process this, so skipping.. type is ${message.value.runtimeType}");
@@ -138,13 +138,13 @@ class EbbotChatParser {
     }
 
     Map<String, dynamic> file = message.value;
-    return types.FileMessage(
+    return FileMessage(
       id: file['key'],
-      author: user,
+      authorId: user.id,
+      createdAt: DateTime.now().toUtc(),
       name: file['filename'],
       size: file['size'],
-      uri: file['url'],
-      type: types.MessageType.file,
+      source: file['url'],
       metadata: message.toJson(),
     );
   }

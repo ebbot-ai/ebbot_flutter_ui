@@ -2,7 +2,19 @@ import 'package:ebbot_flutter_ui/v1/configuration/ebbot_behaviour.dart';
 import 'package:ebbot_flutter_ui/v1/src/controller/chat_input_field_controller.dart';
 import 'package:ebbot_flutter_ui/v1/src/initializer/service_locator.dart';
 import 'package:ebbot_flutter_ui/v1/src/service/log_service.dart';
-import 'package:flutter_chat_ui/flutter_chat_ui.dart';
+
+// Simple replacement for InputOptions since it doesn't exist in v2
+class InputOptions {
+  final bool enabled;
+  final Function(String) onTextChanged;
+  final ChatInputFieldController textEditingController;
+
+  const InputOptions({
+    required this.enabled,
+    required this.onTextChanged,
+    required this.textEditingController,
+  });
+}
 
 class ChatInputController {
   bool enabled;
