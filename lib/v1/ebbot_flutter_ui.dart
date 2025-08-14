@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'dart:collection';
 import 'dart:io';
 
 import 'package:ebbot_dart_client/configuration/configuration.dart';
@@ -122,6 +124,10 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
   bool get isInitialized => _isInitialized;
 
   final _typingUsers = <types.User>[];
+  
+  // Message throttling
+  final Queue<types.Message> _messageQueue = Queue<types.Message>();
+  Timer? _messageTimer;
   bool hasReceivedGPTMessageBefore = false;
 
   late EbbotServiceInitializer _ebbotServiceInitializer;
@@ -153,6 +159,7 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
   void dispose() {
     super.dispose();
     _logger?.i("Disposing EbbotFlutterUiState");
+    _messageTimer?.cancel();
     _serviceLocator.getService<EbbotDartClientService>().client.closeAsync();
     _serviceLocator.reset();
   }
@@ -377,17 +384,56 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
       return;
     }
 
-    setState(() {
-      _logger?.d(
-          "adding message of type ${message.type} from user ${message.author.id}");
-
-      _messages.insert(0, message);
-    });
+    // Check if message throttling is enabled and this is not a user message
+    final throttlingConfig = widget._configuration.behaviour.messageThrottling;
+    final isUserMessage = message.author == chatUser;
+    
+    if (throttlingConfig.enabled && !isUserMessage) {
+      // Add to queue for throttled delivery
+      _messageQueue.add(message);
+      _startMessageTimer();
+    } else {
+      // Add immediately for user messages or when throttling is disabled
+      _addMessageToList(message);
+    }
   }
 
   @override
   void handleOnTextChanged(String text) {
     handleSendPressed(types.PartialText(text: text));
+  }
+
+  void _addMessageToList(types.Message message) {
+    setState(() {
+      _logger?.d(
+          "adding message of type ${message.type} from user ${message.author.id}");
+      _messages.insert(0, message);
+    });
+  }
+
+  void _startMessageTimer() {
+    if (_messageTimer?.isActive == true) {
+      return; // Timer already running
+    }
+
+    final throttlingConfig = widget._configuration.behaviour.messageThrottling;
+    _messageTimer = Timer.periodic(throttlingConfig.delayBetweenMessages, (_) {
+      _processNextMessage();
+    });
+
+    // Process first message immediately
+    _processNextMessage();
+  }
+
+  void _processNextMessage() {
+    if (_messageQueue.isEmpty) {
+      _messageTimer?.cancel();
+      _messageTimer = null;
+      return;
+    }
+
+    final message = _messageQueue.removeFirst();
+    _addMessageToList(message);
   }
 
   @override
@@ -464,7 +510,11 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
       _infoDialogInChatShown = false;
       _hasAgentHandover = false;
       _messages.clear();
+      _messageQueue.clear();
     });
+
+    _messageTimer?.cancel();
+    _messageTimer = null;
 
     _logger
         ?.i("Restarting conversation, clearing messages and resetting state");

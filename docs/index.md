@@ -12,7 +12,7 @@ Welcome to the Ebbot Flutter UI documentation. This library provides a complete 
 - [**Styling and Theming**](./styling.md) - Customize the appearance of your chat widget
 - [**User Attributes**](./user-attributes.md) - Pass user-specific data to personalize conversations
 - [**Environment Configuration**](./environments.md) - Configure different environments (staging, production, etc.)
-- [**Chat Behavior**](./behavior.md) - Configure input behavior and UI elements
+- [**Chat Behavior**](./behavior.md) - Configure input behavior, UI elements, and message throttling
 - [**Logging**](./logging.md) - Set up logging for debugging and monitoring
 
 ### Advanced Features
@@ -46,6 +46,7 @@ Welcome to the Ebbot Flutter UI documentation. This library provides a complete 
 - Programmatic API for chat control
 - Multi-language support
 - Cross-platform compatibility
+- Message delivery throttling
 
 ## 💡 Need Help?
 
