@@ -20,6 +20,7 @@ import 'package:ebbot_flutter_ui/v1/src/util/ebbot_gpt_user.dart';
 import 'package:ebbot_flutter_ui/v1/src/util/extension.dart';
 import 'package:ebbot_flutter_ui/v1/src/util/string_util.dart';
 import 'package:ebbot_flutter_ui/v1/src/widget/context_menu_widget.dart';
+import 'package:ebbot_flutter_ui/v1/src/widget/markdown_text_widget.dart';
 import 'package:ebbot_flutter_ui/v1/src/widget/start_page_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
@@ -124,7 +125,7 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
   bool get isInitialized => _isInitialized;
 
   final _typingUsers = <types.User>[];
-  
+
   // Message throttling
   final Queue<types.Message> _messageQueue = Queue<types.Message>();
   Timer? _messageTimer;
@@ -387,7 +388,7 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
     // Check if message throttling is enabled and this is not a user message
     final throttlingConfig = widget._configuration.behaviour.messageThrottling;
     final isUserMessage = message.author == chatUser;
-    
+
     if (throttlingConfig.enabled && !isUserMessage) {
       // Add to queue for throttled delivery
       _messageQueue.add(message);
@@ -715,9 +716,28 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
       ),
       customMessageBuilder: _ebbotControllerInitializer
           .chatUiCustomMessageController?.processMessage,
+      textMessageBuilder: _buildTextMessage,
       typingIndicatorOptions: TypingIndicatorOptions(
         typingMode: TypingIndicatorMode.avatar,
         typingUsers: _typingUsers,
+      ),
+    );
+  }
+
+  /// Custom text message builder that handles markdown formatting
+  Widget _buildTextMessage(types.TextMessage message,
+      {required int messageWidth, required bool showName}) {
+    final isReceived = message.author.id != chatUser.id;
+
+    // Wrap in Container with padding to match default text message styling
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 16.0,
+        vertical: 8.0,
+      ),
+      child: MarkdownTextWidget(
+        text: message.text,
+        isReceived: isReceived,
       ),
     );
   }
