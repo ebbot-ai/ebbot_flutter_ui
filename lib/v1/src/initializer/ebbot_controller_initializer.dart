@@ -59,8 +59,8 @@ class EbbotControllerInitializer {
   // usually when the the api has been reset and the controllers need to be reset as a result
   void resetControllers() {
     chatTranscriptController?.reset();
-    ebbotMessageStreamController?.startListening();
-    ebbotChatStreamController?.startListening();
+    ebbotMessageStreamController?.reset();
+    ebbotChatStreamController?.reset();
   }
 }
 

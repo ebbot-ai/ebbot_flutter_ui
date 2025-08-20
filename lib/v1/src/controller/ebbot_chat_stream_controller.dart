@@ -51,6 +51,7 @@ class EbbotChatStreamController extends ResettableController {
           _serviceLocator.getService<EbbotSupportService>();
       final agentImage = chat.data?.chat?.user_profile_picture;
       _logger?.d("Agent handover detected");
+      hasHadAgentHandover = true;
       _handleAgentHandover();
       ebbotSupportService.setEbbotAgentUser(agentImage);
     }

@@ -717,6 +717,7 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
       customMessageBuilder: _ebbotControllerInitializer
           .chatUiCustomMessageController?.processMessage,
       textMessageBuilder: _buildTextMessage,
+      systemMessageBuilder: _buildSystemMessage,
       typingIndicatorOptions: TypingIndicatorOptions(
         typingMode: TypingIndicatorMode.avatar,
         typingUsers: _typingUsers,
@@ -738,6 +739,24 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
       child: MarkdownTextWidget(
         text: message.text,
         isReceived: isReceived,
+      ),
+    );
+  }
+
+  /// Custom system message builder that handles markdown formatting
+  Widget _buildSystemMessage(types.SystemMessage message) {
+    // System messages are typically center-aligned and use a neutral color
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 16.0,
+        vertical: 8.0,
+      ),
+      child: Center(
+        child: MarkdownTextWidget(
+          text: message.text,
+          isReceived: true, // Use received styling for system messages
+          textColor: Colors.grey[600], // Neutral color for system messages
+        ),
       ),
     );
   }
