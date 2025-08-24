@@ -97,6 +97,7 @@ class AdvancedChatExample extends StatelessWidget {
             .onUserMessage((message) => print('User: $message'))
             .onStartConversation((message) => print('Started: $message'))
             .onEndConversation(() => print('Ended'))
+            .onChatClosed(() => print('Chat closed'))
             .build()
         )
         .logConfiguration(
@@ -212,6 +213,9 @@ EbbotCallbackBuilder()
   })
   .onEndConversation(() {
     print('Conversation ended');
+  })
+  .onChatClosed(() {
+    print('Chat closed');
   })
   .onRestartConversation(() {
     print('Conversation restarted');

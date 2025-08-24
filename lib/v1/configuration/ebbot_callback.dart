@@ -4,6 +4,7 @@ class EbbotCallback extends AbstractEbbotCallback {
   final void Function() onLoad;
   final void Function() onRestartConversation;
   final void Function() onEndConversation;
+  final void Function() onChatClosed;
   final void Function(String message) onMessage;
   final void Function(String message) onBotMessage;
   final void Function(String message) onUserMessage;
@@ -15,6 +16,7 @@ class EbbotCallback extends AbstractEbbotCallback {
     required this.onLoad,
     required this.onRestartConversation,
     required this.onEndConversation,
+    required this.onChatClosed,
     required this.onMessage,
     required this.onBotMessage,
     required this.onUserMessage,
@@ -40,6 +42,11 @@ class EbbotCallback extends AbstractEbbotCallback {
   @override
   void dispatchOnEndConversation() async {
     onEndConversation();
+  }
+
+  @override
+  void dispatchOnChatClosed() async {
+    onChatClosed();
   }
 
   @override
@@ -73,6 +80,7 @@ abstract class AbstractEbbotCallback {
   void dispatchOnLoad();
   void dispatchOnRestartConversation();
   void dispatchOnEndConversation();
+  void dispatchOnChatClosed();
   void dispatchOnMessage(String message);
   void dispatchOnBotMessage(String message);
   void dispatchOnUserMessage(String message);
@@ -85,6 +93,7 @@ class EbbotCallbackBuilder {
   void Function() _onLoad = () {};
   void Function() _onRestartConversation = () {};
   void Function() _onEndConversation = () {};
+  void Function() _onChatClosed = () {};
   void Function(String message) _onMessage = (message) {};
   void Function(String message) _onBotMessage = (message) {};
   void Function(String message) _onUserMessage = (message) {};
@@ -110,6 +119,11 @@ class EbbotCallbackBuilder {
 
   EbbotCallbackBuilder onEndConversation(void Function() onEndConversation) {
     _onEndConversation = onEndConversation;
+    return this;
+  }
+
+  EbbotCallbackBuilder onChatClosed(void Function() onChatClosed) {
+    _onChatClosed = onChatClosed;
     return this;
   }
 
@@ -148,6 +162,7 @@ class EbbotCallbackBuilder {
       onLoad: _onLoad,
       onRestartConversation: _onRestartConversation,
       onEndConversation: _onEndConversation,
+      onChatClosed: _onChatClosed,
       onMessage: _onMessage,
       onBotMessage: _onBotMessage,
       onUserMessage: _onUserMessage,

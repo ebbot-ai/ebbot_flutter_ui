@@ -20,6 +20,10 @@ class EbbotCallbackService {
     _callback.dispatchOnEndConversation();
   }
 
+  void dispatchOnChatClosed() {
+    _callback.dispatchOnChatClosed();
+  }
+
   void dispatchOnMessage(String message) {
     _callback.dispatchOnMessage(message);
   }

@@ -44,6 +44,7 @@ import 'package:url_launcher/url_launcher.dart';
 /// - Agent handover support
 /// - Conversation transcripts
 /// - Context menu with actions
+/// - Callback notifications for chat events
 ///
 /// ## Basic Usage
 ///
@@ -77,6 +78,7 @@ import 'package:url_launcher/url_launcher.dart';
 ///       EbbotCallbackBuilder()
 ///         .onMessage((message) => print('Message: $message'))
 ///         .onLoad(() => print('Chat loaded'))
+///         .onChatClosed(() => print('Chat closed by backend'))
 ///         .build()
 ///     )
 ///     .build(),
@@ -290,6 +292,10 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
       _inputBoxVisible = false;
       _hasAgentHandover = false;
     });
+
+    final ebbotCallbackService =
+        _serviceLocator.getService<EbbotCallbackService>();
+    ebbotCallbackService.dispatchOnChatClosed();
   }
 
   @override
