@@ -148,7 +148,9 @@ Future main() async {
       .enabled(true)
       .build();
 
-  var session = EbbotSessionBuilder().chatId("some-chat-id").build();
+  var session = EbbotSessionBuilder()
+      .chatId("1756130819421-be667196-64bb-4759-a112-4ef5e0ee1887")
+      .build();
 
   //var chat = EbbotChatBuilder().
 
@@ -159,7 +161,7 @@ Future main() async {
       .behaviour(behaviour)
       .callback(callback)
       .logConfiguration(logConfiguration)
-      //.session(session)
+      .session(session)
       //.chat(chat)
       .build();
 
