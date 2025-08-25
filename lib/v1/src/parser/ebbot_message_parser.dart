@@ -17,6 +17,8 @@ class EbbotMessageParser {
   types.Message? parse(Message message, types.User user, String id) {
     final messageType = message.data.message.type;
 
+    _logger?.d("Message type: $messageType, id: $id, user: ${user.id}");
+
     switch (messageType) {
       case 'gpt':
         _logger?.d("parsing gpt message");

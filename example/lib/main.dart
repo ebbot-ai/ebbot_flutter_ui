@@ -42,7 +42,11 @@ Future<void> onStartConversation(String message) async {
 }
 
 Future<void> onSessionData(String chatId) async {
-  //print("CALLBACK: onSessionData, chatId: $chatId");
+  print("CALLBACK: onSessionData, chatId: $chatId");
+}
+
+Future<void> onChatClosed() async {
+  print("CALLBACK: onChatClosed");
 }
 
 var apiController = EbbotApiController();
@@ -121,6 +125,7 @@ Future main() async {
       .onUserMessage(onUserMessage)
       .onStartConversation(onStartConversation)
       .onSessionData(onSessionData)
+      .onChatClosed(onChatClosed)
       .build();
 
   var ebbotBehaviourInput = EbbotBehaviourInputBuilder()
@@ -143,7 +148,9 @@ Future main() async {
       .enabled(true)
       .build();
 
-  var session = EbbotSessionBuilder().chatId("some-chat-id").build();
+  var session = EbbotSessionBuilder()
+      .chatId("1756130819421-be667196-64bb-4759-a112-4ef5e0ee1887")
+      .build();
 
   //var chat = EbbotChatBuilder().
 
@@ -154,7 +161,7 @@ Future main() async {
       .behaviour(behaviour)
       .callback(callback)
       .logConfiguration(logConfiguration)
-      //.session(session)
+      .session(session)
       //.chat(chat)
       .build();
 

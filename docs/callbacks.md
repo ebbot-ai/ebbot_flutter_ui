@@ -22,6 +22,7 @@ Callbacks allow you to react to various events in the chat widget's lifecycle, f
 | `onUserMessage` | Called for user messages only | `String message` |
 | `onStartConversation` | Called when conversation starts | `String message` (first message) |
 | `onEndConversation` | Called when conversation ends | None |
+| `onChatClosed` | Called when chat session is closed | None |
 | `onRestartConversation` | Called when conversation restarts | None |
 | `onSessionData` | Called when session data is available | `String chatId` |
 
@@ -86,6 +87,11 @@ class ChatCallbacks {
     analytics.track('conversation_ended');
   }
   
+  static Future<void> onChatClosed() async {
+    print('Chat closed');
+    analytics.track('chat_closed');
+  }
+  
   static Future<void> onRestartConversation() async {
     print('Conversation restarted');
     analytics.track('conversation_restarted');
@@ -122,6 +128,7 @@ final configuration = EbbotConfigurationBuilder()
       .onLoad(ChatCallbacks.onLoad)
       .onStartConversation(ChatCallbacks.onStartConversation)
       .onEndConversation(ChatCallbacks.onEndConversation)
+      .onChatClosed(ChatCallbacks.onChatClosed)
       .onRestartConversation(ChatCallbacks.onRestartConversation)
       .onMessage(ChatCallbacks.onMessage)
       .onBotMessage(ChatCallbacks.onBotMessage)
@@ -155,6 +162,12 @@ Track user engagement and chat metrics:
     })
     .onEndConversation(() {
       mixpanel.track('Chat Ended', {
+        'duration': chatDuration,
+        'message_count': messageCount,
+      });
+    })
+    .onChatClosed(() {
+      mixpanel.track('Chat Closed', {
         'duration': chatDuration,
         'message_count': messageCount,
       });
@@ -217,10 +230,16 @@ class ChatSessionManager {
         print('Session saved: $chatId');
       })
       .onEndConversation(() async {
-        // Clear saved session
+        // Clear saved session on conversation end
         final prefs = await SharedPreferences.getInstance();
         await prefs.remove(_sessionKey);
-        print('Session cleared');
+        print('Session cleared on conversation end');
+      })
+      .onChatClosed(() async {
+        // Clear saved session on chat close
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.remove(_sessionKey);
+        print('Session cleared on chat close');
       });
   }
   
@@ -281,7 +300,10 @@ class ChatStateSync {
         stateManager.updateLastActivity();
       })
       .onEndConversation(() {
-        stateManager.setChatStatus(ChatStatus.ended);
+        stateManager.setChatStatus(ChatStatus.conversationEnded);
+      })
+      .onChatClosed(() {
+        stateManager.setChatStatus(ChatStatus.chatClosed);
       })
       .build();
   }
@@ -309,7 +331,7 @@ Bot responds
     ↓
 ... (conversation continues)
     ↓
-[onEndConversation] or [onRestartConversation]
+[onEndConversation] or [onChatClosed] or [onRestartConversation]
 ```
 
 ## Best Practices
@@ -333,6 +355,7 @@ final debugCallbacks = EbbotCallbackBuilder()
   .onUserMessage((msg) => debugPrint('[CALLBACK] onUserMessage: $msg'))
   .onStartConversation((msg) => debugPrint('[CALLBACK] onStartConversation'))
   .onEndConversation(() => debugPrint('[CALLBACK] onEndConversation'))
+  .onChatClosed(() => debugPrint('[CALLBACK] onChatClosed'))
   .onRestartConversation(() => debugPrint('[CALLBACK] onRestartConversation'))
   .onSessionData((id) => debugPrint('[CALLBACK] onSessionData: $id'))
   .build();

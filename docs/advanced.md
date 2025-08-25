@@ -80,6 +80,7 @@ class AdvancedChatConfig {
           .onUserMessage((msg) => _handleUserMessage(msg))
           .onSessionData((chatId) => _handleSessionData(chatId))
           .onEndConversation(() => _handleConversationEnd())
+          .onChatClosed(() => _handleChatClosed())
           .build()
       )
       

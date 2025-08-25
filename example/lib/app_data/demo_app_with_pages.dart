@@ -1,7 +1,8 @@
 
 // Demo app
 
-import 'package:ebbot_flutter_ui/ebbot_flutter_ui.dart';
+import 'package:ebbot_flutter_ui/v1/configuration/ebbot_configuration.dart';
+import 'package:ebbot_flutter_ui/v1/ebbot_flutter_ui.dart';
 import 'package:ebbot_flutter_ui/v1/src/util/extension.dart';
 import 'package:flutter/material.dart';
 
