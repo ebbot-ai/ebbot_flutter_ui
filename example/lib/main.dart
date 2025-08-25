@@ -148,9 +148,7 @@ Future main() async {
       .enabled(true)
       .build();
 
-  var session = EbbotSessionBuilder()
-      .chatId("1755845916155-e7af28b5-e238-4f9f-abca-bc03461f13dd")
-      .build();
+  var session = EbbotSessionBuilder().chatId("some-chat-id").build();
 
   //var chat = EbbotChatBuilder().
 
