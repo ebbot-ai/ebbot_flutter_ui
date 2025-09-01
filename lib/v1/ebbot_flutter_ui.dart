@@ -305,7 +305,7 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
   }
 
   @override
-  void handleBotStartTyping() {
+  void handleStartTyping() {
     final ebbotSupportService =
         _serviceLocator.getService<EbbotSupportService>();
     setState(() {
@@ -321,7 +321,7 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
   }
 
   @override
-  void handleBotStopTyping() {
+  void handleStopTyping() {
     setState(() {
       _typingUsers.clear();
     });
