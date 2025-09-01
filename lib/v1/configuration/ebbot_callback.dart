@@ -10,6 +10,9 @@ class EbbotCallback extends AbstractEbbotCallback {
   final void Function(String message) onUserMessage;
   final void Function(String message) onStartConversation;
   final void Function(String chatId) onSessionData;
+  final void Function(bool isVisible) onInputVisibilityChanged;
+  final void Function(bool isTyping, String? typingEntity) onTypingChanged;
+  final void Function() onAgentHandover;
 
   EbbotCallback({
     required this.onLoadError,
@@ -22,6 +25,9 @@ class EbbotCallback extends AbstractEbbotCallback {
     required this.onUserMessage,
     required this.onStartConversation,
     required this.onSessionData,
+    required this.onInputVisibilityChanged,
+    required this.onTypingChanged,
+    required this.onAgentHandover,
   });
 
   @override
@@ -73,6 +79,22 @@ class EbbotCallback extends AbstractEbbotCallback {
   void dispatchOnSessionData(String chatId) async {
     onSessionData(chatId);
   }
+
+  @override
+  void dispatchOnInputVisibilityChanged(bool isVisible) async {
+    onInputVisibilityChanged(isVisible);
+  }
+
+  @override
+  void dispatchOnTypingChanged(bool isTyping, String? typingEntity) async {
+    onTypingChanged(isTyping, typingEntity);
+  }
+
+  @override
+  void dispatchOnAgentHandover() async {
+    onAgentHandover();
+  }
+
 }
 
 abstract class AbstractEbbotCallback {
@@ -86,6 +108,9 @@ abstract class AbstractEbbotCallback {
   void dispatchOnUserMessage(String message);
   void dispatchOnStartConversation(String message);
   void dispatchOnSessionData(String chatId);
+  void dispatchOnInputVisibilityChanged(bool isVisible);
+  void dispatchOnTypingChanged(bool isTyping, String? typingEntity);
+  void dispatchOnAgentHandover();
 }
 
 class EbbotCallbackBuilder {
@@ -99,6 +124,9 @@ class EbbotCallbackBuilder {
   void Function(String message) _onUserMessage = (message) {};
   void Function(String message) _onStartConversation = (message) {};
   void Function(String chatId) _onSessionData = (chatId) {};
+  void Function(bool isVisible) _onInputVisibilityChanged = (isVisible) {};
+  void Function(bool isTyping, String? typingEntity) _onTypingChanged = (isTyping, typingEntity) {};
+  void Function() _onAgentHandover = () {};
 
   EbbotCallbackBuilder onLoadError(
       void Function(EbbotLoadError error) onLoadError) {
@@ -156,6 +184,24 @@ class EbbotCallbackBuilder {
     return this;
   }
 
+  EbbotCallbackBuilder onInputVisibilityChanged(
+      void Function(bool isVisible) onInputVisibilityChanged) {
+    _onInputVisibilityChanged = onInputVisibilityChanged;
+    return this;
+  }
+
+  EbbotCallbackBuilder onTypingChanged(
+      void Function(bool isTyping, String? typingEntity) onTypingChanged) {
+    _onTypingChanged = onTypingChanged;
+    return this;
+  }
+
+  EbbotCallbackBuilder onAgentHandover(void Function() onAgentHandover) {
+    _onAgentHandover = onAgentHandover;
+    return this;
+  }
+
+
   EbbotCallback build() {
     return EbbotCallback(
       onLoadError: _onLoadError,
@@ -168,6 +214,9 @@ class EbbotCallbackBuilder {
       onUserMessage: _onUserMessage,
       onStartConversation: _onStartConversation,
       onSessionData: _onSessionData,
+      onInputVisibilityChanged: _onInputVisibilityChanged,
+      onTypingChanged: _onTypingChanged,
+      onAgentHandover: _onAgentHandover,
     );
   }
 }

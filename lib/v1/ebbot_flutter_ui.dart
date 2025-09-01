@@ -254,7 +254,7 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
     final chatTheme = ebbotSupportService.chatTheme();
 
     final config = ebbotClientService.client.chatStyleConfig;
-    _logger?.d("bottom widget visibility: $_inputBoxVisible");
+    _logger?.d("Input box visibility: $_inputBoxVisible");
     _logger?.d("Chat started: $_isChatStarted");
 
     final startPageEnabled = config?.start_page_enabled ?? false;
@@ -283,6 +283,10 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
       _inputBoxVisible = true;
       _hasAgentHandover = true;
     });
+    // Dispatch callbacks
+    final ebbotCallbackService =
+        _serviceLocator.getService<EbbotCallbackService>();
+    ebbotCallbackService.dispatchOnAgentHandover();
   }
 
   @override
@@ -299,7 +303,7 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
   }
 
   @override
-  void handleTypingUsers() {
+  void handleStartTyping() {
     final ebbotSupportService =
         _serviceLocator.getService<EbbotSupportService>();
     setState(() {
@@ -307,13 +311,23 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
 
       _typingUsers.add(ebbotSupportService.getEbbotUser());
     });
+    // Dispatch callback
+    final ebbotCallbackService =
+        _serviceLocator.getService<EbbotCallbackService>();
+    final typingEntity = _hasAgentHandover ? 'agent' : 'bot';
+    ebbotCallbackService.dispatchOnTypingChanged(true, typingEntity);
   }
 
   @override
-  void handleClearTypingUsers() {
+  void handleStopTyping() {
     setState(() {
       _typingUsers.clear();
     });
+    // Dispatch callback
+    final ebbotCallbackService =
+        _serviceLocator.getService<EbbotCallbackService>();
+    final typingEntity = _hasAgentHandover ? 'agent' : 'bot';
+    ebbotCallbackService.dispatchOnTypingChanged(false, typingEntity);
   }
 
   @override
@@ -332,6 +346,10 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
       setState(() {
         _inputBoxVisible = visibility;
       });
+      // Dispatch callback
+      final ebbotCallbackService =
+          _serviceLocator.getService<EbbotCallbackService>();
+      ebbotCallbackService.dispatchOnInputVisibilityChanged(visibility);
     }
   }
 
