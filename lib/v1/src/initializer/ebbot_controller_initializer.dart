@@ -55,7 +55,7 @@ class EbbotControllerInitializer {
     chatTranscriptController = ChatTranscriptController();
   }
 
-  // updateControllers is called when the controllers need to reset themselves
+  // resetControllers is called when the controllers need to reset themselves
   // usually when the the api has been reset and the controllers need to be reset as a result
   void resetControllers() {
     chatTranscriptController?.reset();
