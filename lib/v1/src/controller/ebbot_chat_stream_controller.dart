@@ -46,7 +46,7 @@ class EbbotChatStreamController extends ResettableController {
     _logger?.d("we have ${chatMessages.length} chat messages to process");
 
     // Check if there is an agent handover happening
-    if (chat.data?.chat?.handled_by == 'agent') {
+    if (chat.data?.chat?.handled_by == 'agent' && !hasHadAgentHandover) {
       final ebbotSupportService =
           _serviceLocator.getService<EbbotSupportService>();
       final agentImage = chat.data?.chat?.user_profile_picture;
