@@ -13,7 +13,6 @@ class EbbotCallback extends AbstractEbbotCallback {
   final void Function(bool isVisible) onInputVisibilityChanged;
   final void Function(bool isTyping, String? typingEntity) onTypingChanged;
   final void Function() onAgentHandover;
-  final void Function() onConversationRestart;
 
   EbbotCallback({
     required this.onLoadError,
@@ -29,7 +28,6 @@ class EbbotCallback extends AbstractEbbotCallback {
     required this.onInputVisibilityChanged,
     required this.onTypingChanged,
     required this.onAgentHandover,
-    required this.onConversationRestart,
   });
 
   @override
@@ -97,10 +95,6 @@ class EbbotCallback extends AbstractEbbotCallback {
     onAgentHandover();
   }
 
-  @override
-  void dispatchOnConversationRestart() async {
-    onConversationRestart();
-  }
 }
 
 abstract class AbstractEbbotCallback {
@@ -117,7 +111,6 @@ abstract class AbstractEbbotCallback {
   void dispatchOnInputVisibilityChanged(bool isVisible);
   void dispatchOnTypingChanged(bool isTyping, String? typingEntity);
   void dispatchOnAgentHandover();
-  void dispatchOnConversationRestart();
 }
 
 class EbbotCallbackBuilder {
@@ -134,7 +127,6 @@ class EbbotCallbackBuilder {
   void Function(bool isVisible) _onInputVisibilityChanged = (isVisible) {};
   void Function(bool isTyping, String? typingEntity) _onTypingChanged = (isTyping, typingEntity) {};
   void Function() _onAgentHandover = () {};
-  void Function() _onConversationRestart = () {};
 
   EbbotCallbackBuilder onLoadError(
       void Function(EbbotLoadError error) onLoadError) {
@@ -209,11 +201,6 @@ class EbbotCallbackBuilder {
     return this;
   }
 
-  EbbotCallbackBuilder onConversationRestart(
-      void Function() onConversationRestart) {
-    _onConversationRestart = onConversationRestart;
-    return this;
-  }
 
   EbbotCallback build() {
     return EbbotCallback(
@@ -230,7 +217,6 @@ class EbbotCallbackBuilder {
       onInputVisibilityChanged: _onInputVisibilityChanged,
       onTypingChanged: _onTypingChanged,
       onAgentHandover: _onAgentHandover,
-      onConversationRestart: _onConversationRestart,
     );
   }
 }

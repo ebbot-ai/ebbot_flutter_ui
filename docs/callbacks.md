@@ -28,7 +28,6 @@ Callbacks allow you to react to various events in the chat widget's lifecycle, f
 | `onInputVisibilityChanged` | Called when input box visibility changes | `bool isVisible` |
 | `onTypingChanged` | Called when typing indicator state changes | `bool isTyping, String? typingEntity` |
 | `onAgentHandover` | Called when agent handover occurs | None |
-| `onConversationRestart` | Called when conversation restarts | None |
 
 ## Basic Implementation
 
@@ -144,10 +143,6 @@ class ChatCallbacks {
     print('Agent handover occurred');
   }
   
-  // Conversation restart
-  static Future<void> onConversationRestart() async {
-    print('Conversation restarted');
-  }
 }
 
 // Configure callbacks
@@ -167,7 +162,6 @@ final configuration = EbbotConfigurationBuilder()
       .onInputVisibilityChanged(ChatCallbacks.onInputVisibilityChanged)
       .onTypingChanged(ChatCallbacks.onTypingChanged)
       .onAgentHandover(ChatCallbacks.onAgentHandover)
-      .onConversationRestart(ChatCallbacks.onConversationRestart)
       .build()
   )
   .build();
@@ -395,7 +389,6 @@ final debugCallbacks = EbbotCallbackBuilder()
   .onInputVisibilityChanged((isVisible) => debugPrint('[CALLBACK] onInputVisibilityChanged: $isVisible'))
   .onTypingChanged((isTyping, entity) => debugPrint('[CALLBACK] onTypingChanged: $isTyping, entity: $entity'))
   .onAgentHandover(() => debugPrint('[CALLBACK] onAgentHandover'))
-  .onConversationRestart(() => debugPrint('[CALLBACK] onConversationRestart'))
   .build();
 ```
 

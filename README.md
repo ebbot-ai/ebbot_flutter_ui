@@ -235,9 +235,6 @@ EbbotCallbackBuilder()
   .onAgentHandover(() {
     print('Agent handover occurred');
   })
-  .onConversationRestart(() {
-    print('Conversation restarted');
-  })
   .onLoadError((error) {
     print('Load error: $error');
   })

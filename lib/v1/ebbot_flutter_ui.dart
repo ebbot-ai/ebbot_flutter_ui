@@ -287,7 +287,6 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
     final ebbotCallbackService =
         _serviceLocator.getService<EbbotCallbackService>();
     ebbotCallbackService.dispatchOnAgentHandover();
-    ebbotCallbackService.dispatchOnInputVisibilityChanged(true);
   }
 
   @override
@@ -301,7 +300,6 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
     final ebbotCallbackService =
         _serviceLocator.getService<EbbotCallbackService>();
     ebbotCallbackService.dispatchOnChatClosed();
-    ebbotCallbackService.dispatchOnInputVisibilityChanged(false);
   }
 
   @override
@@ -567,8 +565,6 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
     final ebbotCallbackService =
         _serviceLocator.getService<EbbotCallbackService>();
     ebbotCallbackService.dispatchOnRestartConversation();
-    ebbotCallbackService.dispatchOnConversationRestart();
-    ebbotCallbackService.dispatchOnInputVisibilityChanged(false);
   }
 
   @override

@@ -66,7 +66,6 @@
 ///       .onInputVisibilityChanged((isVisible) => print('Input visible: $isVisible'))
 ///       .onTypingChanged((isTyping, typingEntity) => print('Typing: $isTyping ($typingEntity)'))
 ///       .onAgentHandover(() => print('Agent handover occurred'))
-///       .onConversationRestart(() => print('Conversation restarted'))
 ///       .build()
 ///   )
 ///   .build();
