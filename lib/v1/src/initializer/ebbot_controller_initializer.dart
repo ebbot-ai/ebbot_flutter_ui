@@ -37,15 +37,15 @@ class EbbotControllerInitializer {
             controllerDelegates.handleRestartConversation);
 
     ebbotMessageStreamController = EbbotMessageStreamController(
-      controllerDelegates.handleTypingUsers,
-      controllerDelegates.handleClearTypingUsers,
+      controllerDelegates.handleBotStartTyping,
+      controllerDelegates.handleBotStopTyping,
       controllerDelegates.handleAddMessage,
       controllerDelegates.handleInputMode,
     );
 
     ebbotChatStreamController = EbbotChatStreamController(
-      controllerDelegates.handleTypingUsers,
-      controllerDelegates.handleClearTypingUsers,
+      controllerDelegates.handleBotStartTyping,
+      controllerDelegates.handleBotStopTyping,
       controllerDelegates.handleAddMessage,
       controllerDelegates.handleInputMode,
       controllerDelegates.handleAgentHandover,
@@ -66,8 +66,8 @@ class EbbotControllerInitializer {
 
 abstract class AbstractControllerDelegate {
   void handleOnTextChanged(String text);
-  void handleTypingUsers();
-  void handleClearTypingUsers();
+  void handleBotStartTyping();
+  void handleBotStopTyping();
   void handleAddMessage(types.Message message);
   void handleInputMode(String? mode);
   void handleRestartConversation();

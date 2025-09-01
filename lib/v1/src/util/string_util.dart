@@ -1,10 +1,7 @@
-import 'dart:convert';
-import 'dart:math';
+import 'package:uuid/uuid.dart';
 
 class StringUtil {
   static String randomString() {
-    final random = Random.secure();
-    final values = List<int>.generate(16, (i) => random.nextInt(255));
-    return base64UrlEncode(values);
+    return const Uuid().v4();
   }
 }

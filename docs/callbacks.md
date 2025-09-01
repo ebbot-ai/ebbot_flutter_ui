@@ -25,6 +25,10 @@ Callbacks allow you to react to various events in the chat widget's lifecycle, f
 | `onChatClosed` | Called when chat session is closed | None |
 | `onRestartConversation` | Called when conversation restarts | None |
 | `onSessionData` | Called when session data is available | `String chatId` |
+| `onInputVisibilityChanged` | Called when input box visibility changes | `bool isVisible` |
+| `onTypingChanged` | Called when typing indicator state changes | `bool isTyping, String? typingEntity` |
+| `onAgentHandover` | Called when agent handover occurs | None |
+| `onConversationRestart` | Called when conversation restarts | None |
 
 ## Basic Implementation
 
@@ -39,6 +43,12 @@ final configuration = EbbotConfigurationBuilder()
       })
       .onMessage((message) {
         print('New message: $message');
+      })
+      .onInputVisibilityChanged((isVisible) {
+        print('Input visibility: $isVisible');
+      })
+      .onTypingChanged((isTyping, typingEntity) {
+        print('Typing: $isTyping, entity: $typingEntity');
       })
       .build()
   )
@@ -118,6 +128,26 @@ class ChatCallbacks {
     print('Session ID: $chatId');
     saveSessionId(chatId);
   }
+  
+  // Input visibility changes
+  static Future<void> onInputVisibilityChanged(bool isVisible) async {
+    print('Input visibility changed: $isVisible');
+  }
+  
+  // Typing indicator changes
+  static Future<void> onTypingChanged(bool isTyping, String? typingEntity) async {
+    print('Typing changed: $isTyping, entity: $typingEntity');
+  }
+  
+  // Agent handover
+  static Future<void> onAgentHandover() async {
+    print('Agent handover occurred');
+  }
+  
+  // Conversation restart
+  static Future<void> onConversationRestart() async {
+    print('Conversation restarted');
+  }
 }
 
 // Configure callbacks
@@ -134,6 +164,10 @@ final configuration = EbbotConfigurationBuilder()
       .onBotMessage(ChatCallbacks.onBotMessage)
       .onUserMessage(ChatCallbacks.onUserMessage)
       .onSessionData(ChatCallbacks.onSessionData)
+      .onInputVisibilityChanged(ChatCallbacks.onInputVisibilityChanged)
+      .onTypingChanged(ChatCallbacks.onTypingChanged)
+      .onAgentHandover(ChatCallbacks.onAgentHandover)
+      .onConversationRestart(ChatCallbacks.onConversationRestart)
       .build()
   )
   .build();
@@ -358,6 +392,10 @@ final debugCallbacks = EbbotCallbackBuilder()
   .onChatClosed(() => debugPrint('[CALLBACK] onChatClosed'))
   .onRestartConversation(() => debugPrint('[CALLBACK] onRestartConversation'))
   .onSessionData((id) => debugPrint('[CALLBACK] onSessionData: $id'))
+  .onInputVisibilityChanged((isVisible) => debugPrint('[CALLBACK] onInputVisibilityChanged: $isVisible'))
+  .onTypingChanged((isTyping, entity) => debugPrint('[CALLBACK] onTypingChanged: $isTyping, entity: $entity'))
+  .onAgentHandover(() => debugPrint('[CALLBACK] onAgentHandover'))
+  .onConversationRestart(() => debugPrint('[CALLBACK] onConversationRestart'))
   .build();
 ```
 

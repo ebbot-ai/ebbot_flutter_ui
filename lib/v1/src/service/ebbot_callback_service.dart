@@ -43,4 +43,20 @@ class EbbotCallbackService {
   void dispatchOnSessionData(String chatId) {
     _callback.dispatchOnSessionData(chatId);
   }
+
+  void dispatchOnInputVisibilityChanged(bool isVisible) {
+    _callback.dispatchOnInputVisibilityChanged(isVisible);
+  }
+
+  void dispatchOnTypingChanged(bool isTyping, String? typingEntity) {
+    _callback.dispatchOnTypingChanged(isTyping, typingEntity);
+  }
+
+  void dispatchOnAgentHandover() {
+    _callback.dispatchOnAgentHandover();
+  }
+
+  void dispatchOnConversationRestart() {
+    _callback.dispatchOnConversationRestart();
+  }
 }

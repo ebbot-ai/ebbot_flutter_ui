@@ -98,6 +98,9 @@ class AdvancedChatExample extends StatelessWidget {
             .onStartConversation((message) => print('Started: $message'))
             .onEndConversation(() => print('Ended'))
             .onChatClosed(() => print('Chat closed'))
+            .onInputVisibilityChanged((isVisible) => print('Input: $isVisible'))
+            .onTypingChanged((isTyping, entity) => print('Typing: $isTyping ($entity)'))
+            .onAgentHandover(() => print('Agent handover'))
             .build()
         )
         .logConfiguration(
@@ -222,6 +225,18 @@ EbbotCallbackBuilder()
   })
   .onSessionData((chatId) {
     print('Session data received: $chatId');
+  })
+  .onInputVisibilityChanged((isVisible) {
+    print('Input visibility: $isVisible');
+  })
+  .onTypingChanged((isTyping, typingEntity) {
+    print('Typing: $isTyping, entity: $typingEntity');
+  })
+  .onAgentHandover(() {
+    print('Agent handover occurred');
+  })
+  .onConversationRestart(() {
+    print('Conversation restarted');
   })
   .onLoadError((error) {
     print('Load error: $error');
