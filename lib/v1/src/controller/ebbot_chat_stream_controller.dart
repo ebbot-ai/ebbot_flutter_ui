@@ -50,18 +50,19 @@ class EbbotChatStreamController extends ResettableController {
       final ebbotSupportService =
           _serviceLocator.getService<EbbotSupportService>();
       final agentImage = chat.data?.chat?.user_profile_picture;
-      _logger?.d("Agent handover detected");
+      _logger?.d("Agent handover detected with image: ${agentImage != null ? 'provided' : 'missing (will use default)'}");
       hasHadAgentHandover = true;
       _handleAgentHandover();
       ebbotSupportService.setEbbotAgentUser(agentImage);
     }
 
     // Check if the chat has been "closed"
-    if (chat.data?.chat?.status == 'closed' &&
-        chat.data?.chat?.type == 'close_chat') {
+    final chatContent = chat.data?.chat;
+    if (chatContent?.status == 'chat_closed' &&
+        chatContent?.type == 'close_chat') {
       _handleChatClosed();
     }
-
+    
     for (var message in chatMessages) {
       _handleClearTypingUsers();
       _logger?.d("Message sender: ${message.sender}");

@@ -73,7 +73,8 @@ class ChatTranscriptService {
     }
 
     if (parsedMessage != null) {
-      final timestamp = message.data.message.timestamp;
+      final timestamp =
+          message.data.message.timestamp ?? DateTime.now().toIso8601String();
       final key = parseTimestampToDouble(timestamp);
       _chatTranscript[key] = parsedMessage;
     }
@@ -192,8 +193,8 @@ class ChatTranscriptService {
 
   String _getSubHeader(Message message) {
     try {
-      final int timestamp =
-          parseTimestampToMillis(message.data.message.timestamp);
+      final int timestamp = parseTimestampToMillis(
+          message.data.message.timestamp ?? DateTime.now().toIso8601String());
 
       final dateTime = DateTime.fromMillisecondsSinceEpoch(timestamp);
 

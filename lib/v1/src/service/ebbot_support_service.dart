@@ -12,14 +12,17 @@ class EbbotSupportService {
   final _serviceLocator = ServiceLocator();
 
   types.User? _cachedEbbotUser;
+  String? _defaultBotAvatar;
 
   types.User getEbbotUser() {
     if (_cachedEbbotUser != null) return _cachedEbbotUser!;
 
     final client = _serviceLocator.getService<EbbotDartClientService>().client;
     final config = client.chatStyleConfig;
+    // Store the default bot avatar for fallback
+    _defaultBotAvatar = config?.avatar.src;
     // This will default to use the GPT avatar, it will be overridden once an agent handover happens
-    _cachedEbbotUser = _generateEbbotUser(imageUrl: config?.avatar.src);
+    _cachedEbbotUser = _generateEbbotUser(imageUrl: _defaultBotAvatar);
     return _cachedEbbotUser!;
   }
 
@@ -33,11 +36,22 @@ class EbbotSupportService {
   }
 
   void setEbbotAgentUser(String? imageUrl) {
-    _cachedEbbotUser = _generateEbbotUser(imageUrl: imageUrl);
+    // Use the default bot avatar as fallback if agent has no image
+    final avatarToUse = imageUrl ?? _defaultBotAvatar;
+    _cachedEbbotUser = _generateEbbotUser(imageUrl: avatarToUse);
   }
 
   void resetEbbotUser() {
     _cachedEbbotUser = null;
+  }
+
+  String? getDefaultBotAvatar() {
+    if (_defaultBotAvatar == null) {
+      final client = _serviceLocator.getService<EbbotDartClientService>().client;
+      final config = client.chatStyleConfig;
+      _defaultBotAvatar = config?.avatar.src;
+    }
+    return _defaultBotAvatar;
   }
 
   ChatTheme chatTheme() {
