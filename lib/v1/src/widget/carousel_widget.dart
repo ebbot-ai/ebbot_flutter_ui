@@ -115,7 +115,7 @@ class _CarouselWidgetState extends State<CarouselWidget> {
                   width: double.infinity,
                   child: Image.network(
                     slides[index]["url"],
-                    fit: BoxFit.cover,
+                    fit: BoxFit.contain,
                   ),
                 ),
               ),
