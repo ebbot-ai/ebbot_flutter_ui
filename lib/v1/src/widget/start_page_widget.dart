@@ -104,9 +104,12 @@ class _StartPageWidgetState extends State<StartPageWidget> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: logoImageContainer,
+                Padding(
+                  padding: const EdgeInsets.only(top: 5),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: logoImageContainer,
+                  ),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(8),
