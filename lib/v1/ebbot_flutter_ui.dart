@@ -22,6 +22,7 @@ import 'package:ebbot_flutter_ui/v1/src/util/string_util.dart';
 import 'package:ebbot_flutter_ui/v1/src/widget/context_menu_widget.dart';
 import 'package:ebbot_flutter_ui/v1/src/widget/markdown_text_widget.dart';
 import 'package:ebbot_flutter_ui/v1/src/widget/start_page_widget.dart';
+import 'package:ebbot_flutter_ui/v1/utils/input_field_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_chat_types/flutter_chat_types.dart';
@@ -143,6 +144,7 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
   bool _infoDialogInChatShown = false;
   bool _isChatRestarted = false;
   bool _inputBoxVisible = true;
+  bool _inputBoxVisibilityRestored = false;
   bool _hasAgentHandover = false;
 
   bool get _shouldUsePassedChatId =>
@@ -188,6 +190,12 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
             .build())
         .build();
 
+    // If not using passed chatId, clear shared prefs and save current input field state
+    if (!_shouldUsePassedChatId) {
+      await inputFieldStorage.clear();
+      await inputFieldStorage.save(_inputBoxVisible ? 'visible' : 'hidden');
+    }
+
     _ebbotServiceInitializer = EbbotServiceInitializer(
         widget._botId, widget._configuration, configuration);
 
@@ -228,6 +236,17 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
     setState(() {
       _isInitialized = true;
     });
+
+    // If using passed chatId, restore input field visibility from shared prefs (only once)
+    if (_shouldUsePassedChatId && !_inputBoxVisibilityRestored) {
+      final lastValue = await inputFieldStorage.load();
+      if (lastValue != null) {
+        setState(() {
+          _inputBoxVisible = inputFieldStorage.isVisible(lastValue);
+        });
+      }
+      _inputBoxVisibilityRestored = true;
+    }
   }
 
   // Overrides
@@ -331,7 +350,7 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
   }
 
   @override
-  void handleInputMode(String? inputMode) {
+  void handleInputMode(String? inputMode) async {
     final visibility = switch (inputMode) {
       'hidden' => false,
       'visible' => true,
@@ -346,6 +365,14 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
       setState(() {
         _inputBoxVisible = visibility;
       });
+      // Save to shared prefs if using passed chatId (restore only after all messages loaded)
+      if (_shouldUsePassedChatId && _inputBoxVisibilityRestored) {
+        await inputFieldStorage.save(_inputBoxVisible ? 'visible' : 'hidden');
+      }
+      // Save to shared prefs if not using passed chatId
+      if (!_shouldUsePassedChatId) {
+        await inputFieldStorage.save(_inputBoxVisible ? 'visible' : 'hidden');
+      }
       // Dispatch callback
       final ebbotCallbackService =
           _serviceLocator.getService<EbbotCallbackService>();
@@ -508,7 +535,7 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
   }
 
   @override
-  void handleSendPressed(types.PartialText message) {
+  void handleSendPressed(types.PartialText message) async {
     final textMessage = types.TextMessage(
       author: chatUser,
       createdAt: DateTime.now().millisecondsSinceEpoch,
@@ -522,6 +549,14 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
     ebbotClient.sendTextMessage(textMessage.text);
     _ebbotControllerInitializer.chatInputController?.chatInputFieldController
         .clear();
+
+    // Save input field state after user sends a message
+    if (_shouldUsePassedChatId && _inputBoxVisibilityRestored) {
+      await inputFieldStorage.save(_inputBoxVisible ? 'visible' : 'hidden');
+    }
+    if (!_shouldUsePassedChatId) {
+      await inputFieldStorage.save(_inputBoxVisible ? 'visible' : 'hidden');
+    }
   }
 
   @override
@@ -568,14 +603,27 @@ class EbbotFlutterUiState extends State<EbbotFlutterUi>
   }
 
   @override
-  void handleEndConversation() {
+  void handleEndConversation() async {
     final ebbotClientService =
         _serviceLocator.getService<EbbotDartClientService>();
     ebbotClientService.endSession();
 
+    // Always hide input field and save state when chat ends
+    setState(() {
+      _inputBoxVisible = false;
+    });
+    await inputFieldStorage.save('hidden');
+
     final ebbotCallbackService =
         _serviceLocator.getService<EbbotCallbackService>();
     ebbotCallbackService.dispatchOnEndConversation();
+  }
+  // Call this when rating card is shown (chat ended/timed out)
+  void handleRatingCardShown() async {
+    setState(() {
+      _inputBoxVisible = false;
+    });
+    await inputFieldStorage.save('hidden');
   }
 
   @override
